@@ -15,6 +15,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+
 void closesocket(SOCKET s)
 {
     close(s);
@@ -135,13 +136,17 @@ void RestServer::update()
 
 				printf("RestServer: Got %s request for %s from %s\n", method.c_str(), url.c_str(), connection.ip.c_str());
 
+				HttpRequest request;
+				request.method = method;
+				request.url = url;
+
 				bool handled = false;
 				HttpResponse response;
 				for(Handler& h : handlers)
 				{
 					if(h.path ==  url.substr(0, h.path.size()) && h.method == method)
 					{
-						h.callback(response);
+						h.callback(request, response);
 						handled = true;
 						break;
 					}
@@ -164,7 +169,15 @@ void RestServer::update()
 	
 }
 
-void RestServer::addHandler(const std::string &path, const std::string &method, const std::function<void(HttpResponse&)> &callback)
+
+
+std::vector<std::string> HttpRequest::splitUrl() const
+{
+	return split(url, "/");
+
+}
+
+void RestServer::addHandler(const std::string &path, const std::string &method, const std::function<void(const HttpRequest&, HttpResponse&)> &callback)
 {
 	handlers.push_back(Handler(path, method, callback));
 }

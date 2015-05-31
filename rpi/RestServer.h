@@ -4,10 +4,21 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <vector>
 
 
 typedef int SOCKET;
 namespace json { class Value; }
+
+class HttpRequest
+{
+public:
+	std::string method;
+	std::string url;
+
+	std::vector<std::string> splitUrl() const;
+};
+
 class HttpResponse
 {
 	std::map<std::string, std::string> headers;
@@ -42,13 +53,14 @@ class RestServer
 	class Handler
 	{
 	public:
-		std::string path;
 		std::string method;
-		std::function<void(HttpResponse& response)> callback;
-		Handler(const std::string &path, const std::string &method, const std::function<void(HttpResponse&)> &callback)
+		std::string path;
+
+		std::function<void(const HttpRequest& request, HttpResponse& response)> callback;
+		Handler(const std::string &path, const std::string &method, const std::function<void(const HttpRequest&, HttpResponse&)> &callback)
 		{
-			this->path = path;
 			this->method = method;
+			this->path = path;
 			this->callback = callback;
 		}
 	};
@@ -62,6 +74,6 @@ public:
 	RestServer();
 	void update();
 
-	void addHandler(const std::string &path, const std::string &method, const std::function<void(HttpResponse&)> &callback);
+	void addHandler(const std::string &path, const std::string &method, const std::function<void(const HttpRequest&, HttpResponse&)> &callback);
 
 };

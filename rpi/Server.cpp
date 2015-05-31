@@ -21,7 +21,6 @@ enum SensorType
   SENSOR_ANALOG =         7,
   SENSOR_SHT10_TEMP =     8,
   SENSOR_SHT10_HUM =      9,
-
 };
 
 #define MAX_SENSORCOUNT 8
@@ -51,7 +50,7 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 	rfcomm.registerHandler(PKT_SENSORINFO, std::bind(&Server::handleSensorInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 
-	restServer.addHandler("/list", "GET", [this](HttpResponse& h) 
+	restServer.addHandler("/list", "GET", [this](const HttpRequest& r, HttpResponse& h) 
 	{ 
 		json::Value v;
 		for(auto node : nodes)
@@ -64,6 +63,27 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 		}
 		h.setJson(v);
 	});
+	restServer.addHandler("/reset", "POST", [this](const HttpRequest& r, HttpResponse& h) 
+	{
+		std::vector<std::string> path = r.splitUrl();
+		json::Value v;
+		if(path.size() != 2 || path[1][0] != ':')
+			v = "error";
+		else
+		{
+		 	int nodeId = atoi(path[1].substr(1).c_str());
+		 	if(nodeId != 0)
+		 	{
+			 	v = "ok";
+			 	rfcomm.send(nodes[nodeId]->address, PKT_RESET, NULL, 0);
+			 }
+			 else
+			 	v = "error";
+		}
+		h.setJson(v);
+	});
+
+
 }
 
 
@@ -82,7 +102,7 @@ bool Server::isAlive(int nodeId)
 {
 	if(nodes.find(nodeId) == nodes.end())
 		return false;
-	if(nodes[nodeId]->lastHello + 10000 < getTickCount())
+	if(nodes[nodeId]->lastHello + 60000 < getTickCount())
 		return false;
 	return true;
 }
@@ -170,7 +190,7 @@ void Server::handleSensorInfo(unsigned char nodeId, const RF24NetworkHeader &hea
 	{
 		float value = (float)*((float*)(data+2));
 	    printf("%f\n", value);
-		db.query("INSERT INTO `data` (`nodeid`, `sensorid`, `data`) VALUES ("+std::to_string(nodeId)+", "+std::to_string(data[1])+", " + std::to_string(value) + ")");
+		db.query("INSERT INTO `data` (`date`, `nodeid`, `sensorid`, `data`) VALUES (NOW(), "+std::to_string(nodeId)+", "+std::to_string(data[1])+", " + std::to_string(value) + ")");
 	}
 	else if(data[1] == SENSOR_SWITCH ||
 	0)
