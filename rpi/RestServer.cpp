@@ -21,7 +21,7 @@ void closesocket(SOCKET s)
     close(s);
 }
 
-std::vector<std::string> split( std::string value, std::string seperator )
+static std::vector<std::string> split( std::string value, std::string seperator )
 {
 	std::vector<std::string> ret;
 	while(value.find(seperator) != std::string::npos)
@@ -133,15 +133,28 @@ void RestServer::update()
 				std::string method = req.substr(0, req.find(" "));
 				std::string url = req.substr(req.find(" ")+1);
 				url = url.substr(0, url.find(" "));
+				std::string data = connection.data.substr(connection.data.find("\r\n\r\n")+4);
 
 				printf("RestServer: Got %s request for %s from %s\n", method.c_str(), url.c_str(), connection.ip.c_str());
 
 				HttpRequest request;
 				request.method = method;
 				request.url = url;
+				request.data = data;
 
 				bool handled = false;
 				HttpResponse response;
+				response.addHeader("Access-Control-Allow-Origin", "http://sensorcloud.borf.info");
+
+
+				if(method == "OPTIONS")
+				{
+					response.setCode(200);
+					response.addHeader("Access-Control-Allow-Methods", "GET,PUT,POST,OPTIONS");
+					response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+					handled = true;
+				}
+
 				for(Handler& h : handlers)
 				{
 					if(h.path ==  url.substr(0, h.path.size()) && h.method == method)
@@ -176,6 +189,13 @@ std::vector<std::string> HttpRequest::splitUrl() const
 	return split(url, "/");
 
 }
+
+json::Value HttpRequest::getPostData() const
+{
+	return json::readJson(data);
+}
+
+
 
 void RestServer::addHandler(const std::string &path, const std::string &method, const std::function<void(const HttpRequest&, HttpResponse&)> &callback)
 {
@@ -214,3 +234,4 @@ void HttpResponse::setJson(const json::Value& value)
 	addHeader("Content-Type", "application/json");
 	setBody(((std::stringstream&)(std::stringstream() << value)).str());
 }
+

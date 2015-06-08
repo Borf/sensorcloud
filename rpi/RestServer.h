@@ -15,8 +15,10 @@ class HttpRequest
 public:
 	std::string method;
 	std::string url;
+	std::string data;
 
 	std::vector<std::string> splitUrl() const;
+	json::Value getPostData() const;
 };
 
 class HttpResponse

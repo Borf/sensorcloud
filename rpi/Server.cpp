@@ -2,12 +2,20 @@
 #include "json.h"
 #include <RF24Network/RF24Network.h>
 #include <unistd.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 
 #define PKT_HELLO 1
 #define PKT_REQINFO 2
 #define PKT_INFO 3
 #define PKT_SENSORINFO 4
 #define PKT_RESET 5
+#define PKT_ACTIVATE 6
 #define PKT_MAX 32
 
 enum SensorType
@@ -21,6 +29,7 @@ enum SensorType
   SENSOR_ANALOG =         7,
   SENSOR_SHT10_TEMP =     8,
   SENSOR_SHT10_HUM =      9,
+  ACT_RF_PROJECTORSCREEN =10,
 };
 
 #define MAX_SENSORCOUNT 8
@@ -40,7 +49,19 @@ class EepromData
 };
 #pragma pack(pop)   /* restore original alignment from stack */
 
-
+static std::vector<std::string> split(std::string value, std::string seperator)
+{
+	std::vector<std::string> ret;
+	while (value.find(seperator) != std::string::npos)
+	{
+		int index = value.find(seperator);
+		if (index != 0)
+			ret.push_back(value.substr(0, index));
+		value = value.substr(index + seperator.length());
+	}
+	ret.push_back(value);
+	return ret;
+}
 
 Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 {
@@ -57,7 +78,7 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 		{
 			json::Value n;
 			n["id"] = node.second->id;
-			n["lastHello"] = (int)(getTickCount() - node.second->lastHello);
+			n["lastHello"] = (int)((getTickCount() - node.second->lastHello) / 1000);
 			n["address"] = node.second->address;
 			v.push_back(n);
 		}
@@ -81,6 +102,92 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 			 	v = "error";
 		}
 		h.setJson(v);
+	});
+	restServer.addHandler("/activate", "POST", [this](const HttpRequest& r, HttpResponse& h)
+	{
+		std::vector<std::string> path = r.splitUrl();
+		json::Value v = "error";
+		if(path.size() == 2 && path[1][0] == ':')
+		{
+		 	int nodeId = atoi(path[1].substr(1).c_str());
+		 	if(nodeId != 0)
+		 	{
+		 		json::Value postData = r.getPostData();
+		 		char data[2];
+		 		data[0] = postData["sensor"].asInt();
+		 		data[1] = postData["value"].asInt();
+		 		printf("Server: NodeInfo: %i, %i\n", nodeId, nodes[nodeId]);
+		 		printf("Server: %i Nodes\n", nodes.size());
+		 		for(auto n : nodes)
+		 		{
+		 			printf("Server: Node ID %i\n", n.first);
+		 			printf("Server: Pointer: %i\n", n.second);
+		 			if(n.second)
+		 			{
+		 				printf("Server: id / address: %i / %i\n", n.second->id, n.second->address);
+		 			}
+		 		}
+		 		rfcomm.send(nodes[nodeId]->address, PKT_ACTIVATE, data, 2);
+		 		v = "ok";
+		 	}
+			if (nodeId == 0)
+			{
+				json::Value postData = r.getPostData();
+				
+
+			}
+		}
+
+
+		h.setJson(v);
+
+	});
+
+
+	restServer.addHandler("/command", "POST", [this](const HttpRequest& r, HttpResponse &h)
+	{
+		json::Value postData = r.getPostData();
+		std::string command = postData["command"];
+		printf("Server: Received command %s\n", command.c_str());
+		if (command == "start kodi")
+			system("ssh root@192.168.2.17 \"systemctl stop service.multimedia.mpd && systemctl start kodi\"");
+		else if (command == "stop kodi")
+			system("ssh root@192.168.2.17 \"systemctl start service.multimedia.mpd && systemctl stop kodi\"");
+		else if (command == "start projector" || command == "stop projector")
+		{
+			struct sockaddr_in sin = { 0 };
+			sin.sin_family = AF_INET;
+			sin.sin_port = htons(20554);
+			sin.sin_addr.s_addr = inet_addr("192.168.2.19");
+
+			SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
+			int rc = connect(s, (struct sockaddr*) &sin, sizeof(sockaddr_in));
+			char buf[1025];
+			rc = recv(s, buf, 1024, 0);
+			if (rc < 0)
+				return;
+			buf[rc] = 0;
+			printf("Server: received %i bytes: %s\n", rc, buf);
+			send(s, "PJREQ", 5, 0);
+			rc = recv(s, buf, 1024, 0);
+			if (rc < 0)
+				return;
+			buf[rc] = 0;
+			printf("Server: received %i bytes: %s\n", rc, buf);
+			char binData[7] = { 0x21, 0x89, 0x01, 0x50, 0x57, 0x31, 0x0A }; // turn on
+			if (command == "stop projector")
+				binData[5] = 0x30;
+
+			send(s, binData, 7, 0);
+			rc = recv(s, buf, 1024, 0);
+			if (rc < 0)
+				return;
+			buf[rc] = 0;
+			printf("Server: received %i bytes: %s\n", rc, buf);
+			close(s);
+
+		}
+
 	});
 
 
