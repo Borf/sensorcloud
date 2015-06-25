@@ -16,6 +16,7 @@ public:
 	std::string method;
 	std::string url;
 	std::string data;
+	std::map<std::string, std::string> headers;
 
 	std::vector<std::string> splitUrl() const;
 	json::Value getPostData() const;

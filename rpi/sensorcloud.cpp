@@ -1,5 +1,8 @@
 #include "Server.h"
+#include "PushBullet.h"
+#include "Promise.h"
 #include <fstream>
+
 
 
 int main(int argc, char** argv) 
@@ -24,13 +27,7 @@ int main(int argc, char** argv)
   printf("Done initializing...\n");
 
   while(true)
-    server.update();
-/*
-	setup();
-	while(1)
-	{
-		loop();
-	}*/
+		server.update();
 	return 0;
 }
 

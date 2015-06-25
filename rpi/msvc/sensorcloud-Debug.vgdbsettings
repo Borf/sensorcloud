@@ -131,6 +131,15 @@
       <EnableNonStopMode>false</EnableNonStopMode>
     </AdditionalGDBSettings>
     <LaunchGDBSettings xsi:type="GDBLaunchParametersNewInstance">
+      <GDBExe>/usr/local/bin/gdb</GDBExe>
+      <GDBEnvironment>
+        <Records>
+          <Record>
+            <VariableName>LANG</VariableName>
+            <Value>en_US.UTF-8</Value>
+          </Record>
+        </Records>
+      </GDBEnvironment>
       <DebuggedProgram>$(TargetPath)</DebuggedProgram>
       <GDBServerPort>2000</GDBServerPort>
       <ProgramArguments />

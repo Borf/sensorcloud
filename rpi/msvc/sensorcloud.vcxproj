@@ -67,6 +67,8 @@
     <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\RFComm.cpp" />
     <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\sensorcloud.cpp" />
     <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Server.cpp" />
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\PushBullet.cpp" />
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Promise.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\Db.h" />
@@ -74,6 +76,8 @@
     <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\RestServer.h" />
     <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\RFComm.h" />
     <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\Server.h" />
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\PushBullet.h" />
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Promise.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

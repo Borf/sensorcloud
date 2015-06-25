@@ -3,7 +3,11 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <assert.h>
+//#include <assert.h>
+
+#undef assert
+#define assert(x) { if(!(x)) { printf("Assertion failed at %s:%i\n", __FILE__, __LINE__); } }
+
 
 	namespace json
 	{
@@ -55,8 +59,8 @@
 			inline operator const std::string&() const		{ return asString(); }
 
 
-			inline int asInt() const					{ assert(type == Type::intValue); return value.intValue; }
-			inline float asFloat() const				{ assert(type == Type::floatValue || type == Type::intValue); return type == Type::floatValue ? value.floatValue : value.intValue; }
+			inline int asInt() const					{ if (type == Type::stringValue) { return atoi(value.stringValue->c_str()); } assert(type == Type::intValue); return value.intValue;	}
+			inline float asFloat() const				{ if (type == Type::floatValue) { return atof(value.stringValue->c_str()); } assert(type == Type::floatValue || type == Type::intValue); return type == Type::floatValue ? value.floatValue : value.intValue; }
 			inline bool asBool() const					{ assert(type == Type::boolValue); return value.boolValue; }
 			inline const std::string& asString() const	{ assert(type == Type::stringValue); return *value.stringValue; }
 			inline bool isNull() const					{ return type == Type::nullValue; }

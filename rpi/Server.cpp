@@ -63,7 +63,7 @@ static std::vector<std::string> split(std::string value, std::string seperator)
 	return ret;
 }
 
-Server::Server(const json::Value &config) : config(config), db(config["mysql"])
+Server::Server(const json::Value &config) : config(config), db(config["mysql"]), pb(config)
 {
 
 	rfcomm.registerHandler(PKT_REQINFO, std::bind(&Server::handleReqInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -113,22 +113,21 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 		 	if(nodeId != 0)
 		 	{
 		 		json::Value postData = r.getPostData();
+				if (!postData.isMember("sensor") && !postData.isMember("value"))
+					return;
 		 		char data[2];
 		 		data[0] = postData["sensor"].asInt();
 		 		data[1] = postData["value"].asInt();
-		 		printf("Server: NodeInfo: %i, %i\n", nodeId, nodes[nodeId]);
-		 		printf("Server: %i Nodes\n", nodes.size());
-		 		for(auto n : nodes)
-		 		{
-		 			printf("Server: Node ID %i\n", n.first);
-		 			printf("Server: Pointer: %i\n", n.second);
-		 			if(n.second)
-		 			{
-		 				printf("Server: id / address: %i / %i\n", n.second->id, n.second->address);
-		 			}
-		 		}
-		 		rfcomm.send(nodes[nodeId]->address, PKT_ACTIVATE, data, 2);
-		 		v = "ok";
+
+				if (nodes.find(nodeId) != nodes.end() && nodes[nodeId])
+				{
+					rfcomm.send(nodes[nodeId]->address, PKT_ACTIVATE, data, 2);
+					v = "ok";
+				}
+				else
+				{
+					printf("Server: Could not activate node %i\n", nodeId);
+				}
 		 	}
 			if (nodeId == 0)
 			{
@@ -147,6 +146,8 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 	restServer.addHandler("/command", "POST", [this](const HttpRequest& r, HttpResponse &h)
 	{
 		json::Value postData = r.getPostData();
+		if (!postData.isMember("command"))
+			return;
 		std::string command = postData["command"];
 		printf("Server: Received command %s\n", command.c_str());
 		if (command == "start kodi")
@@ -190,7 +191,7 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"])
 
 	});
 
-
+	db.query("INSERT INTO `events` (`date`, `type`, `text`, `notify`, `nodeid`) VALUEs (NOW(), 'status', 'SensorCloud server started', false, NULL)");
 }
 
 
@@ -199,6 +200,19 @@ void Server::update()
 	db.update();
 	restServer.update();
 	rfcomm.update();
+	pb.update();
+
+
+	for (auto n : nodes)
+	{
+		if (n.second && !n.second->timedOut && n.second->lastHello + 60000 < getTickCount())
+		{
+			pb.sendMessage("Sensorcloud: Error!", "Error: node "  + std::to_string(n.second->id) + " timed out");
+			db.query("INSERT INTO `events` (`date`, `type`, `text`, `notify`, `nodeid`) VALUEs (NOW(), 'status', 'Node timed out', false, "+std::to_string(n.second->id)+")");
+			n.second->timedOut = true;
+		}
+
+	}
 
 
 	usleep(1000);
@@ -260,8 +274,10 @@ void Server::handleReqInfo(unsigned char nodeId, const RF24NetworkHeader &header
 						rfcomm.sendMulti(header.from_node, PKT_INFO, (char*)clientInfo, sizeof(EepromData));
 						nodes[nodeId] = new Node();
 						nodes[nodeId]->id = nodeId;
+						nodes[nodeId]->timedOut = false;
 						nodes[nodeId]->address = header.from_node;
 						nodes[nodeId]->lastHello = getTickCount();
+						db.query("INSERT INTO `events` (`date`, `type`, `text`, `notify`, `nodeid`) VALUEs (NOW(), 'status', 'Node started', false, "+std::to_string(nodeId)+")");
 
 					});
 		});
@@ -275,6 +291,7 @@ void Server::handleHello(unsigned char nodeId, const RF24NetworkHeader &header, 
 		rfcomm.send(header.from_node, PKT_RESET, NULL, 0);
 		return;
 	}
+	nodes[nodeId]->timedOut = false;
 	nodes[nodeId]->lastHello = getTickCount();
 }
 
