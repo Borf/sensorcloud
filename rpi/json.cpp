@@ -117,6 +117,7 @@
 				return value.arrayValue->size();
 			else if (type == Type::objectValue)
 				return value.objectValue->size();
+			printf("Unsupported: %s:%i", __FILE__, __LINE__); 
 			throw "Unsupported";
 		}
 
@@ -183,6 +184,7 @@
 
 		void Value::erase(size_t index)
 		{
+			printf("Cannot cast: %s:%i", __FILE__, __LINE__);
 			throw "Cannot cast";
 		}
 
@@ -205,6 +207,7 @@
 				return Iterator(value.objectValue->end());
 			else if (type == Type::arrayValue)
 				return Iterator(value.arrayValue->end());
+			printf("oops: %s:%i", __FILE__, __LINE__);
 			throw "oops";
 		}
 
@@ -214,6 +217,7 @@
 				return Iterator(value.objectValue->begin());
 			else if (type == Type::arrayValue)
 				return Iterator(value.arrayValue->begin());
+			printf("oops: %s:%i", __FILE__, __LINE__);
 			throw "oops";
 		}
 
@@ -225,6 +229,7 @@
 				return this->objectIterator->second;
 			else  if (type == Type::arrayValue)
 				return *arrayIterator;
+			printf("Oops: %s:%i", __FILE__, __LINE__);
 			throw "Oops";
 		}
 
@@ -234,6 +239,7 @@
 				return this->objectIterator != other.objectIterator;
 			else  if (type == Type::arrayValue)
 				return this->arrayIterator != other.arrayIterator;
+			printf("Oops: %s:%i", __FILE__, __LINE__);
 			throw "Oops";
 		}
 
@@ -389,7 +395,7 @@
 			while (!stream.eof())
 			{
 				char token = stream.peek();
-				if ((token >= '0' && token <= '9') || token == '.' || token == '-')
+				if ((token >= '0' && token <= '9') || token == '.' || token == '-' || token == 'e' || token == '+')
 					numeric += stream.get();
 				else
 					break;
@@ -465,6 +471,7 @@
 				eatComment(stream);
 				return eatValue(stream);
 			}
+			printf("Unsable to parse json: %s:%i\n", __FILE__, __LINE__);
 			throw "Unable to parse json";
 		};
 

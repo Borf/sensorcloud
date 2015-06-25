@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source files">
+      <UniqueIdentifier>{74ca4f23-275c-4c09-a36c-14ebfa4ce068}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header files">
+      <UniqueIdentifier>{59043b4e-fe88-403c-bdc1-ab8d1d012295}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource files">
+      <UniqueIdentifier>{b4375cd3-9796-4bd8-8ce9-73422f5e7d0b}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Server.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\json.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\RestServer.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\RFComm.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\sensorcloud.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Db.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\PushBullet.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Promise.cpp">
+      <Filter>Source files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\Db.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\RestServer.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\RFComm.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\Server.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\json.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\PushBullet.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\Promise.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <sstream>
+#include <algorithm>
 
 #include <unistd.h>
 #include <string.h>
@@ -16,12 +17,29 @@
 #include <arpa/inet.h>
 
 
+// trim from start
+static inline std::string &ltrim(std::string &s) {
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+	return s;
+}
+
+// trim from end
+static inline std::string &rtrim(std::string &s) {
+	s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+	return s;
+}
+
+// trim from both ends
+static inline std::string &trim(std::string &s) {
+	return ltrim(rtrim(s));
+}
+
 void closesocket(SOCKET s)
 {
     close(s);
 }
 
-std::vector<std::string> split( std::string value, std::string seperator )
+static std::vector<std::string> split( std::string value, std::string seperator )
 {
 	std::vector<std::string> ret;
 	while(value.find(seperator) != std::string::npos)
@@ -133,15 +151,55 @@ void RestServer::update()
 				std::string method = req.substr(0, req.find(" "));
 				std::string url = req.substr(req.find(" ")+1);
 				url = url.substr(0, url.find(" "));
+				std::string data = connection.data.substr(connection.data.find("\r\n\r\n")+4);
+				std::string rawheaders = connection.data.substr(0, connection.data.find("\r\n\r\n"));
+				rawheaders = rawheaders.substr(rawheaders.find("\r\n") + 2);
 
-				printf("RestServer: Got %s request for %s from %s\n", method.c_str(), url.c_str(), connection.ip.c_str());
+				std::vector<std::string> headers = split(rawheaders, "\r\n");
+
 
 				HttpRequest request;
 				request.method = method;
 				request.url = url;
+				request.data = data;
+				for (std::string &h : headers)
+				{
+					std::string headerName = h.substr(0, h.find(":"));
+					std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::tolower);
+					std::string headerData = h.substr(h.find(":") + 1);
+					request.headers[headerName] = trim(headerData);
+				}
+				
+				if (request.headers.find("content-length") != request.headers.end())
+				{
+					int len = atoi(request.headers["content-length"].c_str());
+					if (request.data.length() != len)
+					{
+						//printf("RestServer: Got a request for %s, but not enough data yet. Expected %i, got %i\n", url.c_str(), len, request.data.length());
+						//printf("---\n%s\n---\n", connection.data.c_str());
+						continue;
+					}
+					//else
+					//	printf("RestServer: Got enough data: %s\n", request.data.c_str());
+				}
+
+
+				printf("RestServer: Got %s request for %s from %s, data '%s'\n", method.c_str(), url.c_str(), connection.ip.c_str(), request.data.c_str());
+
 
 				bool handled = false;
 				HttpResponse response;
+				response.addHeader("Access-Control-Allow-Origin", "http://sensorcloud.borf.info");
+
+
+				if(method == "OPTIONS")
+				{
+					response.setCode(200);
+					response.addHeader("Access-Control-Allow-Methods", "GET,PUT,POST,OPTIONS");
+					response.addHeader("Access-Control-Allow-Headers", "Content-Type");
+					handled = true;
+				}
+
 				for(Handler& h : handlers)
 				{
 					if(h.path ==  url.substr(0, h.path.size()) && h.method == method)
@@ -176,6 +234,13 @@ std::vector<std::string> HttpRequest::splitUrl() const
 	return split(url, "/");
 
 }
+
+json::Value HttpRequest::getPostData() const
+{
+	return json::readJson(data);
+}
+
+
 
 void RestServer::addHandler(const std::string &path, const std::string &method, const std::function<void(const HttpRequest&, HttpResponse&)> &callback)
 {
@@ -214,3 +279,4 @@ void HttpResponse::setJson(const json::Value& value)
 	addHeader("Content-Type", "application/json");
 	setBody(((std::stringstream&)(std::stringstream() << value)).str());
 }
+
