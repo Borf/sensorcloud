@@ -15,6 +15,7 @@ endif
 LDFLAGS=
 CCFLAGS+=-ggdb `mysql_config --cflags`
 LDFLAGS+=`mysql_config --cflags --libs`
+LDFLAGS+=`curl-config --libs`
 CCFLAGS += -MMD
 
 # define all programs

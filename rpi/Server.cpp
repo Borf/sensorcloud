@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <math.h>
 
 
 #define PKT_HELLO 1
@@ -80,6 +81,7 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"]),
 			n["id"] = node.second->id;
 			n["lastHello"] = (int)((getTickCount() - node.second->lastHello) / 1000);
 			n["address"] = node.second->address;
+			n["id"] = node.second->id;
 			v.push_back(n);
 		}
 		h.setJson(v);
@@ -291,19 +293,21 @@ void Server::handleHello(unsigned char nodeId, const RF24NetworkHeader &header, 
 		rfcomm.send(header.from_node, PKT_RESET, NULL, 0);
 		return;
 	}
+	nodes[nodeId]->address = header.from_node;
 	nodes[nodeId]->timedOut = false;
 	nodes[nodeId]->lastHello = getTickCount();
 }
 
 void Server::handleSensorInfo(unsigned char nodeId, const RF24NetworkHeader &header, char* data)
 {
-	if(!isAlive(nodeId))
+	if (!isAlive(nodeId))
 	{
 		printf("Server: Got a sensorinfo packet from a timed out node. Resetting\n");
 		rfcomm.send(header.from_node, PKT_RESET, NULL, 0);
 		return;
 	}
 	printf("Server: Got sensorinfo from %i: %i -> ", nodeId, data[1]);
+	nodes[nodeId]->address = header.from_node;
 
 	if(	data[1] == SENSOR_DHT11_TEMP || 
 		 data[1] == SENSOR_DHT11_HUM || 
@@ -314,7 +318,8 @@ void Server::handleSensorInfo(unsigned char nodeId, const RF24NetworkHeader &hea
 	{
 		float value = (float)*((float*)(data+2));
 	    printf("%f\n", value);
-		db.query("INSERT INTO `data` (`date`, `nodeid`, `sensorid`, `data`) VALUES (NOW(), "+std::to_string(nodeId)+", "+std::to_string(data[1])+", " + std::to_string(value) + ")");
+		if (!isnan(value))
+			db.query("INSERT INTO `data` (`date`, `nodeid`, `sensorid`, `data`) VALUES (NOW(), "+std::to_string(nodeId)+", "+std::to_string(data[1])+", " + std::to_string(value) + ")");
 	}
 	else if(data[1] == SENSOR_SWITCH ||
 	0)

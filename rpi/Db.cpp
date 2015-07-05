@@ -98,7 +98,7 @@ QueryObject& Db::query(const std::string &query,
 	const std::function<void(MYSQL_ROW)> &onRow, 
 	const std::function<void(MYSQL_RES*)> &onQuery)
 {
-	printf("Db: Running query %s\n", query.c_str());
+	//printf("Db: Running query %s\n", query.c_str());
 
 	QueryObject* o = new QueryObject();
 	o->query = query;
