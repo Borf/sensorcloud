@@ -39,6 +39,12 @@
     <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Promise.cpp">
       <Filter>Source files</Filter>
     </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\PushBullet.h">
+      <Filter>Header files</Filter>
+    </ClCompile>
+    <ClCompile Include="\\192.168.2.12\pi\sensorcloud\rpi\Promise.h">
+      <Filter>Header files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\Db.h">
@@ -54,12 +60,6 @@
       <Filter>Header files</Filter>
     </ClInclude>
     <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\json.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\PushBullet.h">
-      <Filter>Header files</Filter>
-    </ClInclude>
-    <ClInclude Include="\\192.168.2.12\pi\sensorcloud\rpi\Promise.h">
       <Filter>Header files</Filter>
     </ClInclude>
   </ItemGroup>
