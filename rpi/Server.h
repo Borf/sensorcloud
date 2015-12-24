@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RFComm.h"
+#include "IPComm.h"
 #include "RestServer.h"
 #include "Db.h"
 #include "PushBullet.h"
@@ -12,9 +13,14 @@ class Node
 {
 public:
 	int id;
-	int address;
 	unsigned long lastHello;
 	bool timedOut;
+	std::string name;
+
+	Comm* comm;
+	std::string connectionInfo;
+	void send(unsigned char packetId, char* data, int len);
+	void sendMulti(unsigned char packetId, char* data, int len);
 };
 
 class Server
@@ -22,6 +28,7 @@ class Server
 public:
 	json::Value config;
 	RFComm rfcomm;
+	IPComm ipcomm;
 	RestServer restServer;
 	Db db;
 	PushBullet pb;
@@ -33,9 +40,9 @@ public:
 
 	void update();
 
-	void handleReqInfo(unsigned char nodeId, const RF24NetworkHeader &header, char* data);
-	void handleSensorInfo(unsigned char nodeId, const RF24NetworkHeader &header, char* data);
-	void handleHello(unsigned char nodeId, const RF24NetworkHeader &header, char* data);
+	void handleReqInfo(Comm* comm, unsigned char nodeId, char* data);
+	void handleSensorInfo(Comm* comm, unsigned char nodeId, char* data);
+	void handleHello(Comm* comm, unsigned char nodeId, char* data);
 
 
 	bool isAlive(int nodeId);

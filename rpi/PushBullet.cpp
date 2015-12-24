@@ -83,6 +83,7 @@ void PushBullet::update()
 			if (jobs[i]->callback)
 				jobs[i]->callback(json::readJson(jobs[i]->result));
 			mutex.lock();
+			printf("PB: Deleting job\n");
 			delete jobs[i];
 			jobs.erase(jobs.begin() + i);
 			i--;

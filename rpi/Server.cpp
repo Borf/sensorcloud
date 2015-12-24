@@ -50,7 +50,7 @@ class EepromData
 };
 #pragma pack(pop)   /* restore original alignment from stack */
 
-static std::vector<std::string> split(std::string value, std::string seperator)
+/*static std::vector<std::string> split(std::string value, std::string seperator)
 {
 	std::vector<std::string> ret;
 	while (value.find(seperator) != std::string::npos)
@@ -62,7 +62,7 @@ static std::vector<std::string> split(std::string value, std::string seperator)
 	}
 	ret.push_back(value);
 	return ret;
-}
+}*/
 
 Server::Server(const json::Value &config) : config(config), db(config["mysql"]), pb(config)
 {
@@ -71,6 +71,9 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"]),
 	rfcomm.registerHandler(PKT_HELLO, std::bind(&Server::handleHello, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	rfcomm.registerHandler(PKT_SENSORINFO, std::bind(&Server::handleSensorInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
+	ipcomm.registerHandler(PKT_REQINFO, std::bind(&Server::handleReqInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	ipcomm.registerHandler(PKT_HELLO, std::bind(&Server::handleHello, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	ipcomm.registerHandler(PKT_SENSORINFO, std::bind(&Server::handleSensorInfo, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
 	restServer.addHandler("/list", "GET", [this](const HttpRequest& r, HttpResponse& h) 
 	{ 
@@ -80,7 +83,7 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"]),
 			json::Value n;
 			n["id"] = node.second->id;
 			n["lastHello"] = (int)((getTickCount() - node.second->lastHello) / 1000);
-			n["address"] = node.second->address;
+			n["address"] = node.second->connectionInfo;
 			n["id"] = node.second->id;
 			v.push_back(n);
 		}
@@ -98,7 +101,8 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"]),
 		 	if(nodeId != 0)
 		 	{
 			 	v = "ok";
-			 	rfcomm.send(nodes[nodeId]->address, PKT_RESET, NULL, 0);
+				printf("Server: Resetting node %i because of a REST request\n", nodeId);
+			 	nodes[nodeId]->send(PKT_RESET, NULL, 0);
 			 }
 			 else
 			 	v = "error";
@@ -123,7 +127,7 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"]),
 
 				if (nodes.find(nodeId) != nodes.end() && nodes[nodeId])
 				{
-					rfcomm.send(nodes[nodeId]->address, PKT_ACTIVATE, data, 2);
+					nodes[nodeId]->send(PKT_ACTIVATE, data, 2);
 					v = "ok";
 				}
 				else
@@ -193,6 +197,31 @@ Server::Server(const json::Value &config) : config(config), db(config["mysql"]),
 
 	});
 
+	restServer.addHandler("/info",
+		"GET",
+		[this](const HttpRequest& r, HttpResponse& h)
+		{
+			int nodeId = atoi(r.url.substr(r.url.find(":") + 1).c_str());
+			json::Value v;
+		/*	db.query("SELECT * FROM `nodes` WHERE `address` = " + std::to_string(nodeId), 
+				[clientInfo](MYSQL_ROW row)
+				{
+					strcpy(clientInfo->name, row[1]);
+				},
+				[clientInfo](MYSQL_RES* result)
+				{
+					if (mysql_num_rows(result) == 0)
+					{
+						printf("Server: Error, could not find whoami info in database for node %i\n", clientInfo->id);
+						clientInfo->id = 0;
+					}
+				})
+			//can't do this async :(*/
+			v["info"] = "yay";
+			h.setJson(v);
+		});
+	
+	
 	db.query("INSERT INTO `events` (`date`, `type`, `text`, `notify`, `nodeid`) VALUEs (NOW(), 'status', 'SensorCloud server started', false, NULL)");
 }
 
@@ -202,6 +231,7 @@ void Server::update()
 	db.update();
 	restServer.update();
 	rfcomm.update();
+	ipcomm.update();
 	pb.update();
 
 
@@ -209,15 +239,13 @@ void Server::update()
 	{
 		if (n.second && !n.second->timedOut && n.second->lastHello + 60000 < getTickCount())
 		{
-			pb.sendMessage("Sensorcloud: Error!", "Error: node "  + std::to_string(n.second->id) + " timed out");
+//			pb.sendMessage("Sensorcloud: Node " + n.second->name + "("+std::to_string(n.second->id)+") timed out", "Error: node "  + std::to_string(n.second->id) + " timed out, Node name: " + n.second->name + ", last address: " + std::to_string(n.second->address));
 			db.query("INSERT INTO `events` (`date`, `type`, `text`, `notify`, `nodeid`) VALUEs (NOW(), 'status', 'Node timed out', false, "+std::to_string(n.second->id)+")");
 			n.second->timedOut = true;
 		}
 
 	}
-
-
-	usleep(1000);
+	usleep(10000);
 }
 
 
@@ -225,21 +253,27 @@ bool Server::isAlive(int nodeId)
 {
 	if(nodes.find(nodeId) == nodes.end())
 		return false;
-	if(nodes[nodeId]->lastHello + 60000 < getTickCount())
+	if(nodes[nodeId]->lastHello + 5*60000 < getTickCount())
 		return false;
 	return true;
 }
 
 
-void Server::handleReqInfo(unsigned char nodeId, const RF24NetworkHeader &header, char* data)
+void Server::handleReqInfo(Comm* comm, unsigned char nodeId, char* data)
 {
-	printf("Server: Got request for whoami info\n");
-
+	printf("Server: Got request for whoami info from node %i\n", nodeId);
+	if (nodeId == 0)
+	{
+		printf("Server: Requesting info for node 0..this should not happen, resetting\n");
+		comm->send(nodeId, PKT_RESET, NULL, 0);
+		return;
+	}
 
 	EepromData* clientInfo = new EepromData();
 	memset(clientInfo, 0, sizeof(EepromData));
 
 	clientInfo->id = nodeId;
+	
 
 
 	db.query("SELECT * FROM `nodes` WHERE `address` = " + std::to_string(nodeId), 
@@ -247,20 +281,20 @@ void Server::handleReqInfo(unsigned char nodeId, const RF24NetworkHeader &header
 		{
 			strcpy(clientInfo->name, row[1]);
 		},
-		[nodeId, clientInfo](MYSQL_RES* result)
+		[clientInfo](MYSQL_RES* result)
 		{
 			if(mysql_num_rows(result) == 0)
 			{
-				printf("Server: Error, could not find whoami info in database for node %i\n", nodeId);
+				printf("Server: Error, could not find whoami info in database for node %i\n", clientInfo->id);
 				clientInfo->id = 0;
 			}
-		}).then([this, clientInfo, nodeId, header]()
+		}).then([this, clientInfo, comm]()
 		{
 			if(clientInfo->id == 0)
 				return;
 
-				db.query("SELECT * FROM `sensors` WHERE `node` = " + std::to_string(nodeId), 
-					[clientInfo](MYSQL_ROW row)
+				db.query("SELECT * FROM `sensors` WHERE `node` = " + std::to_string(clientInfo->id), 
+					[this, clientInfo](MYSQL_ROW row)
 					{
 						int sensorId = atoi(row[1]);
 						clientInfo->sensors[sensorId].type = atoi(row[2]);
@@ -268,46 +302,58 @@ void Server::handleReqInfo(unsigned char nodeId, const RF24NetworkHeader &header
 						clientInfo->sensors[sensorId].values[0] = atoi(row[4]);
 						clientInfo->sensors[sensorId].values[1] = atoi(row[5]);
 						clientInfo->sensors[sensorId].values[2] = atoi(row[6]);
-					}, [clientInfo](MYSQL_RES* result)
+
+
+				
+				}, [clientInfo](MYSQL_RES* result)
 					{
 						clientInfo->sensorCount = mysql_num_rows(result);
-					}).then([this, clientInfo, nodeId, header]()
+					}).then([this, clientInfo, comm]()
 					{
-						rfcomm.sendMulti(header.from_node, PKT_INFO, (char*)clientInfo, sizeof(EepromData));
-						nodes[nodeId] = new Node();
-						nodes[nodeId]->id = nodeId;
-						nodes[nodeId]->timedOut = false;
-						nodes[nodeId]->address = header.from_node;
-						nodes[nodeId]->lastHello = getTickCount();
-						db.query("INSERT INTO `events` (`date`, `type`, `text`, `notify`, `nodeid`) VALUEs (NOW(), 'status', 'Node started', false, "+std::to_string(nodeId)+")");
-
+						nodes[clientInfo->id] = new Node();
+						nodes[clientInfo->id]->connectionInfo = comm->getConnectionInfo(clientInfo->id);
+						
+						
+						nodes[clientInfo->id]->comm = comm;
+						nodes[clientInfo->id]->id = clientInfo->id;
+						nodes[clientInfo->id]->name = clientInfo->name;
+						nodes[clientInfo->id]->timedOut = false;
+						nodes[clientInfo->id]->lastHello = getTickCount();
+						db.query("INSERT INTO `events` (`date`, `type`, `text`, `notify`, `nodeid`) VALUES (NOW(), 'status', 'Node started', false, " + std::to_string(clientInfo->id) + ")");
+						nodes[clientInfo->id]->sendMulti(PKT_INFO, (char*)clientInfo, sizeof(EepromData));
 					});
 		});
 }
 
 
-void Server::handleHello(unsigned char nodeId, const RF24NetworkHeader &header, char* data)
+void Server::handleHello(Comm* comm, unsigned char nodeId, char* data)
 {
 	if(!isAlive(nodeId))
 	{
-		rfcomm.send(header.from_node, PKT_RESET, NULL, 0);
+		printf("Node %i is not alive, resetting\n", nodeId);
+		comm->send(nodeId, PKT_RESET, NULL, 0);
 		return;
 	}
-	nodes[nodeId]->address = header.from_node;
+	if(nodeId == 0)
+	{
+		printf("Server: Got a hello packet from node %i\n", nodeId);
+		return;
+	}
+//	nodes[nodeId]->address = header.from_node;
 	nodes[nodeId]->timedOut = false;
 	nodes[nodeId]->lastHello = getTickCount();
 }
 
-void Server::handleSensorInfo(unsigned char nodeId, const RF24NetworkHeader &header, char* data)
+void Server::handleSensorInfo(Comm* comm, unsigned char nodeId, char* data)
 {
 	if (!isAlive(nodeId))
 	{
 		printf("Server: Got a sensorinfo packet from a timed out node. Resetting\n");
-		rfcomm.send(header.from_node, PKT_RESET, NULL, 0);
+		comm->send(nodeId, PKT_RESET, NULL, 0);
 		return;
 	}
-	printf("Server: Got sensorinfo from %i: %i -> ", nodeId, data[1]);
-	nodes[nodeId]->address = header.from_node;
+//	printf("Server: Got sensorinfo from %i: %i -> ", nodeId, data[1]);
+//	nodes[nodeId]->address = header.from_node;
 
 	if(	data[1] == SENSOR_DHT11_TEMP || 
 		 data[1] == SENSOR_DHT11_HUM || 
@@ -317,17 +363,19 @@ void Server::handleSensorInfo(unsigned char nodeId, const RF24NetworkHeader &hea
 	 0)
 	{
 		float value = (float)*((float*)(data+2));
-	    printf("%f\n", value);
+	  //  printf("%f\n", value);
 		if (!isnan(value))
 			db.query("INSERT INTO `data` (`date`, `nodeid`, `sensorid`, `data`) VALUES (NOW(), "+std::to_string(nodeId)+", "+std::to_string(data[1])+", " + std::to_string(value) + ")");
 	}
 	else if(data[1] == SENSOR_SWITCH ||
 	0)
 	{
-		printf("Switch data\n");
+		int value = data[2] == '0' ? 0 : 1;
+		db.query("INSERT INTO `data` (`date`, `nodeid`, `sensorid`, `data`) VALUES (NOW(), "+std::to_string(nodeId)+", "+std::to_string(data[1])+", " + std::to_string(value) + ")");
+		//printf("Switch data\n");
 	}
 	else
-		printf("UNKNOWN DATATYPE\n");
+		printf("Server: UNKNOWN DATATYPE\n");
 }
 
 
@@ -342,4 +390,16 @@ unsigned long Server::getTickCount()
 	result  = ts.tv_nsec / 1000000;
     result += ts.tv_sec * 1000;
     return result;
+}
+
+
+
+void Node::send(unsigned char packetId, char* data, int len)
+{
+	comm->send(id, packetId, data, len);
+}
+
+void Node::sendMulti(unsigned char packetId, char* data, int len)
+{
+	comm->sendMulti(id, packetId, data, len);
 }

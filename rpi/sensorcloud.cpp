@@ -2,7 +2,7 @@
 #include "PushBullet.h"
 #include "Promise.h"
 #include <fstream>
-
+#include <unistd.h>
 
 
 int main(int argc, char** argv) 
@@ -27,7 +27,10 @@ int main(int argc, char** argv)
   printf("Done initializing...\n");
 
   while(true)
+  {
 		server.update();
+		usleep(100);
+  }
 	return 0;
 }
 

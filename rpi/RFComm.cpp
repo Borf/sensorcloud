@@ -33,13 +33,13 @@ void RFComm::update()
 
 
 		unsigned char id = header.type;
-		printf("RFComm: Received packet %i from node %i (address %i)\n", id, nodeId, header.from_node);
+		//printf("RFComm: Received packet %i from node %i (address %i)\n", id, nodeId, header.from_node);
 
-		if(packetHandlers.find(id) != packetHandlers.end())
-			packetHandlers[id](nodeId, header, buffer);
+		if(handlers.find(id) != handlers.end())
+			handlers[id](this, nodeId, buffer);
 		else
 		{
-			printf("RFComm: Unknown packetId\n");    
+			printf("RFComm: received unknown packetId: %i from node %i ( address %i)\n", id, nodeId, header.from_node);    
 			send(header.from_node, 5, NULL, 0);
 		}
 	}
@@ -47,13 +47,9 @@ void RFComm::update()
 
 
 
-void RFComm::registerHandler(unsigned char packetId, const std::function<void(unsigned char nodeId, const RF24NetworkHeader& header, char* buffer)> &callback)
+void RFComm::send(int nodeId, unsigned char packetId, char* data, int len) const
 {
-	packetHandlers[packetId] = callback;
-}
-
-void RFComm::send(int address, unsigned char packetId, char* data, int len) const
-{
+	int address = mesh->getAddress(nodeId);
 	RF24NetworkHeader header(address, packetId);
 	bool ok = network->write(header,data,len);
 	if(!ok)
@@ -65,8 +61,9 @@ void RFComm::send(int address, unsigned char packetId, const std::string &) cons
 	
 }
 
-void RFComm::sendMulti(int address, unsigned char packetId, char* data, int len) const
+void RFComm::sendMulti(int nodeId, unsigned char packetId, char* data, int len) const
 {
+	int address = mesh->getAddress(nodeId);
 	char buffer[32];
 	RF24NetworkHeader header(address, packetId);
 	for(int i = 0; i < len; i+=23)
@@ -76,8 +73,15 @@ void RFComm::sendMulti(int address, unsigned char packetId, char* data, int len)
 
 		bool ok = network->write(header,buffer,24);
 		if (!ok)
-			printf("RFComm::sendMulti failed.\n");
+			printf("RFComm::sendMulti, sending data to address %i  failed.\n", address);
 	}
 
 	
+}
+
+
+std::string RFComm::getConnectionInfo(int nodeId) const
+{
+	int address = mesh->getAddress(nodeId);
+	return "RF: " + std::to_string(address);
 }

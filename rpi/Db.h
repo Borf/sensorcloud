@@ -36,6 +36,9 @@ private:
 
 	void threadFunc();
 
+	const json::Value& config;
+	void connect();
+	
 public:
 	Db(const json::Value &config);
 	~Db();

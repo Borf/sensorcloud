@@ -4,23 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <mysql/errmsg.h>
 
 
-
-Db::Db(const json::Value &config)
+Db::Db(const json::Value &config) : config(config)
 {
 	mysql = mysql_init(NULL);
-
-	if (mysql_real_connect(mysql, 
-			config["host"].asString().c_str(), 
-			config["user"].asString().c_str(), 
-			config["pass"].asString().c_str(), 
-			config["daba"].asString().c_str(), 0, NULL, 0) == NULL) 
-	{
-		fprintf(stderr, "Could not connect to mysql\n%s\n", mysql_error(mysql));
-		mysql_close(mysql);
-		exit(1);
-	}
+	connect();
 	running = true;
 	thread = std::thread(std::bind(&Db::threadFunc, this));
 }
@@ -29,6 +19,23 @@ Db::~Db()
 {
 	running = false;
 	thread.join();
+}
+
+void Db::connect()
+{
+	if (mysql_real_connect(mysql, 
+		config["host"].asString().c_str(), 
+		config["user"].asString().c_str(), 
+		config["pass"].asString().c_str(), 
+		config["daba"].asString().c_str(),
+		0,
+		NULL,
+		0) == NULL) 
+	{
+		fprintf(stderr, "Could not connect to mysql\n%s\n", mysql_error(mysql));
+		mysql_close(mysql);
+		exit(1);
+	}
 }
 
 void Db::update()
@@ -55,6 +62,7 @@ void Db::update()
 			mutex.unlock();
 			queryObjects[i]->callThen();
 			mutex.lock();
+//			printf("Db: delete queryobj %i\n", i);
 			delete queryObjects[i];
 			queryObjects.erase(queryObjects.begin()+i);
 			i--;
@@ -78,8 +86,15 @@ void Db::threadFunc()
 			{
 				if(mysql_query(mysql, q->query.c_str()))
 				{
+					if (mysql_errno(mysql) == CR_SERVER_GONE_ERROR)
+					{
+						
+						continue;						
+					}
 					printf("Db: Error running query \"%s\", %s\n", q->query.c_str(), mysql_error(mysql));
 					q->canBeDeleted = true;
+					q->result = NULL;
+					continue;
 				}
 				q->result = mysql_store_result(mysql);
 				q->canBeDeleted = true;

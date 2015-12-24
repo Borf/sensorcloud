@@ -1,6 +1,7 @@
 #include "RestServer.h"
 #include "json.h"
 
+#include <string>
 #include <vector>
 #include <sstream>
 #include <algorithm>
@@ -125,6 +126,7 @@ void RestServer::update()
 		socklen_t size = sizeof(client);
 		if((new_s = accept(s, (struct sockaddr*)&client, &size)))
 		{
+		//	printf("RestServer: New connection\n");
 			char ip[32];
 			inet_ntop(AF_INET, &client.sin_addr, ip, 32);
 			connections.push_back(Connection(new_s, ip));			
@@ -136,6 +138,7 @@ void RestServer::update()
 		if(FD_ISSET(connection.s, &socks))
 		{
 			char buf[1024];
+			memset(buf,0,1024);
 			int rc = recv(connection.s, buf, 1024, 0);
 			if(rc <= 0)
 			{
@@ -143,6 +146,7 @@ void RestServer::update()
 				connection.s = 0;
 				continue;
 			}
+	//		printf("RestServer: Got data: %s\n", buf);
 			connection.data += std::string(buf, rc);
 			if(connection.data.find("\r\n\r\n") != std::string::npos)
 			{

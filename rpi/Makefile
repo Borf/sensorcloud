@@ -27,10 +27,10 @@ OBJ_FILES := $(SRC_FILES:.cpp=.o)
 all: ${PROGRAMS}
 
 ${PROGRAMS}: ${OBJ_FILES}
-	g++-4.8 ${LDFLAGS} -pthread -lrf24-bcm -lrf24network -lrf24mesh -o $@ $^ --std=c++11
+	g++-4.8 ${LDFLAGS} -pthread -lrf24-bcm -lrf24network -lrf24mesh -g -o $@ $^ --std=c++11
 
 %.o: %.cpp
-	g++-4.8 ${CCFLAGS} -Wall -I../ -c -o $@ $<
+	g++-4.8 ${CCFLAGS} -Wall -I../ -g -c -o $@ $<
 	
 
 clean:
