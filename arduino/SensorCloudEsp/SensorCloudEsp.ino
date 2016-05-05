@@ -52,7 +52,7 @@ Log logger;
 Timer timer;
 const char* ssid = "borf.info";
 const char* password = "StroopWafel";
-#define USE_DISPLAY
+//#define USE_DISPLAY
 
 
 
@@ -241,6 +241,8 @@ void loop() {
 
   for(auto s : settings.sensors)
     s->update();
+  for(auto a : settings.actuators)
+    a->update();
 
 #ifdef USE_DISPLAY
   if(analogRead(A0) > 100)

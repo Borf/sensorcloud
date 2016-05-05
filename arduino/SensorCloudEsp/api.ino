@@ -187,7 +187,11 @@ void initApi()
     httpServer.send(200, "application/json",  buf);
   }); 
 
-
+  httpServer.on("/api/version", []()
+  {
+    httpServer.send(200, "application/json", "{\"version\" : 0.5 }");
+    
+  });
   
   httpServer.on("/api/actuate", HTTP_POST, [](){
     StaticJsonBuffer<200> jsonBuffer;

@@ -7,7 +7,7 @@
 class ActuatorSwitch : public Actuator
 {
 public:
-  ActuatorSwitch(JsonObject& config)
+  ActuatorSwitch(const JsonObject& config)
   {
     pin = config["pin"];
     pinMode(pin, OUTPUT);

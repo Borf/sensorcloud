@@ -3,6 +3,7 @@
 #include "Sensor_DHT.h"
 #include "Sensor_Switch.h"
 #include "Log.h"
+#include <ArduinoJson.h>
 
 
 Sensor* Sensor::build(JsonObject& info)
@@ -16,11 +17,10 @@ Sensor* Sensor::build(JsonObject& info)
     case 1:
       logger.println("SENSOR\tUnsupported DHT11, use DHT21");
     case 2:
-      logger.println("SENSOR\tMaking DHT");
-      s = new DHTSensor(info["config"]);
+      s = new DHTSensor((JsonObject&)info["config"]);
       break;
     case 4:
-      s = new SensorSwitch(info["config"]);
+      s = new SensorSwitch((JsonObject&)info["config"]);
       break;
   }
 

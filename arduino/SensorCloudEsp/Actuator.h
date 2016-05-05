@@ -11,6 +11,6 @@ public:
   static Actuator* build(JsonObject& o);
 
   virtual void activate(JsonObject& o) = 0;
-  
+  virtual void update() {};
 };
 
