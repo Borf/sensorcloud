@@ -1,0 +1,22 @@
+rm -rf _build
+mkdir _build
+mkdir _build/js
+mkdir _build/css
+
+cp *.html _build
+cp -R fonts _build
+cat js/jquery.min.js > _build/js/all.js
+cat js/bootstrap.min.js >> _build/js/all.js
+cat js/raphael-min.js >> _build/js/all.js
+cat js/morris.min.js >> _build/js/all.js
+cat js/sb-admin-2.js >> _build/js/all.js
+cat js/sensor.js >> _build/js/all.js
+
+
+sed '/buildremove/d' _build/index.html > _build/index_.html
+sed 's/<!--buildadd//g' _build/index_.html > _build/index.html
+rm _build/index_.html
+
+
+uncss http://sensor.sensorcloud.borf.info http://sensor.sensorcloud.borf.info/#log http://sensor.sensorcloud.borf.info/#wifi http://sensor.sensorcloud.borf.info/#sensor > _build/css/stylesheet.css
+chmod 777 -R _build

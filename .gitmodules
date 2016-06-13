@@ -1,6 +1,0 @@
-[submodule "www/blockly"]
-	path = www/blockly
-	url = https://github.com/google/blockly
-[submodule "www/closure-library"]
-	path = www/closure-library
-	url = https://github.com/google/closure-library.git

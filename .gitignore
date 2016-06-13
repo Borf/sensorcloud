@@ -3,3 +3,5 @@
 rpi/config.json
 rpi/dhcplist.txt
 rpi/sensorcloud
+sensor/junk/
+www/old/

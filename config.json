@@ -1,0 +1,139 @@
+{
+	"mysql" : 
+	{
+		"host" : "localhost",
+		"user" : "sensorcloud2",
+		"pass" : "r7YzvaHU7EZeXCUQ",
+		"daba" : "sensorcloud2"
+	},
+	"current" :
+	[
+		{
+			"" : ""	
+		}
+		
+	],
+	"actuators" : 
+	[
+		{
+			"name" : "Fan Shed",
+			"nodeId" : 3,
+			"sensorId" : 0,
+			"actions" : 
+			[
+				{
+					"title" : "Turn On",
+					"value" : 0,
+					"icon" : "glyphicon-off",
+					"color" : "green"
+				},
+				{
+					"title" : "Turn Off",
+					"value" : 1,
+					"icon" : "glyphicon-off",
+					"color" : "red"
+				}
+			]
+		},
+		{
+			"name" : "Garden Lights",
+			"nodeId" : 2,
+			"sensorId" : 1,
+			"actions" : 
+			[
+				{
+					"title" : "Turn On",
+					"value" : 1,
+					"icon" : "glyphicon-off",
+					"color" : "green"
+				},
+				{
+					"title" : "Turn Off",
+					"value" : 0,
+					"icon" : "glyphicon-off",
+					"color" : "red"
+				}
+			]
+		},
+		{
+			"name" : "Watch Movie",
+			"actions" : 
+			[
+				{
+					"title" : "Turn On",
+					"icon" : "glyphicon-off",
+					"color" : "green",
+					"macro" :
+					[
+						{
+							"nodeId" : 2,
+							"sensorId" : 0,
+							"value" : 0
+						},
+						{
+							"command" : "start projector"
+						}
+					]						
+				},
+				{
+					"title" : "Turn Off",
+					"icon" : "glyphicon-off",
+					"color" : "red",
+					"macro" :
+					[
+						{
+							"nodeId" : 2,
+							"sensorId" : 0,
+							"value" : 2
+						},
+						{
+							"command" : "stop projector"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name" : "Projector Screen",
+			"nodeId" : 2,
+			"sensorId" : 0,
+			"actions" : 
+			[
+				{
+					"title" : "Move Down",
+					"value" : 0,
+					"icon" : "glyphicon-menu-down"
+				},
+				{
+					"title" : "Stop",
+					"value" : 1,
+					"icon" : "glyphicon-stop"
+				},
+				{
+					"title" : "Move Up",
+					"value" : 2,
+					"icon" : "glyphicon-menu-up"
+				}
+			]
+		},
+		{
+			"name" : "Projector",
+			"nodeId" : 0,
+			"actions" : 
+			[
+				{
+					"title" : "Turn On",
+					"command" : "start projector",
+					"icon" : "glyphicon-off",
+					"color" : "green"
+				},
+				{
+					"title" : "Turn Off",
+					"command" : "stop projector",
+					"icon" : "glyphicon-off",
+					"color" : "red"
+				}
+			]
+		}
+	]
+}
