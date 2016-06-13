@@ -6,3 +6,4 @@ rpi/sensorcloud
 sensor/junk/
 sensor/_build/
 www/old/
+arduino/SensorCloudEsp/data/
