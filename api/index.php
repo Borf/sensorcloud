@@ -29,7 +29,7 @@ $cruds = array(
 		"fields" => array("id", "nodeid", "type", "config"),
 		"fieldconfig" => array("config" => "json"),
 		"key" => "id",
-		
+
 	),
 );
 
@@ -122,15 +122,15 @@ if(isset($cruds[$page[0]]))
 	if($method == "POST")
 	{
 		$data = decodeData();
-		
+
 		handlePost($data);
 		echo "ok";
 		exit();
-	
+
 	}
-	
+
 	print_r($crud);
-	
+
 	die();
 
 }
@@ -147,7 +147,7 @@ if($page[0] == "login")
 		$_SESSION["login"] = false;
 		die(showResult("json", array("auth" => false)));
 	}
-	
+
 }
 
 
@@ -171,6 +171,8 @@ if($page[0] == "report")
 					$type = "HUMIDITY";
 				else if($key == "switch")
 					$type = "SWITCH";
+				else if($key == "value")
+					$type = "VALUE";
 				else
 					die("Unknown sensor value");
 
@@ -210,9 +212,9 @@ if($page[0] == "sensordata")
 		$type = "HUMIDITY";
 
 
-	$sql = "select round(avg(`value`)*10)/10 as `value`, `name`, date_format(min(stamp), '%Y-%m-%d %k:%i') as `time`, round(unix_timestamp(`stamp`)/60/10) as `groupie` from `sensordata` 
-		LEFT JOIN `sensors` ON `sensors`.`id` = `sensordata`.`sensorid` 
-		LEFT JOIN `nodes` ON `nodes`.`id` = `sensors`.`nodeid` 
+	$sql = "select round(avg(`value`)*10)/10 as `value`, `name`, date_format(min(stamp), '%Y-%m-%d %k:%i') as `time`, round(unix_timestamp(`stamp`)/60/10) as `groupie` from `sensordata`
+		LEFT JOIN `sensors` ON `sensors`.`id` = `sensordata`.`sensorid`
+		LEFT JOIN `nodes` ON `nodes`.`id` = `sensors`.`nodeid`
 		where `sensordata`.`type` = '".$type."' AND `stamp` >= now() - interval 2 day
 		group by `name`,`groupie`
 			 order by `stamp` DESC, `name`";
@@ -262,10 +264,10 @@ if($page[0] == "fullnode")
 	$res = mysqli_query($db, "SELECT * FROM `sensors` WHERE `node` = " . $id) or die(mysqli_error($db));
 	while($line = mysqli_fetch_assoc($res))
 		$sensors[] = $line;
-		
-	
+
+
 	$data = array();
-	
+
 	$data[] = $node["name"];
 	$data[] = count($sensors);
 	for($i = 0; $i < count($sensors); $i++)
@@ -278,7 +280,7 @@ if($page[0] == "fullnode")
 	}
 	echo implode(",", $data);
 	echo "\n";
-	die();	
+	die();
 }
 
 if($page[0] == "current")
@@ -295,8 +297,8 @@ if($page[0] == "current")
 if($page[0] == "nodelist")
 {
 	//SELECT * FROM nodes n LEFT JOIN (SELECT distinct nodeid, ip, stamp, hwid FROM pings p order by stamp desc limit 1) as bla ON bla.nodeid = n.id
-/*	$res = mysqli_query($db, "SELECT 
-								`nodes`.*, 
+/*	$res = mysqli_query($db, "SELECT
+								`nodes`.*,
 								(SELECT `stamp` FROM `pings` WHERE `pings`.`nodeid` = `id` ORDER BY `stamp` DESC LIMIT 1) as `stamp`,
 								(SELECT `hwid` FROM `pings` WHERE `pings`.`nodeid` = `id` ORDER BY `stamp` DESC LIMIT 1) as `hwid`,
 								(SELECT `ip` FROM `pings` WHERE `pings`.`nodeid` = `id` ORDER BY `stamp` DESC LIMIT 1) as `ip`,
@@ -304,22 +306,22 @@ if($page[0] == "nodelist")
 								FROM `nodes`") or die(mysqli_error($db));*/
 
 
-$res = mysqli_query($db, "SELECT 
- n.id, 
-    n.name, 
-    n.hwid, 
-    p.stamp, 
-    p.ip, 
+$res = mysqli_query($db, "SELECT
+ n.id,
+    n.name,
+    n.hwid,
+    p.stamp,
+    p.ip,
     p.heapspace,
     p.rssi,
     sen.stamp as lastsensordata,
     rooms.name as room,
     (select count(*) from `sensors` LEFT JOIN `sensortypes` ON `sensortypes`.`id` = `sensors`.`type` WHERE `sensors`.`nodeid` = `n`.`id` AND `sensortypes`.`name` LIKE 'SEN%') as `sensorcount`,
     (select count(*) from `sensors` LEFT JOIN `sensortypes` ON `sensortypes`.`id` = `sensors`.`type` WHERE `sensors`.`nodeid` = `n`.`id` AND `sensortypes`.`name` LIKE 'ACT%') as `actcount`
-FROM 
+FROM
  nodes AS n
 LEFT JOIN (
- select `nodeid`, `stamp`, `ip`, `heapspace`,`rssi` from `pings` as `p1` 
+ select `nodeid`, `stamp`, `ip`, `heapspace`,`rssi` from `pings` as `p1`
  	inner join (
  		select MAX(`p3`.`id`) as `id` from `pings` as `p3` group by `nodeid`
  	) as `p2`
@@ -329,7 +331,8 @@ ON `n`.`id` = `p`.`nodeid`
 LEFT JOIN (
 select `nodeid`, max(`stamp`) as `stamp` from `sensors` left join (
     select `sensorid`, `stamp` from `sensordata` as `s1` INNER JOIN (
-    	select MAX(`s3`.`id`) as `id` from `sensordata` as `s3` group by `sensorid`
+    	select MAX(`s3`.`id`) as `id` from
+    	`sensordata` as `s3` group by `sensorid`
     	) as `s2`
     	ON `s1`.`id` = `s2`.`id`
     ) as `s`
@@ -340,7 +343,7 @@ ON `sen`.`nodeid` = `n`.`id`
 left join `rooms` on `rooms`.`id` = `n`.`room`
 
 ") or die(mysqli_error($db));
-
+	$data = array();
 	while($line = mysqli_fetch_assoc($res))
 		$data[] = $line;
 	showResult($returnType, $data);
@@ -350,19 +353,19 @@ left join `rooms` on `rooms`.`id` = `n`.`room`
 if($page[0] == "roomlist")
 {
 	$res = mysqli_query($db, "
-		SELECT 
-			`rooms`.`id` as `roomid`, 
-			`rooms`.`name` as `roomname`, 
+		SELECT
+			`rooms`.`id` as `roomid`,
+			`rooms`.`name` as `roomname`,
 			`rooms`.`area` as `area`,
-			`nodes`.`id` as `nodeid`, 
-			`nodes`.`name` as `nodename`, 
+			`nodes`.`id` as `nodeid`,
+			`nodes`.`name` as `nodename`,
 			`sensors`.`id` as `sensorid`,
 			`sensors`.`type` as `sensortype`,
 			`sensortypes`.`name` as `sensorname`
 		FROM `rooms`
-		LEFT JOIN `nodes` ON `nodes`.`room` = `rooms`.`id` 
-		LEFT JOIN `sensors` ON `sensors`.`nodeid` = `nodes`.`id` 
-		LEFT JOIN `sensortypes` ON `sensors`.`type` = `sensortypes`.`id` 
+		LEFT JOIN `nodes` ON `nodes`.`room` = `rooms`.`id`
+		LEFT JOIN `sensors` ON `sensors`.`nodeid` = `nodes`.`id`
+		LEFT JOIN `sensortypes` ON `sensors`.`type` = `sensortypes`.`id`
 
 		ORDER BY `rooms`.`id`, `nodes`.`id`") or die(mysqli_error($db));
 
@@ -449,8 +452,8 @@ if($page[0] == "last24")
 	$data = array();
 	while($line = mysqli_fetch_assoc($res))
 		$data[] = array("time" => $line["d"], "data" => $line["data"]);
-	
-	$data2 = array();	
+
+	$data2 = array();
 	foreach($data as $t)
 	{
 		$group = substr($t["time"], 0, 14) . sprintf("%02d", 10*(int)(((int)substr($t["time"], 14, 2) / 10))) . ":00";
@@ -462,29 +465,29 @@ if($page[0] == "last24")
 	$data = array();
 	while($line = mysqli_fetch_assoc($res))
 		$data[] = array("time" => $line["d"], "data" => $line["data"]);
-	
-	$data3 = array();	
+
+	$data3 = array();
 	foreach($data as $t)
 	{
 		$group = substr($t["time"], 0, 14) . sprintf("%02d", 10*(int)(((int)substr($t["time"], 14, 2) / 10))) . ":00";
 		$data3[$group][] = $t["data"];
 	}
 
-	
+
 	$data = array();
 	foreach($data2 as $time => $value)
 	{
 		$temp2 = null;
 		if(isset($data3[$time]))
 			$temp2 = round(array_sum($data3[$time]) / count($data3[$time]), 2);
-			
+
 		$data[] = array("time" => $time, "temp1" => round(array_sum($value) / count($value), 2),
 		"temp2" => $temp2);
 	}
 	showResult($returnType, $data);
 	exit();
 
-	
+
 
 }
 
@@ -503,7 +506,7 @@ if($page[0] == "actuators")
 function decodeData()
 {
 	$postdata = file_get_contents("php://input");
-	
+
 	return json_decode($postdata, true, 512, JSON_BIGINT_AS_STRING);
 }
 
@@ -531,8 +534,8 @@ function showResult($type, $data)
 		foreach($data as $key => $value)
 			echo $value . ",";
 	}
-	
-	
+
+
 	exit();
 }
 
@@ -551,17 +554,17 @@ function handlePost($data)
 			handlePost($data[$i]);
 		return;
 	}
-	
+
 	foreach($crud["fields"] as $field)
 		if(!isset($data[$field]))
 			die($field . " is not set");
-	
+
 	$sql = "";
 	if(isset($page[1]))
 		$sql = "UPDATE `" . $crud["table"] . "` SET ";
 	else
 		$sql = "INSERT INTO `" . $crud["table"] . "` SET ";
-	
+
 	foreach($crud["fields"] as $field)
 		$sql .= "`" . $field . "` = '" . mysqli_escape_string($db, $data[$field]) . "', ";
 	$sql = substr($sql, 0, -2);
@@ -571,7 +574,7 @@ function handlePost($data)
 		$sql .= " WHERE TRUE ";
 		$keys = explode(",", $crud["key"]);
 		$ids = explode(",", substr($page[1],1));
-		$ids = array_map(function($i) { return (int)$i; }, $ids);	
+		$ids = array_map(function($i) { return (int)$i; }, $ids);
 
 		for($i = 0; $i < count($keys); $i++)
 			$sql .= " AND `" . $keys[$i] . "` = " . (int)$ids[$i];
