@@ -1,0 +1,21 @@
+{
+  "name": "SensorCloudTelegram",
+  "version": "0.0.1",
+  "description": "Telegram bot with sensorcloud",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {},
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "config.json": "0.0.4",
+    "express": "^4.16.2",
+    "lodash": "^4.17.4",
+    "node-telegram-bot-api": "^0.29.0",
+    "request": "^2.83.0",
+    "winston": "^2.4.0"
+  }
+}
