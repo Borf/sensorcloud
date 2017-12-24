@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <algorithm>
 #include <list>
 #include <time.h>
 
@@ -13,14 +14,7 @@ class Timer
     int delay;
     time_t fireTime;
 
-    Callback(const std::function<void()>& callback, int delay, bool repeat)
-    {
-      this->callback = callback;
-      this->fireTime = time(nullptr) + delay;
-      this->delay = delay;
-      if(!repeat)
-        delay = 0;
-    }  
+	Callback(const std::function<void()>& callback, int delay, bool repeat);
   };
   
   std::list<Callback> callbacks;

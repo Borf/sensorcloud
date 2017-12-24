@@ -1,0 +1,22 @@
+{
+  "name": "mqtt_node",
+  "version": "1.0.0",
+  "description": "Sensorcloud mqtt service",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Borf",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "config.json": "0.0.4",
+    "express": "^4.16.2",
+    "lodash": "^4.17.4",
+    "mqtt": "^2.15.0",
+    "mysql": "^2.15.0",
+    "node-telegram-bot-api": "^0.30.0",
+    "winston": "^2.4.0"
+  }
+}

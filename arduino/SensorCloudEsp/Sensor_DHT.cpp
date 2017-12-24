@@ -3,13 +3,13 @@
 
 #include <ArduinoJson.h>
 #include "Log.h"
-#include <SFE_MicroOLED.h>  // Include the SFE_MicroOLED library
+#include <OLEDDisplay.h>
 
 DHTSensor::DHTSensor(JsonObject& config) : dht(config["pin"], DHT22)
 {
   pin = config["pin"];
   dht.begin();
-  lastSense = 0;  
+  lastSense = 0;
 }
 
 void DHTSensor::update()
@@ -21,13 +21,19 @@ void DHTSensor::sense()
   if(millis() - lastSense > 4000)
   {
     lastSense = millis();
-    humidity = dht.readHumidity();
-    temperature = dht.readTemperature();
-    if (isnan(humidity) || isnan(temperature)) {
-      logger.printTime();
+    float newhumidity = dht.readHumidity();
+    float newtemperature = dht.readTemperature();
+    if (isnan(newhumidity) || isnan(newtemperature)) {
       logger.println("DHT\tFailed to read from DHT sensor!");
+	  humidity = 0;
+	  temperature = 0;
       return;
     }
+	else
+	{
+		humidity = newhumidity;
+		temperature = newtemperature;
+	}
   }
 }
 
@@ -46,13 +52,11 @@ void DHTSensor::settings(JsonObject &o)
   o["pin"] = pin;
 }
 
-void DHTSensor::print(MicroOLED &oled)
+void DHTSensor::print(OLEDDisplay* display, int x, int y)
 {
   sense();
-  oled.print("Temp ");
-  oled.print(temperature);
-  oled.print("Hum: ");
-  oled.print(humidity);
+  display->drawString(x, y, "DHT Sensor");
+  display->drawString(x, y+10, "Temp: " + String(temperature));
+  display->drawString(x, y+20, "Hum: " + String(humidity));
+
 }
-
-

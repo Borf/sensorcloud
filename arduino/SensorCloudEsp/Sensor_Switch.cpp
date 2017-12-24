@@ -1,16 +1,14 @@
-
+#include <ESP8266WiFi.h>
 #include "Sensor_Switch.h"
+#include "Settings.h"
 
 #include <functional>
 #include <ArduinoJson.h>
 #include "Log.h"
-#include <SFE_MicroOLED.h>  // Include the SFE_MicroOLED library
+#include "Display.h"
 
 
-bool callApi(String api, String method, String postData, std::function<void(JsonObject& data)> callback);
-bool callApi(String api, String method, JsonObject& postData, std::function<void(JsonObject& data)> callback);
-bool callApi(String api, String method, JsonArray& postData, std::function<void(JsonObject& data)> callback);
-int getId();
+bool callApi(const char* api, const char* method, JsonArray& postData, std::function<void(JsonObject& data)> callback);
 
 
 SensorSwitch::SensorSwitch(JsonObject& config)
@@ -25,16 +23,20 @@ void SensorSwitch::update()
   int value = digitalRead(pin);
   if(value != lastValue)
   {
-    logger.printTime();
-    logger.println("Switch change!");
+    logger.print("Switch change: ");
+	logger.println(value);
 
-    StaticJsonBuffer<200> buffer;
+	DynamicJsonBuffer buffer(2048);
     JsonArray& allData = buffer.createArray();
     JsonObject& o = buffer.createObject();
     o["id"] = id;
     o["switch"] = value;
     allData.add(o);
-    callApi(String("report/:") + getId(), "POST", allData, [](JsonObject &ret)   {   });
+
+	char apiCall[100];
+	sprintf(apiCall, "report/:%i", ::settings.id);
+
+	callApi(apiCall, "POST", allData, [](JsonObject &ret) {});
   }
   lastValue = value;
 }
@@ -51,10 +53,8 @@ void SensorSwitch::settings(JsonObject &o)
   o["pin"] = pin;
 }
 
-void SensorSwitch::print(MicroOLED &oled)
+void SensorSwitch::print(OLEDDisplay* display)
 {
-  oled.print("Switch ");
-  oled.print(digitalRead(pin));
 }
 
 

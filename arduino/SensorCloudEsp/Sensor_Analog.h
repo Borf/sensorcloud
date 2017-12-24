@@ -2,16 +2,16 @@
 
 #include "Sensor.h"
 
-class SensorSwitch : public Sensor
+class AnalogSensor : public Sensor
 {
-  int lastValue;
+	float value;
 public:
-  SensorSwitch(JsonObject& config);
-  virtual ~SensorSwitch() {};
- 
+  AnalogSensor(JsonObject& config);
+  virtual ~AnalogSensor() {};
+
   virtual void update();
+  void sense();
   virtual void getData(JsonObject& o, JsonBuffer& buffer);
   virtual void settings(JsonObject &o);
   virtual void print(OLEDDisplay* display);
 };
-

@@ -1,19 +1,35 @@
-'use strict';
-
-
-var TelegramBot = require('node-telegram-bot-api'),
+var mqtt = require('mqtt'),
+    topicrouter = require('./src/topicrouter.js'),
+    TelegramBot = require('node-telegram-bot-api'),
     logger = require('winston'),
     config = require('config.json')('./config.json'),
     _ = require('lodash'),
     express = require('express'),
     bodyParser = require('body-parser'),
-    util = require('util');
-
+    util = require('util'),
+    db = require('./src/db.js');
 
 
 logger.remove(logger.transports.Console);
 logger.add(logger.transports.Console, {'timestamp':true});
-var bot = new TelegramBot(config.api_token,
+
+db.connect(config);
+
+var client  = mqtt.connect('mqtt://192.168.2.201')
+client.on('connect', function () {});
+client.subscribe('boot/#');
+client.subscribe('ping');
+client.subscribe('report');
+
+router = new topicrouter(client);
+require('./src/topics/boot')(router);
+
+
+
+
+
+
+/*var bot = new TelegramBot(config.api_token,
     {
         polling : true
     });
@@ -26,7 +42,7 @@ bot.onText(/\/start/i, function(msg)
     id = msg.chat.id;
     logger.info("ID: " + id);
     bot.sendMessage(id, "Hello World");
-});
+});*/
 
 var app = express();
 app.use(bodyParser.json());
@@ -42,3 +58,6 @@ app.listen(1337, function()
 {
     logger.info("Listening on port 1337");
 });
+
+
+console.log("Running...");

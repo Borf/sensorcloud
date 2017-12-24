@@ -7,3 +7,8 @@ sensor/junk/
 sensor/_build/
 www/old/
 arduino/SensorCloudEsp/data/
+arduino/SensorCloudEsp/Debug/
+arduino/SensorCloudEsp/Release/
+arduino/SensorCloudEsp/_vm/
+mqtt_node/node_modules
+mqtt_node/config.json

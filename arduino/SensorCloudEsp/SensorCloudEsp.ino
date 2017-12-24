@@ -1,3 +1,5 @@
+#include <Arduino.h>
+/*
 static const uint8_t D0   = 16;
 static const uint8_t D1   = 5;
 static const uint8_t D2   = 4;
@@ -8,302 +10,321 @@ static const uint8_t D6   = 12;
 static const uint8_t D7   = 13;
 static const uint8_t D8   = 15;
 static const uint8_t D9   = 3;
-static const uint8_t D10  = 1;
+static const uint8_t D10  = 1;*/
 
-#include <DHT.h>
+//#include <GDBStub.h>
 
 #define _NOMINMAX
 #include <ESP8266WiFi.h>
+#include <ArduinoOTA.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266HTTPClient.h>
-#include <SPI.h>
-#include <Wire.h>  // Include Wire if you're using I2C
-#include <SFE_MicroOLED.h>  // Include the SFE_MicroOLED library
+#include <EEPROM.h>
+#include <OLEDDisplayUi.h>
+#include <OLEDDisplay.h>
+
 
 #include "Log.h"
 #include "Timer.h"
+#include "Onkyo.h"
 
 #include <list>
 #include "Sensor.h"
 #include "Actuator.h"
-
+#include "Settings.h"
+#include "Display.h"
 #include <ArduinoJson.h>
-#include <Adafruit_NeoPixel.h>
 
 extern "C" {
 #include "user_interface.h"
+	void dns_setserver(char numdns, ip_addr_t *dnsserver);
 }
 
-struct Settings
-{
-  int id = -1;
-  String name;
-  std::list<Sensor*> sensors;
-  std::list<Actuator*> actuators;
-} settings;
-int getId() { return settings.id; };
-
-
-
-Log logger;
-Timer timer;
+WiFiServer server(23);
+WiFiClient serverClient;
 const char* ssid = "borf.info";
 const char* password = "StroopWafel";
-//#define USE_DISPLAY
+const char* progressor = "|/-\\";
 
-
-
-#ifdef USE_DISPLAY
-MicroOLED oled(255, 0); // Example I2C declaration
-#endif
 
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
-Adafruit_NeoPixel pixels(3, 4, NEO_RGB + NEO_KHZ800);
-int pulse = 0;
-long displayOffTime;
+bool callApi(const char* api, const char* method, const char* postData, std::function<void(JsonObject& data)> callback);
+bool callApi(const char* api, const char* method, JsonObject& postData, std::function<void(JsonObject& data)> callback);
+bool callApi(const char* api, const char* method, JsonArray& postData, std::function<void(JsonObject& data)> callback);
 
-bool callApi(String api, String method, String postData, std::function<void(JsonObject& data)> callback);
-bool callApi(String api, String method, JsonObject& postData, std::function<void(JsonObject& data)> callback);
-bool callApi(String api, String method, JsonArray& postData, std::function<void(JsonObject& data)> callback);
+void checkTelnet()
+{
+	if (server.hasClient())
+	{
+		serverClient.stop();
+		serverClient = server.available();
+		logger.println("Telnet client connected");
+	}
+	if (serverClient.connected() && serverClient.available() > 0)
+		serverClient.read();
+}
 
 
 
 void setup() {
-  pixels.begin(); // This initializes the NeoPixel library.
-  for(int i = 0; i < 3; i++)
-    pixels.setPixelColor(i, pixels.Color(255,0,0));
-  pixels.show();
+	EEPROM.begin(512);
+	Serial.begin(115200);
 
-#ifdef USE_DISPLAY
-  oled.begin();
-  oled.clear(PAGE);  // Clear the display's memory (gets rid of artifacts)
-  oled.clear(ALL);  // Clear the display's memory (gets rid of artifacts)
-  oled.display();   
-  oled.clear(PAGE);  // Clear the display's memory (gets rid of artifacts)
-  oled.println("Booting...");
-  oled.display();
-#endif
+	char host[48];
+	if (settings.loadFromEeprom())
+	{
+		logger.println("ESP\tSetting WiFi settings");
+		sprintf(host, "borf.sensor.%i.%s", settings.id, settings.name.c_str());
+		String wifiApName = String("borf.sensor.") + settings.id;
+		IPAddress Ip(10, 0, settings.id, 1);
+		IPAddress NMask(255, 255, 255, 0);
+		WiFi.softAPConfig(Ip, Ip, NMask);
+		WiFi.softAP(wifiApName.c_str(), password);
+		wifi_station_set_hostname(host);
+		display.begin(settings.display);
+	}
 
-  Serial.begin(115200);
-  logger.println("ESP\tBooting ESP...");
-  logger.print("ESP\tMy ID is ");
-  logger.println(ESP.getChipId(), HEX);
-  logger.print("WIFI\tConnecting to WiFi...");
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.begin(ssid, password);
-  while(WiFi.waitForConnectResult() != WL_CONNECTED)
-  {
-    logger.print(".");
-    WiFi.begin(ssid, password);
-    delay(1000);
-  }
-  logger.print("\nWIFI\tConnected to ");
-  logger.println(ssid);
-  logger.print("WIFI\tIP address: ");
-  logger.println(WiFi.localIP());
-  logger.print("WIFI\tDNS address: ");
-  logger.println(WiFi.dnsIP(0));
-  logger.println("API\tConnecting to API for ID");
-  if(!callApi(String("nodes/hwid:") + String(ESP.getChipId(), HEX), "GET", "", [](JsonObject& ret)
-  {
-    settings.name = ret["data"][0]["name"].as<const char*>();
-    settings.id = ret["data"][0]["id"];
-    logger.print("API\tMy ID is ");
-    logger.println(settings.id);
-    logger.print("API\tMy name is ");
-    logger.println(settings.name);
-    if(settings.id == 0)
-    {
-      logger.println("Oops, cannot have ID 0");
-      delay(1000);
-      ESP.restart();
-    }
-  })) ESP.restart();
-#ifdef USE_DISPLAY
-  oled.print("I am ");
-  oled.println(settings.name);
-  oled.display();
-#endif
-  String host = String("esp8266-sensor.") + settings.id;
-  String wifiApName = String("borf.sensor.") + settings.id;
-  IPAddress Ip(10, 0, settings.id, 1);
-  IPAddress NMask(255, 255, 255, 0);
-  WiFi.softAPConfig(Ip, Ip, NMask);
-  WiFi.softAP(wifiApName.c_str(), password);
-  wifi_station_set_hostname((char*)host.c_str());
-#if 1
-  logger.print("WIFI\treconnecting for proper name in dhcpd....");
-  WiFi.reconnect();  
-  WiFi.begin(ssid, password);
-  while(WiFi.waitForConnectResult() != WL_CONNECTED)
-  {
-    WiFi.begin(ssid, password);
-    logger.print(".");
-    delay(100);
-  }
-  logger.println("\nWIFI\treconnected");
+	server.begin();
+	server.setNoDelay(true);
+	checkTelnet();
 
-#endif
-  //ok, all initialized
-  
-  MDNS.begin(host.c_str());
-  timer.begin();
+	display.bootStart();
+	logger.println("ESP\tBooting ESP...");
+	logger.print("ESP\tMy ID is ");
+	logger.println(ESP.getChipId(), HEX);
+	logger.print("WIFI\tConnecting to WiFi...");
+	WiFi.mode(WIFI_AP_STA);
+	WiFi.begin(ssid, password);
+	display.bootConnecting();
+	while (WiFi.waitForConnectResult() != WL_CONNECTED)
+	{
+		logger.print(".");
+		WiFi.begin(ssid, password);
+		delay(1000);
+	}
+	display.bootConnected();
+	checkTelnet();
+	logger.println();
+	logger.print("WIFI\tConnected to ");
+	logger.println(ssid);
+	logger.print("WIFI\tIP address: ");
+	logger.println(WiFi.localIP());
+	logger.print("WIFI\tDNS address: ");
+	logger.println(WiFi.dnsIP(0));
 
-  callApi(String("sensors/nodeid:") + settings.id, "GET", "", [](JsonObject& ret)
-  {
-    logger.printTime();
-    logger.print("API\tGot sensor info. Sensorcount: ");
-    logger.println(ret["data"].size());
-    for(int i = 0; i < ret["data"].size(); i++)
-    {
-      Sensor* sensor = Sensor::build(ret["data"][i]);
-      if(sensor)
-        settings.sensors.push_back(sensor);
-      else
-      {
-        Actuator* actuator = Actuator::build(ret["data"][i]);
-        if(actuator)
-          settings.actuators.push_back(actuator);
-
-        else
-        {
-          logger.printTime();
-          logger.print("Unknown sensor / actuator type: ");
-          logger.print((int)ret["data"]["type"]);
-        }
-      }
-    }
-  });
+	IPAddress dns(192, 168, 2, 202);
+	ip_addr_t d;
+	d.addr = static_cast<uint32_t>(dns);
+	dns_setserver(0, &d);
+	logger.print("WIFI\tDNS address now: ");
+	logger.println(WiFi.dnsIP(0));
 
 
-  timer.addCallback(60, []()
-  {
-    logger.printTime();
-    logger.println("Reading out sensors...");
-    StaticJsonBuffer<200> buffer;
-    JsonArray& allData = buffer.createArray();
-    for(auto s : settings.sensors)
-    {
-      JsonObject& o = buffer.createObject();
-      o["id"] = s->id;
-      s->getData(o, buffer);
-      allData.add(o);
-    }
+	logger.println("API\tConnecting to API for ID");
+	char apiCall[100];
+	sprintf(apiCall, "nodes/hwid:%x", ESP.getChipId());
 
-    callApi(String("report/:") + settings.id, "POST", allData, [](JsonObject &ret)   {   });
-    
-  }, true);
+	if (!callApi(apiCall, "GET", "", [&host](JsonObject& ret)
+	{
+		JsonObject &el = ret["data"][0];
+		settings.name = ret["data"][0]["name"].as<const char*>();
+		settings.id = ret["data"][0]["id"];
+		if (el.containsKey("config"))
+		{
+			JsonObject &config = el["config"];
+			if (config.containsKey("display"))
+				settings.display = (Display::Type)config["display"].as<int>();
+			if (config.containsKey("mode"))
+				settings.mode = (Settings::Mode)config["mode"].as<int>();
+
+		}
+		sprintf(host, "borf.sensor.%i.%s", settings.id, settings.name.c_str());
+		if (settings.saveToEeprom())
+			ESP.reset();
+
+		logger.print("API\tMy ID is ");
+		logger.println(settings.id);
+		logger.print("API\tMy name is ");
+		logger.println(settings.name);
+		if (settings.id == 0)
+		{
+			logger.println("Oops, cannot have ID 0");
+			delay(1000);
+			ESP.restart();
+		}
+	})) ESP.restart();
+
+	display.bootBooted();
+	checkTelnet();
+	//ok, all wifi initialized
+
+	MDNS.begin(host);
+	timer.begin();
+
+	sprintf(apiCall, "sensors/nodeid:%i", settings.id);
+	callApi(apiCall, "GET", "", [](JsonObject& ret)
+	{
+		logger.print("API\tGot sensor info. Sensorcount: ");
+		logger.println(ret["data"].size());
+		for (size_t i = 0; i < ret["data"].size(); i++)
+		{
+			Sensor* sensor = Sensor::build(ret["data"][i]);
+			if (sensor)
+				settings.sensors.push_back(sensor);
+			else
+			{
+				Actuator* actuator = Actuator::build(ret["data"][i]);
+				if (actuator)
+					settings.actuators.push_back(actuator);
+
+				else
+				{
+					logger.print("Unknown sensor / actuator type: ");
+					logger.print((int)ret["data"]["type"]);
+				}
+			}
+		}
+	});
 
 
+	if (settings.mode == Settings::Mode::Sensor)
+	{
+		FrameCallback* frames = new FrameCallback[settings.sensors.size()];
+		int i = 0;
+		for (auto s : settings.sensors)
+			frames[i++] = [](OLEDDisplay* d, OLEDDisplayUiState* state, int16_t x, int16_t y)
+		{
+			auto it = settings.sensors.begin();
+			std::advance(it, state->currentFrame);
+			(*it)->print(d, x + display.offX, y + display.offY);
+		};
+		// for(auto a : settings.actuators)
+		//   frames[i++] = nullptr;
+		if (display.ui)
+			display.ui->setFrames(frames, i);
 
-  timer.addCallback(13, []()
-  {
-    StaticJsonBuffer<200> buffer;
-    JsonObject& o = buffer.createObject();
-    o["heapspace"] = ESP.getFreeHeap();
-    callApi(String("ping/:") + settings.id, "POST", o, [](JsonObject &ret) {  });
-  });
+	}
 
+	if (settings.mode == Settings::Mode::Sensor)
+		timer.addCallback(60 * 5, []()
+	{
+		display.resetTimeout();
+		logger.println("Reading out sensors...");
+		DynamicJsonBuffer buffer(512);
+		JsonArray& allData = buffer.createArray();
+		for (auto s : settings.sensors)
+		{
+			JsonObject& o = buffer.createObject();
+			o["id"] = s->id;
+			s->getData(o, buffer);
+			allData.add(o);
+		}
+		char apiCall[100];
+		sprintf(apiCall, "report/:%i", settings.id);
+		callApi(apiCall, "POST", allData, [](JsonObject &) {});
 
+	}, true);
 
-  httpUpdater.setup(&httpServer);
-  httpServer.begin();
-  MDNS.addService("http", "tcp", 80);
-  logger.printTime();
-  logger.printf("HTTP\tHTTPUpdateServer ready! Open http://%s.local/update in your browser\n", host.c_str());
-  initApi();
+	if (settings.mode == Settings::Mode::OnkyoDisplay)
+	{
+		onkyo.begin(IPAddress(192, 168, 2, 200), 60128);
+	}
 
+	timer.addCallback(1, []()
+	{
+		DynamicJsonBuffer buffer;
+		JsonObject& o = buffer.createObject();
+		o["heapspace"] = ESP.getFreeHeap();
+		o["ip"] = (String)(String(WiFi.localIP()[0]) + "." + String(WiFi.localIP()[1]) + "." + String(WiFi.localIP()[2]) + "." + String(WiFi.localIP()[3]));
+		o["rssi"] = WiFi.RSSI();
+		char apiCall[100];
+		sprintf(apiCall, "ping/:%i", settings.id);
+		callApi(apiCall, "POST", o, [](JsonObject &) {});
+	});
 
-#ifdef USE_DISPLAY
-  oled.println("Booted :)");
-  oled.display();
-  delay(1000);
-  oled.clear(PAGE);
-  oled.display();
-  displayOffTime = millis() + 10000;
-#endif
- 
-  for(int i = 0; i < 3; i++)
-    pixels.setPixelColor(i, pixels.Color(0,255,0));
-  pixels.show();
+	httpServer.begin();
+	MDNS.addService("http", "tcp", 80);
+	logger.printf("HTTP\tHTTPUpdateServer ready! Open http://");
+	logger.print(host);
+	logger.println(".local/update in your browser");
+	initApi();
+	httpUpdater.setup(&httpServer);
+	ArduinoOTA.setPort(8266);
+	ArduinoOTA.onStart([]() {
+		Serial.println("Start");
+	});
+	ArduinoOTA.onEnd([]() {
+		Serial.println("\nEnd");
+	});
+	ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+		Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+	});
+	ArduinoOTA.onError([](ota_error_t error) {
+		Serial.printf("Error[%u]: ", error);
+		if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+		else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+		else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+		else if (error == OTA_END_ERROR) Serial.println("End Failed");
+	});
+	ArduinoOTA.begin();
+	logger.println("Done setup...going to main loop");
 }
 
-long displayScroll;
 
 void loop() {
-  httpServer.handleClient();
-  timer.update();
+	checkTelnet();
+	ArduinoOTA.handle();
+	httpServer.handleClient();
+	timer.update();
+	for (auto s : settings.sensors)
+		s->update();
+	for (auto a : settings.actuators)
+		a->update();
 
-  for(auto s : settings.sensors)
-    s->update();
-  for(auto a : settings.actuators)
-    a->update();
+	display.update();
 
-#ifdef USE_DISPLAY
-  if(analogRead(A0) > 100)
-  {
-      if(millis() >= displayOffTime)
-      {
-        oled.command(DISPLAYON);
-        displayScroll = millis();
-      }
-      displayOffTime = millis() + 10000;
-  }
-  
-  if(millis() < displayOffTime)
-  {
-    oled.clear(PAGE);
-    oled.setCursor(0,0);
-    oled.println(settings.name);
-    oled.print("IP: .");
-    oled.print(WiFi.localIP()[2]);
-    oled.print(".");
-    oled.println(WiFi.localIP()[3]);
+	if (settings.mode == Settings::Mode::OnkyoDisplay)
+	{
+		onkyo.update();
+
+		if (!onkyo.connected)
+		{
+			display.clear();
+			display.setTextAlignment(TEXT_ALIGN_LEFT);
+			display.drawString(0, 0, "Connecting to receiver:");
+			display.drawString(0, 30, onkyo.getIp().toString());
+			display.setTextAlignment(TEXT_ALIGN_RIGHT);
+			display.drawString(64, 50, String(progressor[(millis() / 250) % 4]));
+			display.swap();
+		}
+		else if (!onkyo.isPoweredOn())
+		{
+			display.clear();
+			display.setTextAlignment(TEXT_ALIGN_LEFT);
+			display.drawString(0, 0, "Receiver powered down");
+			display.swap();
+		}
+		else
+		{
+			display.clear();
+			display.setTextAlignment(TEXT_ALIGN_LEFT);
+			display.drawStringMaxWidth(0, 0, 64, onkyo.artist);
+			display.drawStringMaxWidth(0, 32, 64, onkyo.title);
+			display.swap();
+
+		}
 
 
-    int i = 0;
-    long line = ((millis() - displayScroll) / 1500) % settings.sensors.size();
-    for(auto s : settings.sensors)
-    {
-      if(i == line)
-        s->print(oled);
-      i++;
-    }
-    
+		display.resetTimeout();
 
-  
-    int bars = -1;
-    int rssi = WiFi.RSSI();
-    if(rssi > -60)
-      bars = 5;
-    else if(rssi > -70)
-      bars = 4;
-    else if(rssi > -80)
-      bars = 3;
-    else if(rssi > -90)
-      bars = 2;
-    else if(rssi > -100)
-      bars = 1;
-  
-    if(bars >= 0)
-    {
-      for(int i = 0; i < bars; i++)
-      {
-        oled.lineV(58 + i,5-i,i+1);
-      }
-    }
-      
-    oled.lineH(0,6,64);
-    oled.display();
-  }
-  else
-    oled.command(DISPLAYOFF);
-#endif
+	}
 
-  delay(1);
+
+	yield();
+	delay(100);
 }

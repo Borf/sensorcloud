@@ -4,10 +4,6 @@
 #include "Log.h"
 #include "Arduino.h"
 
-static const uint8_t D6   = 12;
-static const uint8_t D7   = 13;
-static const uint8_t D8   = 15;
-
 class ActuatorRgb : public Actuator
 {
   int pins[3];
@@ -18,6 +14,5 @@ public:
   ActuatorRgb(const JsonObject& config);
   void activate(JsonObject& o);
   void update();
-  
-};
 
+};

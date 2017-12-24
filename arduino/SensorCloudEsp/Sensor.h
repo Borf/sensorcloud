@@ -2,7 +2,7 @@
 
 #include <ArduinoJson.h>
 
-class MicroOLED;
+class OLEDDisplay;
 
 class Sensor
 {
@@ -17,7 +17,7 @@ public:
   virtual void update() = 0;
   virtual void settings(JsonObject &o) = 0;
   virtual void getData(JsonObject& o, JsonBuffer& buffer) = 0;
-  virtual void print(MicroOLED &oled) {  };
+  virtual void print(OLEDDisplay *, int x, int y) {  };
   
 };
 
