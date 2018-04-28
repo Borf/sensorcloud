@@ -12,11 +12,20 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "config.json": "0.0.4",
+    "eiscp": "git://github.com/Borf/node-eiscp.git",
     "express": "^4.16.2",
     "lodash": "^4.17.4",
     "mqtt": "^2.15.0",
     "mysql": "^2.15.0",
+    "node-coinmarketcap": "^0.2.0",
     "node-telegram-bot-api": "^0.30.0",
     "winston": "^2.4.0"
+  },
+  "devDependencies": {
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1"
   }
 }

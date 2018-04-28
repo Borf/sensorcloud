@@ -7,7 +7,8 @@ var mqtt = require('mqtt'),
     express = require('express'),
     bodyParser = require('body-parser'),
     util = require('util'),
-    db = require('./src/db.js');
+    db = require('./src/db.js'),
+    Jvc = require('./src/jvc.js');
 
 
 logger.remove(logger.transports.Console);
@@ -15,17 +16,30 @@ logger.add(logger.transports.Console, {'timestamp':true});
 
 db.connect(config);
 
-var client  = mqtt.connect('mqtt://192.168.2.201')
-client.on('connect', function () {});
-client.subscribe('boot/#');
-client.subscribe('ping');
-client.subscribe('report');
-
+var client  = mqtt.connect('mqtt://192.168.2.201', {
+    'clientId' : 'SensorCloudServer',
+    'clean' : false,
+    'will' :
+    {
+        'topic' : 'boot/server',
+        'payload' : 'dead',
+        'retain' : true
+    }
+})
 router = new topicrouter(client);
 require('./src/topics/boot')(router);
+var jvc = new Jvc(client, router);
+client.on('connect', function () {
+    jvc.start();
 
+});
+client.subscribe('boot/whoami');
+client.subscribe('ping');
+client.subscribe('report');
+client.publish("boot/server", "alive", { retain: true });
 
-
+require('./src/onkyo2mqtt.js')(client, router);
+require('./src/coin2mqtt.js')(client, router);
 
 
 

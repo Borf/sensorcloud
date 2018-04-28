@@ -9,7 +9,7 @@ module.exports = class TopicRouter
         this.topics = [];
         var that = this;
 
-        client.on('message', function(topic, payload)
+        client.on('message', function(topic, payload, packet)
         {
             that.topics.some(reg =>
             {
@@ -18,7 +18,17 @@ module.exports = class TopicRouter
                     return false;
 
                 reg.regex.lastIndex = 0; //reset
-                reg.callback(client, result, payload);
+
+                var data
+                try
+                {
+                    data = JSON.parse(payload);
+                }
+                catch(e)
+                {
+                    data = payload;
+                }
+                reg.callback(client, result, data, packet);
                 return false;
             });
         });
