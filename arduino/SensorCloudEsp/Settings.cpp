@@ -28,7 +28,7 @@ bool Settings::loadFromEeprom()
 	}
 
 	mode = (Mode)EEPROM.read(index++);
-	display = (Display::Type)EEPROM.read(index++);
+	display = (DisplayType)EEPROM.read(index++);
 
 	logger.println("SETTING\tFound name in EEPROM: " + name);
 
@@ -47,7 +47,7 @@ bool Settings::loadFromEeprom()
 void Settings::reset()
 {
 	mode = Mode::Sensor;
-	display = Display::Type::None;
+	display = DisplayType::None;
 	id = 0;
 	name = "";
 	crc = -1;

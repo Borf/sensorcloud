@@ -40,7 +40,8 @@ module.exports = function(router)
 
                             client.publish('boot/whoami/' + hwid, JSON.stringify(nodeData));
                             client.subscribe(nodeData.roomtopic + "/" + nodeData.topic + "/#");
-                            router.on(new RegExp("(" + nodeData.roomtopic + "/" + nodeData.topic + ")/(.*)", 'i'), require('./node.js')(nodeData.id));
+                            router.remove(new RegExp("(" + nodeData.roomtopic + "/" + nodeData.topic + ")/(.*)", 'i')); //TODO: move all these to the will of this client
+                            router.on(new RegExp("(" + nodeData.roomtopic + "/" + nodeData.topic + ")/(.*)", 'i'), require('./node.js')(nodeData.id, router));
                             connection.release();
                         });
                     });

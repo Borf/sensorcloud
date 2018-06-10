@@ -4,8 +4,12 @@
 #include "Sensor_Switch.h"
 #include "Sensor_Analog.h"
 #include "Log.h"
+#include "Settings.h"
 #include <ArduinoJson.h>
+#include <PubSubClient.h>
 
+
+extern PubSubClient mqttClient;
 
 Sensor* Sensor::build(JsonObject& info)
 {
@@ -31,4 +35,23 @@ Sensor* Sensor::build(JsonObject& info)
 		s->id = info["id"];
 
 	return s;
+}
+
+void Sensor::publish(const String &topic, float value)
+{
+	char buf[32];
+	dtostrf(value, 4, 2, buf);
+	mqttClient.publish((::settings.topicid + "/" + topic).c_str(), buf, true);
+}
+
+void Sensor::publish(const String &topic, int value)
+{
+	char buf[32];
+	sprintf(buf, "%i", value);
+	mqttClient.publish((::settings.topicid + "/" + topic).c_str(), buf, true);
+}
+
+void Sensor::publish(const String &topic, const char* value)
+{
+	mqttClient.publish((::settings.topicid + "/" + topic).c_str(), value);
 }

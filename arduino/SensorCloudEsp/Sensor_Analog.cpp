@@ -19,9 +19,9 @@ void AnalogSensor::sense()
 }
 
 
-void AnalogSensor::getData(JsonObject& o, JsonBuffer& buffer)
+void AnalogSensor::report()
 {
-  o["value"] = analogRead(A0);
+	publish("analog", analogRead(A0));
 }
 
 

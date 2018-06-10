@@ -10,6 +10,7 @@ DHTSensor::DHTSensor(JsonObject& config) : dht(config["pin"], DHT22)
   pin = config["pin"];
   dht.begin();
   lastSense = 0;
+  error = false;
 }
 
 void DHTSensor::update()
@@ -18,19 +19,22 @@ void DHTSensor::update()
 
 void DHTSensor::sense()
 {
-  if(millis() - lastSense > 4000)
+  if(millis() - lastSense > 30000)
   {
     lastSense = millis();
     float newhumidity = dht.readHumidity();
     float newtemperature = dht.readTemperature();
     if (isnan(newhumidity) || isnan(newtemperature)) {
-      logger.println("DHT\tFailed to read from DHT sensor!");
+      logger.print("DHT\tFailed to read from DHT sensor on pin ");
+	  logger.println(pin);
 	  humidity = 0;
 	  temperature = 0;
+	  error = true;
       return;
     }
 	else
 	{
+		error = false;
 		humidity = newhumidity;
 		temperature = newtemperature;
 	}
@@ -38,11 +42,16 @@ void DHTSensor::sense()
 }
 
 
-void DHTSensor::getData(JsonObject& o, JsonBuffer& buffer)
+void DHTSensor::report()
 {
   sense();
-  o["temperature"] = temperature;
-  o["humidity"] = humidity;
+  if (!error)
+  {
+	  publish("temperature", temperature);
+	  publish("humidity", humidity);
+  }
+  else
+	  publish("log", "Error reading out sensor");
 }
 
 

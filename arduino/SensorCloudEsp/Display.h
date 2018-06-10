@@ -1,17 +1,15 @@
 #pragma once
 
+class DisplayDriver;
+class Graphics;
+class Transition;
 
-class OLEDDisplayUi;
-class OLEDDisplay;
 
 class Display
 {
   long displayOffTime;
   long displayScroll;
-
-  int width = 0, height = 0;
 public:
-  int offX = 0, offY = 0;
   enum class Type
   {
     None = 0,
@@ -20,8 +18,9 @@ public:
     Seperate = 3,    
   } type;
 
-  OLEDDisplayUi* ui;
-  OLEDDisplay* display;
+  DisplayDriver* display;
+  Graphics* graphics;
+  Transition* transition;
 
   void begin(Type type);
   void update();
@@ -46,7 +45,4 @@ public:
 
 
 
-
-
-extern Display display;
 

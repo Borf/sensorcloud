@@ -16,6 +16,7 @@ public:
   unsigned char crc;
   int id = -1;
   String name;
+  String topicid;
 
   enum class Mode
   {
@@ -25,7 +26,17 @@ public:
 	OnkyoDisplay,
   } mode = Mode::Sensor;
 
-  Display::Type display = Display::Type::None;
+  enum class DisplayType
+  {
+	  None = 0,
+	  D1MiniShield = 1,
+	  D1Mini = 2,
+	  Seperate = 3,
+	  WaveShare = 4,
+  } type;
+
+
+  DisplayType display = DisplayType::None;
   
   
   std::list<Sensor*> sensors;

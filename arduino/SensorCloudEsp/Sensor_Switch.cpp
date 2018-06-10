@@ -1,7 +1,7 @@
 #include <ESP8266WiFi.h>
 #include "Sensor_Switch.h"
 #include "Settings.h"
-
+#include <FunctionalInterrupt.h>
 #include <functional>
 #include <ArduinoJson.h>
 #include "Log.h"
@@ -14,34 +14,61 @@ bool callApi(const char* api, const char* method, JsonArray& postData, std::func
 SensorSwitch::SensorSwitch(JsonObject& config)
 {
   pin = config["pin"];
-  pinMode(pin, INPUT);
+  pinMode(pin, INPUT_PULLUP);
   lastValue = digitalRead(pin);
+  sendTrigger = false;
+  lastTurnOff = 0;
+  lastTurnOn = millis();
+  turnedOn = false;
+
+  attachInterrupt(pin, std::bind(&SensorSwitch::change, this), CHANGE);
 }
+
+void SensorSwitch::change()
+{
+	int value = digitalRead(pin);
+	long time = millis();
+	if (value == LOW && lastValue == HIGH)
+	{
+		if (time - lastTurnOn > 1000)
+		{
+			sendTrigger = true;
+			turnedOn = true;
+		}
+		lastTurnOn = time;
+	}
+	if (value == HIGH && lastValue == LOW && turnedOn) //turn off
+	{
+		lastTurnOff = time;
+	}
+
+
+	lastValue = value;
+}
+
 
 void SensorSwitch::update()
 {
-  int value = digitalRead(pin);
-  if(value != lastValue)
-  {
-    logger.print("Switch change: ");
-	logger.println(value);
+	long time = millis();
 
-	DynamicJsonBuffer buffer(2048);
-    JsonArray& allData = buffer.createArray();
-    JsonObject& o = buffer.createObject();
-    o["id"] = id;
-    o["switch"] = value;
-    allData.add(o);
-
-	char apiCall[100];
-	sprintf(apiCall, "report/:%i", ::settings.id);
-
-	callApi(apiCall, "POST", allData, [](JsonObject &ret) {});
-  }
-  lastValue = value;
+	if (sendTrigger)
+	{
+		logger.println("Send trigger on!");
+		sendTrigger = false;
+		publish("switch", 1);
+	}
+	if (lastTurnOff != 0 && time - lastTurnOff > 1000 && turnedOn)
+	{
+		lastTurnOff = 0;
+		turnedOn = false;
+		logger.println("Send trigger turn off");
+		publish("switch", 0);
+	}
 }
 
-void SensorSwitch::getData(JsonObject& o, JsonBuffer& buffer)
+
+
+void SensorSwitch::report()
 {
 //  o["switch"] = digitalRead(pin);
 }

@@ -1,4 +1,4 @@
-
+var isEqualRegex = require('is-equal-regex');
 
 
 module.exports = class TopicRouter
@@ -47,5 +47,13 @@ module.exports = class TopicRouter
         );
     }
 
+    remove(topicRegex)
+    {
+        var index = this.topics.findIndex(e => isEqualRegex(e.regex, topicRegex));
+        if(index > -1)
+            this.topics.splice(index, 1);
+        else
+            console.log("Error removing topic to listen to");
+    }
 
 };

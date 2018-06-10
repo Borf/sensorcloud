@@ -44,7 +44,6 @@ module.exports = function(client, router)
         {
             client.publish("onkyo/status/artist", arg.trim(), { retain : true });
             artist = arg.trim();
-            logger.info("Got artist");
         }
     });
     eiscp.on('net-usb-album-name-info', function(arg)
@@ -53,7 +52,6 @@ module.exports = function(client, router)
         {
             client.publish("onkyo/status/album", arg.trim(), { retain : true });
             album = arg.trim();
-            logger.info("Got album");
         }
     });
     eiscp.on('net-usb-title-name-info', function(arg)
@@ -63,7 +61,6 @@ module.exports = function(client, router)
         {
             client.publish("onkyo/status/title", arg.trim(), { retain : true });
             title = arg.trim();
-            logger.info("Got title");
         }
     });
     
@@ -77,7 +74,6 @@ module.exports = function(client, router)
             {
                 client.publish("onkyo/status", "playing", { retain : true });
                 client.publish("log", "Playing " + artist + " - " + title + " (" + album + ")");
-                logger.info("Got play");
             }
             else if(arg[0] == '-')
                 client.publish("onkyo/status", "stopped", { retain : true });
@@ -114,7 +110,6 @@ module.exports = function(client, router)
         {
             client.publish("onkyo/status/title", arg.trim(), { retain : true });
             title = arg.trim();
-            logger.info("Got title");
         }
     });
     
@@ -124,14 +119,13 @@ module.exports = function(client, router)
         
         
         eiscp.get_commands('main', function (err, cmds) {
-
-            console.log(cmds);
+/*            console.log(cmds);
             cmds.forEach(function (cmd) {
                 console.log(cmd);
                 eiscp.get_command(cmd, function (err, values) {
                     console.log(values);
                 });
-            });
+            });*/
         });
     
     });

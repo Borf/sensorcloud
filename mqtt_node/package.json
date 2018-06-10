@@ -13,12 +13,16 @@
     "body-parser": "^1.18.2",
     "config.json": "0.0.4",
     "eiscp": "git://github.com/Borf/node-eiscp.git",
+    "eslint": "^4.19.1",
     "express": "^4.16.2",
+    "is-equal-regex": "^0.1.0",
     "lodash": "^4.17.4",
     "mqtt": "^2.15.0",
     "mysql": "^2.15.0",
     "node-coinmarketcap": "^0.2.0",
     "node-telegram-bot-api": "^0.30.0",
+    "request": "^2.85.0",
+    "sharp": "^0.20.2",
     "winston": "^2.4.0"
   },
   "devDependencies": {
