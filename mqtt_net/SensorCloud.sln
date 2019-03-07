@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SensorCloud", "SensorCloud\SensorCloud.csproj", "{5B81B72F-1445-4EBE-A359-55C3642CA8E6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JvcProjector", "JvcProjector\JvcProjector.csproj", "{9912F8E5-8E15-451A-99AC-C07AF63C1CEA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Onkyo", "Onkyo\Onkyo.csproj", "{ABDC2568-326B-43B2-82ED-189DA680FE9E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8CAA6D7C-A4DD-4C53-8329-E8114CF66A11}"
+	ProjectSection(SolutionItems) = preProject
+		config.json = config.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B81B72F-1445-4EBE-A359-55C3642CA8E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B81B72F-1445-4EBE-A359-55C3642CA8E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B81B72F-1445-4EBE-A359-55C3642CA8E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B81B72F-1445-4EBE-A359-55C3642CA8E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9912F8E5-8E15-451A-99AC-C07AF63C1CEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9912F8E5-8E15-451A-99AC-C07AF63C1CEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9912F8E5-8E15-451A-99AC-C07AF63C1CEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9912F8E5-8E15-451A-99AC-C07AF63C1CEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABDC2568-326B-43B2-82ED-189DA680FE9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABDC2568-326B-43B2-82ED-189DA680FE9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABDC2568-326B-43B2-82ED-189DA680FE9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABDC2568-326B-43B2-82ED-189DA680FE9E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7E1B20F1-0F69-4239-A1D9-5BA7891E45BC}
+	EndGlobalSection
+EndGlobal
