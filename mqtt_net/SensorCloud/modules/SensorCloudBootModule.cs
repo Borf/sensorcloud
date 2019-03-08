@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using SensorCloud.datamodel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,19 +11,19 @@ namespace SensorCloud.modules
 	public class SensorCloudBootModule : Module
 	{
 		MqttModule mqtt;
-		SensorCloudContext mysql;
+		SensorCloudContext db;
 
 		public override void Start()
 		{
 			mqtt = GetModule<MqttModule>();
-			mysql = GetModule<MysqlModule>().context;
+			db = GetModule<DbModule>().context;
 
 			mqtt.On("boot/whoami$", async (match, message) =>
 			{
 				dynamic data = JObject.Parse(message);
 				String hwid = data.hwid;
 
-				var ret = mysql.nodes.Where(n => n.hwid == hwid).Select(n => new
+				var ret = db.nodes.Where(n => n.hwid == hwid).Select(n => new
 				{
 					id = n.id,
 					hwid = n.hwid,
@@ -46,7 +47,7 @@ namespace SensorCloud.modules
 
 			mqtt.On("boot/whoami/(.+)", (match, message) =>
 			{
-				
+
 			});
 
 		}

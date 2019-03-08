@@ -7,21 +7,26 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace SensorCloud.modules
 {
+	/// <summary>
+	/// The TelegramModule handles all communication with the Telegram Bot service. It will show a menu to the user
+	/// with a keyboard, depending on what menu the user is currently navigating. Can be used by other
+	/// modules to send messages to telegram, and other modules can build a menu to show in telegram
+	/// </summary>
 	class TelegramModule : Module
 	{
 		private string apiToken;
 		private int chatId;
 		private TelegramBotClient botClient;
 
-        public Menu rootMenu = new Menu(title : "Root");
-        private Menu currentMenu;
+		public Menu rootMenu = new Menu(title: "Root");
+		private Menu currentMenu;
 
 
 		public TelegramModule(string apiToken, int chatId)
 		{
 			this.apiToken = apiToken;
 			this.chatId = chatId;
-            currentMenu = rootMenu;
+			currentMenu = rootMenu;
 		}
 
 		public override void Start()
@@ -29,39 +34,39 @@ namespace SensorCloud.modules
 			botClient = new TelegramBotClient(apiToken);
 			botClient.OnMessage += OnMessage;
 			botClient.StartReceiving();
-            sendMessage("Sensorcloud bot started");
-        }
+			sendMessage("Sensorcloud bot started");
+		}
 
 		private void OnMessage(object sender, MessageEventArgs e)
 		{
-            foreach(var item in currentMenu.submenus)
-            {
-                if (e.Message.Text == item.title)
-                {
-                    if (item.callback != null)
-                    {
-                        string ret = item.callback();
-                        if (ret == "")
-                            sendMessage("Action done");
-                        else
-                            sendMessage(ret);
-                    }
-                    else
-                    {
-                        currentMenu = item;
-                        sendMessage(currentMenu.title + " menu");
-                        break;
-                    }
-                }
-            }
-            if (e.Message.Text == "Back")
-            {
-                if (currentMenu.parent != null)
-                    currentMenu = currentMenu.parent;
-                sendMessage("Went back");
-            }
+			foreach (var item in currentMenu.submenus)
+			{
+				if (e.Message.Text == item.title)
+				{
+					if (item.callback != null)
+					{
+						string ret = item.callback();
+						if (ret == "")
+							sendMessage("Action done");
+						else
+							sendMessage(ret);
+					}
+					else
+					{
+						currentMenu = item;
+						sendMessage(currentMenu.title + " menu");
+						break;
+					}
+				}
+			}
+			if (e.Message.Text == "Back")
+			{
+				if (currentMenu.parent != null)
+					currentMenu = currentMenu.parent;
+				sendMessage("Went back");
+			}
 
-            /*Log($"Received a text message in chat {e.Message.Chat.Id}.");
+			/*Log($"Received a text message in chat {e.Message.Chat.Id}.");
 
 			await botClient.SendTextMessageAsync(
 			  chatId: e.Message.Chat,
@@ -69,79 +74,78 @@ namespace SensorCloud.modules
 			);*/
 		}
 
-        public void AddRootMenu(Menu menu)
-        {
-            rootMenu.Add(menu);
-        }
-
-        public async void sendMessage(string message)
+		public void AddRootMenu(Menu menu)
 		{
-            List<List<KeyboardButton>> buttons = currentMenu.BuildMenu();
+			rootMenu.Add(menu);
+		}
 
-            await botClient.SendTextMessageAsync(
-              chatId: chatId,
-              text: message,
-              //disableNotification: true,
-              replyMarkup: new ReplyKeyboardMarkup(keyboard: buttons, resizeKeyboard: false, oneTimeKeyboard: false)
-            );
+		public async void sendMessage(string message)
+		{
+			List<List<KeyboardButton>> buttons = currentMenu.BuildMenu();
+
+			await botClient.SendTextMessageAsync(
+			  chatId: chatId,
+			  text: message,
+			  //disableNotification: true,
+			  replyMarkup: new ReplyKeyboardMarkup(keyboard: buttons, resizeKeyboard: false, oneTimeKeyboard: false)
+			);
 		}
 	}
 
 
-    public class Menu
-    {
-        public string title { get; private set; }
-        public List<Menu> submenus { get; private set; } = new List<Menu>();
-        public Func<string> callback { get; private set; }
-        public Menu parent { get; private set; }
+	public class Menu
+	{
+		public string title { get; private set; }
+		public List<Menu> submenus { get; private set; } = new List<Menu>();
+		public Func<string> callback { get; private set; }
+		public Menu parent { get; private set; }
 
-        public Menu(string title, Menu parent = null, Func<string> callback = null)
-        {
-            this.title = title;
-            this.parent = parent;
-            if (parent != null)
-                parent.Add(this);
-            this.callback = callback;
-        }
-        public Menu(string title, Action callback, Menu parent = null) : this(title, parent, null)
-        {
-            this.callback = () => { callback(); return ""; };
-        }
+		public Menu(string title, Menu parent = null, Func<string> callback = null)
+		{
+			this.title = title;
+			this.parent = parent;
+			if (parent != null)
+				parent.Add(this);
+			this.callback = callback;
+		}
+		public Menu(string title, Action callback, Menu parent = null) : this(title, parent, null)
+		{
+			this.callback = () => { callback(); return ""; };
+		}
 
-        public void Add(Menu menu)
-        {
-            menu.parent = this;
-            submenus.Add(menu);
-        }
+		public void Add(Menu menu)
+		{
+			menu.parent = this;
+			submenus.Add(menu);
+		}
 
-        internal List<List<KeyboardButton>> BuildMenu()
-        {
-            List<List<KeyboardButton>> ret = new List<List<KeyboardButton>>();
-            List<KeyboardButton> row = new List<KeyboardButton>();
-            for (int i = 0; i < submenus.Count; i+=2)
-            {
-                row = new List<KeyboardButton>();
-                row.Clear();
-                row.Add(new KeyboardButton(submenus[i].title));
-                if(i+1 < submenus.Count)
-                    row.Add(new KeyboardButton(submenus[i+1].title));
-                ret.Add(row);
-            }
-            //meh
-            if (this != Module.GetModule<TelegramModule>().rootMenu)
-            {
-                if (row.Count == 2)
-                {
-                    row = new List<KeyboardButton>();
-                    ret.Add(row);
-                }
-                row.Add(new KeyboardButton("Back"));
-            }
+		internal List<List<KeyboardButton>> BuildMenu()
+		{
+			List<List<KeyboardButton>> ret = new List<List<KeyboardButton>>();
+			List<KeyboardButton> row = new List<KeyboardButton>();
+			for (int i = 0; i < submenus.Count; i += 2)
+			{
+				row = new List<KeyboardButton>();
+				row.Add(new KeyboardButton(submenus[i].title));
+				if (i + 1 < submenus.Count)
+					row.Add(new KeyboardButton(submenus[i + 1].title));
+				ret.Add(row);
+			}
+			//meh, should be a reference when making the menu object, but don't want to store the telegram module in every menu, and doesn't make a whole lot of sense to pass this as a parameter
+			if (this != ModuleManager.GetModule<TelegramModule>().rootMenu)
+			{
+				if (row.Count == 2)
+				{
+					row = new List<KeyboardButton>();
+					ret.Add(row);
+				}
+				row.Add(new KeyboardButton("Back"));
+			}
 
 
-            return ret;
-        }
-    }
+			return ret;
+		}
+	}
 
 
 }

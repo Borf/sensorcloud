@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using SensorCloud.datamodel;
 using SensorCloud.modules;
 
 namespace SensorCloud.api.Controllers
@@ -14,7 +15,7 @@ namespace SensorCloud.api.Controllers
 
 		public NodesController()
 		{
-			db = Module.GetModule<MysqlModule>().context;
+			db = ModuleManager.GetModule<DbModule>().context;
 		}
 
 		[HttpGet]

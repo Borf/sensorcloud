@@ -1,12 +1,12 @@
 ﻿namespace Onkyo
 {
-    public partial class Receiver
+	public partial class Receiver
 	{
-        public enum PlayStatus
-        {
-            Playing,
-            Paused,
-            Stopped
-        }
-    }
+		public enum PlayStatus
+		{
+			Playing,
+			Paused,
+			Stopped
+		}
+	}
 }

@@ -1,10 +1,11 @@
 ﻿namespace Onkyo
 {
-    public partial class Receiver
+	public partial class Receiver
 	{
-        public enum ShuffleStatus {
-            No,
-            Yes
-        };
-    }
+		public enum ShuffleStatus
+		{
+			No,
+			Yes
+		};
+	}
 }

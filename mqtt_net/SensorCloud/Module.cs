@@ -7,46 +7,20 @@ namespace SensorCloud
 {
 	public abstract class Module
 	{
-        public abstract void Start();
+		public abstract void Start();
 
-
-        static List<Module> modules = new List<Module>();
 
 		public Module()
 		{
-			modules.Add(this);
-		}
-        protected static void removeModule(Module module)
-        {
-            modules.Remove(module);
-        }
-
-		public static T GetModule<T>() where T : Module
-		{
-			foreach (Module m in modules)
-			{
-				if (m is T)
-					return (T)m;
-			}
-			return null;
+			ModuleManager.Add(this);
 		}
 
-		public static IEnumerable<T> GetModules<T>() where T : Module
+		protected T GetModule<T>() where T : Module
 		{
-			List<T> ret = new List<T>();
-			foreach (Module m in modules)
-			{
-				if (m is T)
-					ret.Add((T)m);
-			}
-			return ret;
+			return ModuleManager.GetModule<T>();
 		}
 
-		public static void StartAll()
-		{
-			foreach (Module m in modules)
-				m.Start();
-		}
+
 
 		//TODO: make this a bit better, don't just jam it all in here
 		private static ConsoleColor[] usableColors = {
@@ -60,7 +34,7 @@ namespace SensorCloud
 		private String moduleName;
 		public void Log(string msg)
 		{
-			if(color == ConsoleColor.Black) //uninitialized
+			if (color == ConsoleColor.Black) //uninitialized
 			{
 				moduleName = this.GetType().Name.ToUpper();
 				if (moduleName.Contains("MODULE"))
@@ -75,5 +49,5 @@ namespace SensorCloud
 			Console.WriteLine(msg);
 
 		}
-    }
+	}
 }

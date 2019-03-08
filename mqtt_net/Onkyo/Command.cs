@@ -38,10 +38,10 @@ namespace Onkyo
 			}
 
 			command = System.Text.Encoding.ASCII.GetString(rawData, 2, 3);
-			data = System.Text.Encoding.UTF8.GetString(rawData, 5, rawData.Length - 5).TrimEnd(new char[] { '\r', '\n', (char)0x1a } );
+			data = System.Text.Encoding.UTF8.GetString(rawData, 5, rawData.Length - 5).TrimEnd(new char[] { '\r', '\n', (char)0x1a });
 
 			foreach (JProperty zone in commands["commands"])
-				if(zone.Value[command] != null)
+				if (zone.Value[command] != null)
 					this.name = zone.Value[command]["name"].ToString();
 
 			return this;

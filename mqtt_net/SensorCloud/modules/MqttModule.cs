@@ -9,15 +9,19 @@ using System.Threading.Tasks;
 
 namespace SensorCloud.modules
 {
+	/// <summary>
+	/// Mqtt module connects to an mqtt broker, and allows other modules to subscribe to topics (with regex support)
+	/// Will also publish its status on boot/server so that other nodes can see if the server is listening
+	/// </summary>
 	public class MqttModule : Module
 	{
 		private IMqttClient mqttClient;
-        private string broker;
+		private string broker;
 
-        public MqttModule(string broker)
-        {
-            this.broker = broker;
-        }
+		public MqttModule(string broker)
+		{
+			this.broker = broker;
+		}
 
 
 		public override async void Start()
@@ -52,7 +56,7 @@ namespace SensorCloud.modules
 			await mqttClient.PublishAsync(new MqttApplicationMessageBuilder()
 				.WithTopic(topic)
 				.WithPayload(value)
-                .WithRetainFlag(retain)
+				.WithRetainFlag(retain)
 				.Build());
 		}
 
@@ -100,10 +104,10 @@ namespace SensorCloud.modules
 
 		private void mqttMessageReceived(object sender, MqttApplicationMessageReceivedEventArgs e)
 		{
-            if (lastValues.ContainsKey(e.ApplicationMessage.Topic))
-                lastValues[e.ApplicationMessage.Topic] = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
+			if (lastValues.ContainsKey(e.ApplicationMessage.Topic))
+				lastValues[e.ApplicationMessage.Topic] = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
 
-            bool handled = false;
+			bool handled = false;
 			foreach (var item in callbacks.ToList())
 			{
 				Match match = Regex.Match(e.ApplicationMessage.Topic, item.Key);
@@ -118,11 +122,11 @@ namespace SensorCloud.modules
 				Log($"Message on topic {e.ApplicationMessage.Topic} is not handled");
 		}
 
-        public void storeLastValue(string topic)
-        {
-            if(!lastValues.ContainsKey(topic))
-                lastValues[topic] = "";
-        }
-        public Dictionary<string, string> lastValues = new Dictionary<string, string>();
+		public void storeLastValue(string topic)
+		{
+			if (!lastValues.ContainsKey(topic))
+				lastValues[topic] = "";
+		}
+		public Dictionary<string, string> lastValues = new Dictionary<string, string>();
 	}
 }
