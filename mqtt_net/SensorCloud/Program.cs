@@ -78,6 +78,9 @@ namespace SensorCloud
 				case "dashboard":
 					new DashModule();
 					break;
+				case "jvc":
+					new JvcModule(moduleConfig["host"].Value<string>());
+					break;
 			}
 
 

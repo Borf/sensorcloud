@@ -1,12 +1,9 @@
 ﻿namespace Onkyo
 {
-	public partial class Receiver
+	public enum RepeatStatus
 	{
-		public enum RepeatStatus
-		{
-			None,
-			All,
-			One
-		}
+		None,
+		All,
+		One
 	}
 }

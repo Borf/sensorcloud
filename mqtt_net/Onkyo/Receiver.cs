@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Onkyo
 {
-	public partial class Receiver
+	public class Receiver
 	{
 		private TcpClient tcpClient;
 		private NetworkStream stream;
@@ -20,9 +20,6 @@ namespace Onkyo
 		public event EventHandler<PlayStatus> PlayStatusChange;
 		public event EventHandler<RepeatStatus> RepeatStatusChange;
 		public event EventHandler<ShuffleStatus> ShuffleStatusChange;
-
-
-		public int volume { get; private set; }
 
 		public struct Song
 		{
@@ -130,7 +127,7 @@ namespace Onkyo
 			{
 				int newVolume = Convert.ToInt32(command.data, 16);
 				VolumeChange?.Invoke(this, newVolume);
-				volume = newVolume;
+				_volume = newVolume;
 			}
 			catch (FormatException)
 			{

@@ -62,8 +62,8 @@ namespace SensorCloud.modules
 
 			Menu power = new Menu(title: "Power", parent: onkyoMenu);
 
-			power.Add(new Menu(title: "On", callback: () => SetPower(true)));
-			power.Add(new Menu(title: "Off", callback: () => SetPower(false)));
+			power.Add(new Menu(title: "On", callback: () => Power = true));
+			power.Add(new Menu(title: "Off", callback: () => Power = false));
 
 
 			onkyoMenu.Add(new Menu(title: "Next", callback: () => receiver.Next()));
@@ -93,35 +93,35 @@ namespace SensorCloud.modules
 
 
 
-		private async void onShuffleStatus(object sender, Receiver.ShuffleStatus e)
+		private async void onShuffleStatus(object sender, ShuffleStatus e)
 		{
 			switch (e)
 			{
-				case Receiver.ShuffleStatus.No: await mqtt.Publish("onkyo/status/shuffle", "no", retain: true); break;
-				case Receiver.ShuffleStatus.Yes: await mqtt.Publish("onkyo/status/shuffle", "shuffle", retain: true); break;
+				case ShuffleStatus.No: await mqtt.Publish("onkyo/status/shuffle", "no", retain: true); break;
+				case ShuffleStatus.Yes: await mqtt.Publish("onkyo/status/shuffle", "shuffle", retain: true); break;
 			}
 		}
 
-		private async void onRepeatStatus(object sender, Receiver.RepeatStatus e)
+		private async void onRepeatStatus(object sender, RepeatStatus e)
 		{
 			switch (e)
 			{
-				case Receiver.RepeatStatus.None: await mqtt.Publish("onkyo/status/repeat", "no", retain: true); break;
-				case Receiver.RepeatStatus.One: await mqtt.Publish("onkyo/status/repeat", "single", retain: true); break;
-				case Receiver.RepeatStatus.All: await mqtt.Publish("onkyo/status/repeat", "repeat", retain: true); break;
+				case RepeatStatus.None: await mqtt.Publish("onkyo/status/repeat", "no", retain: true); break;
+				case RepeatStatus.One: await mqtt.Publish("onkyo/status/repeat", "single", retain: true); break;
+				case RepeatStatus.All: await mqtt.Publish("onkyo/status/repeat", "repeat", retain: true); break;
 			}
 		}
 
-		private async void onPlayStatus(object sender, Receiver.PlayStatus e)
+		private async void onPlayStatus(object sender, PlayStatus e)
 		{
 			switch (e)
 			{
-				case Receiver.PlayStatus.Playing: await mqtt.Publish("onkyo/status", "paused", retain: true); break;
-				case Receiver.PlayStatus.Paused: await mqtt.Publish("onkyo/status", "playing", retain: true); break;
-				case Receiver.PlayStatus.Stopped: await mqtt.Publish("onkyo/status", "stopped", retain: true); break;
+				case PlayStatus.Playing: await mqtt.Publish("onkyo/status", "paused", retain: true); break;
+				case PlayStatus.Paused: await mqtt.Publish("onkyo/status", "playing", retain: true); break;
+				case PlayStatus.Stopped: await mqtt.Publish("onkyo/status", "stopped", retain: true); break;
 			}
 
-			if (e == Receiver.PlayStatus.Playing)
+			if (e == PlayStatus.Playing)
 			{
 				if (telegram?.IsInMenu(onkyoMenu) == true)
 				{
@@ -152,7 +152,7 @@ namespace SensorCloud.modules
 			set { receiver.Power = value; }
 		}
 
-		public bool Volume {
+		public int Volume {
 			get { return receiver.Volume; }
 			set { receiver.Volume = value; }
 		}
