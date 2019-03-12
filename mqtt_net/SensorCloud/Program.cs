@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using SensorCloud.modules;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,9 +30,24 @@ namespace SensorCloud
 
 			ModuleManager.StartAll();
 
-			CreateWebHostBuilder(args).Build().Run();
+			CreateWebHostBuilder(args).Build().RunAsync();
 
-			Thread.Sleep(Timeout.Infinite);
+			while (true)
+			{
+				string line = Console.ReadLine().Trim();
+				if (line.ToLower() == "modules")
+				{
+					foreach (Module m in ModuleManager.GetModules<Module>())
+						Console.WriteLine($"{m.moduleName}\t{m.GetType()}");
+				}
+				if (line.Contains("."))
+				{
+					string[] cmd = line.Split(".", 2);
+					Module module = ModuleManager.GetModules<Module>().FirstOrDefault(m => m.moduleName == cmd[0].ToUpper());
+					module?.HandleCommand(cmd[1]);
+				}
+
+			}
 		}
 
 		private static void buildModule(JObject moduleConfig)

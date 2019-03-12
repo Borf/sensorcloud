@@ -34,44 +34,42 @@ namespace SensorCloud.modules
 			botClient = new TelegramBotClient(apiToken);
 			botClient.OnMessage += OnMessage;
 			botClient.StartReceiving();
-			sendMessage("Sensorcloud bot started");
+			SendMessageAsync("Sensorcloud bot started", showNotification: false);
 		}
 
 		private void OnMessage(object sender, MessageEventArgs e)
 		{
-			foreach (var item in currentMenu.submenus)
+			foreach (var item in currentMenu.SubMenus)
 			{
-				if (e.Message.Text == item.title)
+				if (e.Message.Text == item.Title)
 				{
-					if (item.callback != null)
+					if (item.Callback != null)
 					{
-						string ret = item.callback();
+						string ret = item.Callback();
 						if (ret == "")
-							sendMessage("Action done");
+							SendMessageAsync("Action done");
 						else
-							sendMessage(ret);
+							SendMessageAsync(ret);
 					}
 					else
 					{
 						currentMenu = item;
-						sendMessage(currentMenu.title + " menu");
+						string text = currentMenu.Title + " menu";
+						if (currentMenu.AfterMenuText != null)
+							text += " - " + currentMenu.AfterMenuText();
+						SendMessageAsync(text);
 						break;
 					}
 				}
 			}
 			if (e.Message.Text == "Back")
 			{
-				if (currentMenu.parent != null)
-					currentMenu = currentMenu.parent;
-				sendMessage("Went back");
+				if (currentMenu.Parent != null)
+					currentMenu = currentMenu.Parent;
+				SendMessageAsync("Went back");
 			}
 
-			/*Log($"Received a text message in chat {e.Message.Chat.Id}.");
 
-			await botClient.SendTextMessageAsync(
-			  chatId: e.Message.Chat,
-			  text: "You said:\n" + e.Message.Text
-			);*/
 		}
 
 		public void AddRootMenu(Menu menu)
@@ -79,56 +77,64 @@ namespace SensorCloud.modules
 			rootMenu.Add(menu);
 		}
 
-		public async void sendMessage(string message)
+		public async void SendMessageAsync(string message, bool showNotification = true)
 		{
 			List<List<KeyboardButton>> buttons = currentMenu.BuildMenu();
 
 			await botClient.SendTextMessageAsync(
 			  chatId: chatId,
 			  text: message,
-			  //disableNotification: true,
+			  disableNotification: !showNotification,
 			  replyMarkup: new ReplyKeyboardMarkup(keyboard: buttons, resizeKeyboard: false, oneTimeKeyboard: false)
 			);
+		}
+
+		public bool IsInMenu(Menu menu)
+		{
+			return currentMenu == menu;
 		}
 	}
 
 
 	public class Menu
 	{
-		public string title { get; private set; }
-		public List<Menu> submenus { get; private set; } = new List<Menu>();
-		public Func<string> callback { get; private set; }
-		public Menu parent { get; private set; }
+		public string Title { get; private set; }
+		public List<Menu> SubMenus { get; private set; } = new List<Menu>();
+		public Func<string> Callback { get; private set; }
+		public Menu Parent { get; private set; }
+		public Func<string> AfterMenuText;
 
-		public Menu(string title, Menu parent = null, Func<string> callback = null)
+		public Menu(string title, Menu parent = null, Func<string> callback = null, Func<string> afterMenuText = null)
 		{
-			this.title = title;
-			this.parent = parent;
+			this.Title = title;
+			this.Parent = parent;
 			if (parent != null)
 				parent.Add(this);
-			this.callback = callback;
+			this.Callback = callback;
+			this.AfterMenuText = afterMenuText;
+
 		}
 		public Menu(string title, Action callback, Menu parent = null) : this(title, parent, null)
 		{
-			this.callback = () => { callback(); return ""; };
+			this.Callback = () => { callback(); return ""; };
 		}
 
 		public void Add(Menu menu)
 		{
-			menu.parent = this;
-			submenus.Add(menu);
+			menu.Parent = this;
+			SubMenus.Add(menu);
 		}
 
 		internal List<List<KeyboardButton>> BuildMenu()
 		{
 			List<List<KeyboardButton>> ret = new List<List<KeyboardButton>>();
 			List<KeyboardButton> row = new List<KeyboardButton>();
-			for (int i = 0; i < submenus.Count; i += 2)
+			for (int i = 0; i < SubMenus.Count; i += 2)
 			{
 				row = new List<KeyboardButton>();
-				row.Add(new KeyboardButton(submenus[i].title));
-				if (i + 1 < submenus.Count)
-					row.Add(new KeyboardButton(submenus[i + 1].title));
+				row.Add(new KeyboardButton(SubMenus[i].Title));
+				if (i + 1 < SubMenus.Count)
+					row.Add(new KeyboardButton(SubMenus[i + 1].Title));
 				ret.Add(row);
 			}
 			//meh, should be a reference when making the menu object, but don't want to store the telegram module in every menu, and doesn't make a whole lot of sense to pass this as a parameter

@@ -51,7 +51,7 @@ namespace SensorCloud.modules
 					await Task.Delay(100);
 				}
 				await db.SaveChangesAsync();
-				await Task.Delay(1000);
+				await Task.Delay(10000);
 			}
 		}
 
@@ -133,7 +133,7 @@ namespace SensorCloud.modules
 			var ping = new System.Net.NetworkInformation.Ping();
 			ping.PingCompleted += (s, e) =>
 			{
-				if (e.Reply.Status == IPStatus.Success)
+				if (e.Reply != null && e.Reply.Status == IPStatus.Success)
 					item.value = "ok";
 				else
 					item.value = "offline";

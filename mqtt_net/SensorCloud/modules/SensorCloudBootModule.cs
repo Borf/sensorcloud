@@ -41,7 +41,7 @@ namespace SensorCloud.modules
 					})
 				}).First();
 				await mqtt.Publish("boot/whoami/" + hwid, JsonConvert.SerializeObject(ret));
-
+				Log($"Sensor {ret.name}  (id {ret.id}) in {ret.roomtopic} is booting");
 				new SensorCloudNodeModule(hwid).Start();
 			});
 

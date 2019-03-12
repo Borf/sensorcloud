@@ -9,19 +9,6 @@ namespace SensorCloud
 	{
 		public abstract void Start();
 
-
-		public Module()
-		{
-			ModuleManager.Add(this);
-		}
-
-		protected T GetModule<T>() where T : Module
-		{
-			return ModuleManager.GetModule<T>();
-		}
-
-
-
 		//TODO: make this a bit better, don't just jam it all in here
 		private static ConsoleColor[] usableColors = {
 			ConsoleColor.Red,
@@ -31,20 +18,39 @@ namespace SensorCloud
 			ConsoleColor.Yellow };
 		private static int lastColor = -1;
 		private ConsoleColor color = ConsoleColor.Black;
-		private String moduleName;
+
+
+		public string moduleName { get; private set; }
+
+
+		public Module()
+		{
+			ModuleManager.Add(this);
+
+			moduleName = this.GetType().Name.ToUpper();
+			if (moduleName.Contains("MODULE"))
+				moduleName = moduleName.Substring(0, moduleName.IndexOf("MODULE"));
+			lastColor = (lastColor + 1) % usableColors.Length;
+			color = usableColors[lastColor];
+		}
+
+		protected T GetModule<T>() where T : Module
+		{
+			return ModuleManager.GetModule<T>();
+		}
+
+
+		public virtual void HandleCommand(string command)
+		{
+			Console.WriteLine("Unhandled command");
+		}
+
 		public void Log(string msg)
 		{
-			if (color == ConsoleColor.Black) //uninitialized
-			{
-				moduleName = this.GetType().Name.ToUpper();
-				if (moduleName.Contains("MODULE"))
-					moduleName = moduleName.Substring(0, moduleName.IndexOf("MODULE"));
-				lastColor = (lastColor + 1) % usableColors.Length;
-				color = usableColors[lastColor];
-			}
-
 			Console.ForegroundColor = color;
 			Console.Write($"{moduleName}\t");
+			if (moduleName.Length < 8)
+				Console.Write("\t");
 			Console.ForegroundColor = ConsoleColor.Gray;
 			Console.WriteLine(msg);
 

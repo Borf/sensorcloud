@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +24,7 @@ namespace Onkyo
 
 		public int volume { get; private set; }
 
-		struct Song
+		public struct Song
 		{
 			public string title;
 			public string album;
@@ -30,7 +32,7 @@ namespace Onkyo
 			public int index;
 		};
 
-		Song currentSong = new Song();
+		public Song currentSong = new Song();
 
 		public Status status = new Status();
 
@@ -49,6 +51,12 @@ namespace Onkyo
 				await tcpClient.ConnectAsync(address, 60128);
 				Console.WriteLine($"ONKYO\tConnected to {address}");
 				stream = tcpClient.GetStream();
+
+				SendCommand("PWRQSTN");
+				SendCommand("ATMQSTN");
+				SendCommand("MVLQSTN");
+				SendCommand("SLIQSTN");
+
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
 				Task.Run(async () => await readPackets()); //run in background
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
@@ -80,6 +88,12 @@ namespace Onkyo
 						currentSong.title = command.data;
 					if (command.command == "NTR") // index in playlist
 						currentSong.index = int.Parse(command.data.Substring(0, command.data.IndexOf("/")));
+					if (command.command == "PWR")
+						_power = command.data == "01";
+					if (command.command == "SLI")
+						_input = GetInputFromPacket(command.data);
+					if (command.command == "NLS") // net-usb-list-info
+						;
 
 				}
 			}
@@ -93,6 +107,8 @@ namespace Onkyo
 				await Connect(address);
 			}
 		}
+
+
 
 		private void handleStatus(Command command)
 		{
@@ -122,18 +138,32 @@ namespace Onkyo
 			}
 		}
 
-		public void SetVolume(int newVolume)
-		{
-			String hexValue = newVolume.ToString("X2");
-			hexValue = hexValue.ToUpper();
 
-			SendCommand("MVL" + hexValue);
+		bool _power = false;
+		public bool Power {
+			get { return _power; }
+			set { SendCommand("PWR0" + (value ? "1" : "0")); }
 		}
 
-		public void SetPower(bool status)
-		{
-			SendCommand("PWR0" + (status ? "1" : "0"));
+		private string _input;
+		public string Input {
+			get { return _input; }
+			set {
+				if (inputMap.ContainsValue(value))
+				{
+					string packet = inputMap.First(i => i.Value == value).Key;
+					SendCommand("SLI" + packet);
+				}
+			}
 		}
+
+		private int _volume;
+		public int Volume {
+			get { return _volume; }
+			set { SendCommand("MVL" + value.ToString("X2").ToUpper()); }
+		}
+
+
 
 		public void Play() { SendCommand("NTCPLAY"); }
 		public void Pause() { SendCommand("NTCPAUSE"); }
@@ -143,7 +173,7 @@ namespace Onkyo
 
 
 
-		private void SendCommand(string command)
+		public void SendCommand(string command)
 		{
 			Header header = new Header(command.Length + 3);
 			header.WriteToStream(stream);
@@ -151,5 +181,38 @@ namespace Onkyo
 			stream.Write(System.Text.Encoding.ASCII.GetBytes(command));
 			stream.WriteByte(0x0d);
 		}
+
+
+		private Dictionary<string, string> inputMap = new Dictionary<string, string>()
+		{
+			{  "01", "Wiiu" },
+			{  "02", "Aux" },
+			{  "05", "PC" },
+			{  "10", "Kodi" },
+			{  "11", "Chromecast" },
+			{  "12", "TV" },
+			{  "22", "Phono" },
+			{  "23", "CD" },
+			{  "24", "FM" },
+			{  "25", "AM" },
+			{  "26", "Tuner" },
+			{  "27", "Music Server, P4S, DLNA" },
+			{  "28", "Internet Radio" },
+			{  "2B", "Network" },
+		};
+
+		public IEnumerable<string> getInputs()
+		{
+			return inputMap.Values;
+		}
+		private string GetInputFromPacket(string packet)
+		{
+			if (!inputMap.ContainsKey(packet))
+			{
+				Console.WriteLine("Onkyo\t\tCould not find input type for " + packet);
+			}
+			return inputMap[packet];
+		}
+
 	}
 }
