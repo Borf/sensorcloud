@@ -81,6 +81,9 @@ namespace SensorCloud
 				case "jvc":
 					new JvcModule(moduleConfig["host"].Value<string>());
 					break;
+				case "kodi":
+					new KodiModule(moduleConfig["host"].Value<string>());
+					break;
 			}
 
 
