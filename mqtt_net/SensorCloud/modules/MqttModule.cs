@@ -53,6 +53,8 @@ namespace SensorCloud.modules
 
 		public async Task Publish(string topic, string value, bool retain = false)
 		{
+			while (!mqttClient.IsConnected)
+				await Task.Delay(10); //hmm, not so nice
 			await mqttClient.PublishAsync(new MqttApplicationMessageBuilder()
 				.WithTopic(topic)
 				.WithPayload(value)

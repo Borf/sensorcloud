@@ -43,6 +43,11 @@ namespace SensorCloud.modules
 			if (telegram != null)
 				InstallTelegramHandlers(telegram);
 
+			await mqtt.Publish("onkyo/status/title", "", retain: true);
+			await mqtt.Publish("onkyo/status/album", "", retain: true);
+			await mqtt.Publish("onkyo/status/artist", "", retain: true);
+
+
 			mqtt.On("onkyo/volume/set", (match, payload) => Volume = int.Parse(payload));
 			mqtt.On("onkyo/power/set", (match, payload) => Power = (payload == "on"));
 			mqtt.On("onkyo/action", (match, payload) =>
@@ -127,6 +132,9 @@ namespace SensorCloud.modules
 				{
 					telegram.SendMessageAsync($"Now playing {receiver.currentSong.index}. {receiver.currentSong.title} ({receiver.currentSong.album} by {receiver.currentSong.artist})", showNotification: false);
 				}
+				await mqtt.Publish("onkyo/status/title", receiver.currentSong.title, retain: true);
+				await mqtt.Publish("onkyo/status/album", receiver.currentSong.album, retain: true);
+				await mqtt.Publish("onkyo/status/artist", receiver.currentSong.artist, retain: true);
 			}
 		}
 

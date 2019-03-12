@@ -52,7 +52,7 @@ namespace SensorCloud.modules
 				{
 					jsonrpc = "2.0",
 					method = command,
-					//params = new int[] { },
+					@params = new int[] { },
 					id = id
 				}
 			});
