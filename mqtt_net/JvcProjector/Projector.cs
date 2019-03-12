@@ -62,58 +62,80 @@ namespace JvcProjector
 						throw new IOException("Disconnected from projector");
 					count += rc;
 
-					if (count >= 5 && System.Text.Encoding.ASCII.GetString(buffer, 0, 5) == "PJ_OK")
+					while (count > 0)
 					{
-						await stream.WriteAsync(System.Text.Encoding.ASCII.GetBytes("PJREQ"));
-						count -= 5;
-						if (count > 0)
-							Buffer.BlockCopy(buffer, 5, buffer, 0, count);
-					}
-					if (count >= 5 && System.Text.Encoding.ASCII.GetString(buffer, 0, 5) == "PJACK")
-					{
-						//hands have been shaken
-						ready = true;
-						count -= 5;
-						if (count > 0)
-							Buffer.BlockCopy(buffer, 5, buffer, 0, count);
-					}
-					if (count >= 5 && System.Text.Encoding.ASCII.GetString(buffer, 0, 5) == "PJ_NG")
-					{
-						//no udea
-						count -= 5;
-						if (count > 0)
-							Buffer.BlockCopy(buffer, 5, buffer, 0, count);
-					}
-					
-					//status reply: 06 89 01 50 57 0a 40 89 01 50 57 30 0a
-					if (count >= 13 &&
-						buffer[0] == 0x06 &&
-						buffer[1] == 0x89 &&
-						buffer[2] == 0x01 &&
-						buffer[3] == 0x50 &&
-						buffer[4] == 0x57
-						)
-					{
-						PowerStatus newStatus = PowerStatus.emergency;
-						switch(buffer[11])
+						if (count >= 5 && System.Text.Encoding.ASCII.GetString(buffer, 0, 5) == "PJ_OK")
 						{
-							case 0x30: newStatus = PowerStatus.standby; break;
-							case 0x31: newStatus = PowerStatus.poweron; break;
-							case 0x32: newStatus = PowerStatus.cooling; break;
-							case 0x34: newStatus = PowerStatus.emergency; break;
+							await stream.WriteAsync(System.Text.Encoding.ASCII.GetBytes("PJREQ"));
+							count -= 5;
+							if (count > 0)
+								Buffer.BlockCopy(buffer, 5, buffer, 0, count);
+							continue;
 						}
-						if(newStatus != _status)
+						if (count >= 5 && System.Text.Encoding.ASCII.GetString(buffer, 0, 5) == "PJACK")
 						{
-							StatusChange?.Invoke(this, newStatus);
-							_status = newStatus;
+							//hands have been shaked
+							ready = true;
+							count -= 5;
+							if (count > 0)
+								Buffer.BlockCopy(buffer, 5, buffer, 0, count);
+							continue;
+						}
+						if (count >= 5 && System.Text.Encoding.ASCII.GetString(buffer, 0, 5) == "PJ_NG")
+						{
+							//no udea
+							count -= 5;
+							if (count > 0)
+								Buffer.BlockCopy(buffer, 5, buffer, 0, count);
+							continue;
+						}
+						//				♠	ë    P  W  ◙  @  ë  ☺  P  W  0  ◙
+						//status reply: 06 89 01 50 57 0a 40 89 01 50 57 30 0a
+						if (count >= 6 &&
+							buffer[0] == 0x06 &&
+							buffer[1] == 0x89 &&
+							buffer[2] == 0x01 &&
+							buffer[3] == 0x50 &&
+							buffer[4] == 0x57 &&
+							buffer[5] == 0x0a
+							)
+						{
+							count -= 6;
+							if (count > 0)
+								Buffer.BlockCopy(buffer, 6, buffer, 0, count);
+							continue;
 						}
 
-						count -= 13;
-						if (count > 0)
-							Buffer.BlockCopy(buffer, 13, buffer, 0, count);
+						if (count >= 7 &&
+							buffer[0] == 0x40 &&
+							buffer[1] == 0x89 &&
+							buffer[2] == 0x01 &&
+							buffer[3] == 0x50 &&
+							buffer[4] == 0x57 &&
+							buffer[6] == 0x0a
+							)
+						{
+							PowerStatus newStatus = PowerStatus.emergency;
+							switch (buffer[5])
+							{
+								case 0x30: newStatus = PowerStatus.standby; break;
+								case 0x31: newStatus = PowerStatus.poweron; break;
+								case 0x32: newStatus = PowerStatus.cooling; break;
+								case 0x34: newStatus = PowerStatus.emergency; break;
+							}
+							if (newStatus != _status)
+							{
+								StatusChange?.Invoke(this, newStatus);
+								_status = newStatus;
+							}
 
+							count -= 7;
+							if (count > 0)
+								Buffer.BlockCopy(buffer, 7, buffer, 0, count);
+							continue;
+						}
+						break;
 					}
-
 					if (count > 0)
 					{
 						throw new IOException("Protocol error, unknown command");
