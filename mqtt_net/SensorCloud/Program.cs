@@ -32,23 +32,28 @@ namespace SensorCloud
 
 			CreateWebHostBuilder(args).Build().RunAsync();
 
-			while (true)
-			{
-				string line = Console.ReadLine().Trim();
-				if (line.ToLower() == "modules")
-				{
-					foreach (Module m in ModuleManager.GetModules<Module>())
-						Console.WriteLine($"{m.moduleName}\t{m.GetType()}");
-				}
-				if (line.Contains("."))
-				{
-					string[] cmd = line.Split(".", 2);
-					Module module = ModuleManager.GetModules<Module>().FirstOrDefault(m => m.moduleName == cmd[0].ToUpper());
-					module?.HandleCommand(cmd[1]);
-				}
+            if (Console.In != null)
+            {
+                while (true)
+                {
+                    string line = Console.ReadLine().Trim();
+                    if (line.ToLower() == "modules")
+                    {
+                        foreach (Module m in ModuleManager.GetModules<Module>())
+                            Console.WriteLine($"{m.moduleName}\t{m.GetType()}");
+                    }
+                    if (line.Contains("."))
+                    {
+                        string[] cmd = line.Split(".", 2);
+                        Module module = ModuleManager.GetModules<Module>().FirstOrDefault(m => m.moduleName == cmd[0].ToUpper());
+                        module?.HandleCommand(cmd[1]);
+                    }
 
-			}
-		}
+                }
+            }
+            else
+                Thread.Sleep(Timeout.Infinite);
+        }
 
 		private static void buildModule(JObject moduleConfig)
 		{
