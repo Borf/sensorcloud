@@ -6,6 +6,7 @@ namespace JvcProjector
 {
 	public enum PowerStatus
 	{
+        notloaded,
 		standby,
 		poweron,
 		cooling,

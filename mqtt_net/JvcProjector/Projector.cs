@@ -11,7 +11,7 @@ namespace JvcProjector
 		private TcpClient tcpClient;
 		private NetworkStream stream;
 		private bool ready = false;
-		private PowerStatus _status;
+		private PowerStatus _status = PowerStatus.notloaded;
 		public event EventHandler<PowerStatus> StatusChange;
 
 		public PowerStatus Status {

@@ -20,7 +20,11 @@ namespace SensorCloud.modules
 			mqtt = GetModule<MqttModule>();
 			db = GetModule<DbModule>().context;
 
-			Task.Run(async () => await update());
+            foreach (var item in db.dashboardItems.ToList())
+                if(item.type == "mqtt")
+                    StartMqtt(item);
+
+            Task.Run(async () => await update());
 		}
 
 		async Task update()
@@ -35,7 +39,7 @@ namespace SensorCloud.modules
 						case "ping": handlePing(item); break;
 						case "pingtime": handlePingTime(item); break;
 						case "get": await handleGetAsync(item); break;
-						case "mqtt": handleMqtt(item); break;
+						case "mqtt": HandleMqtt(item); break;
 						case "http": await handleHttpAsync(item); break;
 						case "socket":
 						case "sensor":
@@ -79,7 +83,13 @@ namespace SensorCloud.modules
 
 		}
 
-		private void handleMqtt(DashboardItem item)
+        private void StartMqtt(DashboardItem item)
+        {
+            var options = item.parameter.Split("|");
+            mqtt.storeLastValue(options[0]);
+        }
+
+        private void HandleMqtt(DashboardItem item)
 		{
 			var options = item.parameter.Split("|");
 			mqtt.storeLastValue(options[0]);

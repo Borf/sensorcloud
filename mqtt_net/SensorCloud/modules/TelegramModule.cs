@@ -93,6 +93,14 @@ namespace SensorCloud.modules
 		{
 			return currentMenu == menu;
 		}
+
+		internal Menu GetRootMenu(string title)
+		{
+			foreach (Menu m in rootMenu.SubMenus)
+				if (m.Title == title)
+					return m;
+			return null;
+		}
 	}
 
 

@@ -84,6 +84,9 @@ namespace SensorCloud
 				case "kodi":
 					new KodiModule(moduleConfig["host"].Value<string>());
 					break;
+				case "sensorcloudtelegram":
+					new SensorCloudTelegramModule();
+					break;
 			}
 
 
