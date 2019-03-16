@@ -15,7 +15,13 @@ namespace Onkyo
 		private static dynamic commands;
 		static Command()
 		{
-			commands = JObject.Parse(File.ReadAllText("eiscp-commands.json"));
+            try
+            {
+                commands = JObject.Parse(File.ReadAllText("eiscp-commands.json"));
+            } catch(IOException e)
+            {
+                Console.WriteLine(e);
+            }
 		}
 
 
