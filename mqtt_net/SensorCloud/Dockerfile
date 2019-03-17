@@ -20,4 +20,5 @@ WORKDIR /app
 COPY --from=publish /app .
 #COPY config.json /app
 COPY eiscp-commands.json /app
+COPY SensorCloud/wwwroot /app/wwwroot
 ENTRYPOINT ["dotnet", "SensorCloud.dll"]

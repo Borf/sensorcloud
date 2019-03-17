@@ -28,9 +28,10 @@ namespace SensorCloud
 			foreach (JObject moduleConfig in config)
 				buildModule(moduleConfig);
 
-			ModuleManager.StartAll();
+            CreateWebHostBuilder(args).Build().RunAsync();
 
-			CreateWebHostBuilder(args).Build().RunAsync();
+            ModuleManager.StartAll();
+
 
             bool running = true;
             Console.CancelKeyPress += delegate {
@@ -58,6 +59,7 @@ namespace SensorCloud
                         }
                     }catch(Exception e)
                     {
+                        Console.WriteLine(e);
                         running = false;
                         break;
                     }
@@ -112,7 +114,7 @@ namespace SensorCloud
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
             .UseUrls(new string[] { "http://0.0.0.0:5353" })
-            .UseWebRoot("wwwroot")
+            .UseWebRoot("SensorCloud/wwwroot")
 			.UseStartup<Startup>();
 	}
 }

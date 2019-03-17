@@ -12,9 +12,10 @@ namespace SensorCloud.datamodel
 		public DbSet<Room> rooms { get; set; }
 		public DbSet<Ping> pings { get; set; }
 		public DbSet<SensorData> sensordata { get; set; }
-		public DbSet<DashboardItem> dashboardItems { get; set; }
+        public DbSet<DashboardItem> dashboardItems { get; set; }
+        public DbSet<DashboardCard> dashboardCards { get; set; }
 
-		public SensorCloudContext(DbModule module)
+        public SensorCloudContext(DbModule module)
 		{
 			this.module = module;
 		}
@@ -57,10 +58,19 @@ namespace SensorCloud.datamodel
 				entity.HasKey(e => e.id);
 			});
 
-			modelBuilder.Entity<DashboardItem>(entity =>
-			{
-				entity.HasKey(e => e.id);
-			});
-		}
+            modelBuilder.Entity<DashboardCard>(entity =>
+            {
+                entity.HasKey(e => e.id);
+                entity.HasMany(e => e.items).WithOne(i => i.card);
+            });
+
+            modelBuilder.Entity<DashboardItem>(entity =>
+            {
+                entity.HasKey(e => e.id);
+                entity.HasOne(e => e.card).WithMany(c => c.items);
+            });
+
+
+        }
 	}
 }

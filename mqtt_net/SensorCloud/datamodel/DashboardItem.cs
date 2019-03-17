@@ -13,5 +13,8 @@ namespace SensorCloud.datamodel
 		public string parameter { get; set; }
 		public DateTime time { get; set; }
 		public string value { get; set; }
-	}
+
+        [ForeignKey("cardid")]
+        public DashboardCard card { get; set; }
+    }
 }
