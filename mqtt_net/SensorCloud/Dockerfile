@@ -18,4 +18,6 @@ RUN dotnet publish "SensorCloud.csproj" -c Release -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app .
+#COPY config.json /app
+COPY eiscp-commands.json /app
 ENTRYPOINT ["dotnet", "SensorCloud.dll"]
