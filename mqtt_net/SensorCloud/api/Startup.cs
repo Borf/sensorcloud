@@ -25,11 +25,25 @@ namespace api
 		}
 
 		public IConfiguration Configuration { get; }
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddMvc(options =>
+            services.AddCors(options =>
+            {
+                options.AddPolicy(MyAllowSpecificOrigins,
+                builder =>
+                {
+                    builder.WithOrigins("http://api.sensorcloud.borf.nl",
+                                        "http://api.sensorcloud.borf.info",
+                                        "http://sensorcloud.borf.nl",
+                                        "http://sensorcloud.borf.info",
+                                        );
+                });
+            });
+
+            services.AddMvc(options =>
 			{
                 options.Filters.Add(new ApiFilter());
 				options.OutputFormatters.Clear();
