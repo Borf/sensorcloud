@@ -40,7 +40,7 @@ namespace SensorCloud
 
 		public static void StartAll()
 		{
-			foreach (Module m in modules)
+			foreach (Module m in modules.ToList())
 				m.Start();
 		}
 	}
