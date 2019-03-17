@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="refresh" content="600">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <title>Sensorcloud Dashboard</title>
+    <style>
+
+    </style>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+
+    <style>
+        body
+        {
+            background-color: black;
+            color: white;
+        }
+
+        #dashnodes ul {
+        }
+
+        #dashnodes>li:nth-child(7n+0) { background-color: #222; }
+        #dashnodes>li:nth-child(7n+1) { background-color: #002; }
+        #dashnodes>li:nth-child(7n+2) { background-color: #020; }
+        #dashnodes>li:nth-child(7n+3) { background-color: #200; }
+        #dashnodes>li:nth-child(7n+4) { background-color: #220; }
+        #dashnodes>li:nth-child(7n+5) { background-color: #022; }
+        #dashnodes>li:nth-child(7n+6) { background-color: #202; }
+
+        #dashnodes>li:first-child {
+            border-top-left-radius: .25rem;
+            border-top-right-radius: .25rem;
+        }
+
+        #dashnodes>li {
+            padding: .75rem 1.25rem;
+            margin-bottom: -1px;
+            background-color: #000;
+            border: 1px solid rgba(2, 2, 2, .125);
+        }
+
+        #dashnodes>li {
+            margin-top: 0px;
+            margin-bottom: 10px;
+        }
+
+        #dashnodes>li>h2 {
+            margin-bottom: 1px;
+        }
+
+        .list-group-item {
+            padding-top: 1px;
+            padding-bottom: 1px;
+            background-color: #000;
+        }
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <div id="error" class="container alert alert-danger" style="position: relative; height: 90%; width: 90%; display: none;">
+            Error connecting to backend... automatically retrying
+        </div>
+        <ul id="dashnodes" class="card-columns"></ul>
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+    <script src="js/dash.js"></script>
+
+
+
+</body>
+
+</html>

@@ -1,2 +1,7 @@
+SensorCloud/out
+Onkyo/out
+JvcProjector/out
+SensorCloud/Properties
 config.json
 .vs
+*.user
