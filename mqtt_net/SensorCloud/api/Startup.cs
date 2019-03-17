@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -47,7 +48,19 @@ namespace api
 				app.UseDeveloperExceptionPage();
 			}
             app.UseDefaultFiles();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                OnPrepareResponse = ctx =>
+                {
+                    //no static files on api...
+                    if (ctx.Context.Request.Host.Host.Contains("api"))
+                    {
+                        ctx.Context.Response.Headers.Clear();
+                        ctx.Context.Response.StatusCode = 404;
+                        ctx.Context.Response.Body = new MemoryStream();
+                    }
+                }
+            });
 			app.UseMvc();
 		}
 	}
