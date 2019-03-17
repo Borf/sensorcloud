@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using SensorCloud.api;
 
 namespace api
 {
@@ -29,6 +30,7 @@ namespace api
 		{
 			services.AddMvc(options =>
 			{
+                options.Filters.Add(new ApiFilter());
 				options.OutputFormatters.Clear();
 				options.OutputFormatters.Add(new JsonOutputFormatter(new JsonSerializerSettings()
 				{
@@ -44,7 +46,8 @@ namespace api
 			{
 				app.UseDeveloperExceptionPage();
 			}
-
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
 			app.UseMvc();
 		}
 	}

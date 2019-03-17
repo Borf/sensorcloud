@@ -97,8 +97,10 @@ namespace SensorCloud
 
 		}
 
-		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+            .UseUrls(new string[] { "http://localhost:5353" })
+            .UseWebRoot("wwwroot")
 			.UseStartup<Startup>();
 	}
 }
