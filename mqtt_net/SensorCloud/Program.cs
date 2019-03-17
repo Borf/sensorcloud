@@ -32,23 +32,35 @@ namespace SensorCloud
 
 			CreateWebHostBuilder(args).Build().RunAsync();
 
+            bool running = true;
+            Console.CancelKeyPress += delegate {
+                Console.WriteLine("Closing app");
+                running = false;
+            };
+
             if (Console.In != null)
             {
-                while (true)
+                while (running)
                 {
-                    string line = Console.ReadLine().Trim();
-                    if (line.ToLower() == "modules")
+                    try
                     {
-                        foreach (Module m in ModuleManager.GetModules<Module>())
-                            Console.WriteLine($"{m.moduleName}\t{m.GetType()}");
-                    }
-                    if (line.Contains("."))
+                        string line = Console.ReadLine().Trim();
+                        if (line.ToLower() == "modules")
+                        {
+                            foreach (Module m in ModuleManager.GetModules<Module>())
+                                Console.WriteLine($"{m.moduleName}\t{m.GetType()}");
+                        }
+                        if (line.Contains("."))
+                        {
+                            string[] cmd = line.Split(".", 2);
+                            Module module = ModuleManager.GetModules<Module>().FirstOrDefault(m => m.moduleName == cmd[0].ToUpper());
+                            module?.HandleCommand(cmd[1]);
+                        }
+                    }catch(Exception e)
                     {
-                        string[] cmd = line.Split(".", 2);
-                        Module module = ModuleManager.GetModules<Module>().FirstOrDefault(m => m.moduleName == cmd[0].ToUpper());
-                        module?.HandleCommand(cmd[1]);
+                        running = false;
+                        break;
                     }
-
                 }
             }
             else
