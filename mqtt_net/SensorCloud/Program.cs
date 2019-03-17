@@ -37,6 +37,7 @@ namespace SensorCloud
             Console.CancelKeyPress += delegate {
                 Console.WriteLine("Closing app");
                 running = false;
+                Environment.Exit(0);
             };
 
             if (Console.In != null)
