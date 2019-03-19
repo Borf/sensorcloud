@@ -35,14 +35,9 @@ namespace api
                 options.AddPolicy(MyAllowSpecificOrigins,
                 builder =>
                 {
-                    builder.WithOrigins("http://api.sensorcloud.borf.nl",
-                                        "http://api.sensorcloud.borf.info",
-                                        "http://sensorcloud.borf.nl",
-                                        "http://sensorcloud.borf.info",
-                                        );
+		            builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
                 });
-            });
-
+			});
             services.AddMvc(options =>
 			{
                 options.Filters.Add(new ApiFilter());

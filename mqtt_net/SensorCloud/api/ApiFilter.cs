@@ -19,7 +19,10 @@ namespace SensorCloud.api
         public void OnActionExecuting(ActionExecutingContext context)
         {
             if(!hosts.Contains(context.HttpContext.Request.Host.Host))
+			{
+				Console.WriteLine("Blocking " + context.HttpContext.Request.Host.Host);
                 context.Result = new NotFoundResult();
+            }
         }
     }
 }
