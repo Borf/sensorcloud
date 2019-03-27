@@ -2,7 +2,6 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,14 +9,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using SensorCloud.api;
+using SensorCloud.services;
+using SensorCloud.services.mtt;
+using SensorCloud.services.onkyo;
 
 namespace api
 {
-	public class Startup
+    public class Startup
 	{
 		public Startup(IConfiguration configuration)
 		{
@@ -26,6 +27,8 @@ namespace api
 
 		public IConfiguration Configuration { get; }
         readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+        public static Microsoft.AspNetCore.Hosting.IHostingEnvironment env { get; private set; }
+        public static bool IsDevelopment { get { return env.IsDevelopment(); } }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -47,11 +50,18 @@ namespace api
 					ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
 				}, ArrayPool<char>.Shared));
 			}).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-		}
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            services.AddSingleton<IConfiguration>(Configuration);
+
+
+            foreach (var s in ConfigServices.services)
+                s.init(services, Configuration);
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
 		{
+            Startup.env = env;
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

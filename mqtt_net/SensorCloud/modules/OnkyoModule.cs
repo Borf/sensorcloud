@@ -155,7 +155,12 @@ namespace SensorCloud.modules
 				Log($"Got onkyo data: {cmd.command} -> {cmd.data}");
 		}
 
-		public bool Power {
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Power {
 			get { return receiver.Power; }
 			set { receiver.Power = value; }
 		}

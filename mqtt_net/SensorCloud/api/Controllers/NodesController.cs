@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using SensorCloud.datamodel;
-using SensorCloud.modules;
+
 
 namespace SensorCloud.api.Controllers
 {
@@ -16,7 +16,7 @@ namespace SensorCloud.api.Controllers
 	{
 		SensorCloudContext db;
 
-        public NodesController()
+        /*public NodesController()
 		{
 			db = ModuleManager.GetModule<DbModule>().context;
 		}
@@ -50,6 +50,6 @@ namespace SensorCloud.api.Controllers
 		[HttpDelete("{id}")]
 		public void Delete(int id)
 		{
-		}
+		}*/
 	}
 }

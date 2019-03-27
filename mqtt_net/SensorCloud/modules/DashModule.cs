@@ -152,5 +152,10 @@ namespace SensorCloud.modules
 			ping.SendAsync(item.parameter, 100, null);
 			waiter.WaitOne();
 		}
-	}
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

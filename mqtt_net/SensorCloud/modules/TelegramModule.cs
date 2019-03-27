@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -101,7 +103,12 @@ namespace SensorCloud.modules
 					return m;
 			return null;
 		}
-	}
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
 
 	public class Menu
@@ -146,7 +153,7 @@ namespace SensorCloud.modules
 				ret.Add(row);
 			}
 			//meh, should be a reference when making the menu object, but don't want to store the telegram module in every menu, and doesn't make a whole lot of sense to pass this as a parameter
-			if (this != ModuleManager.GetModule<TelegramModule>().rootMenu)
+			//if (this != ModuleManager.GetModule<TelegramModule>().rootMenu)
 			{
 				if (row.Count == 2)
 				{

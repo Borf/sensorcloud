@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SensorCloud.modules
@@ -40,8 +41,6 @@ namespace SensorCloud.modules
 		}
 
 		int id = 1;
-
-
 		private async Task CallRpc(string command)
 		{
 			//[{jsonrpc: "2.0", method: "Input.Down", params: [], id: 8}]
@@ -58,5 +57,10 @@ namespace SensorCloud.modules
 			});
 			id++;
 		}
-	}
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

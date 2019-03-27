@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SensorCloud.modules;
 using System.Threading.Tasks;
 
 namespace SensorCloud.datamodel
 {
 	public class SensorCloudContext : DbContext
 	{
-		DbModule module;
+//		DbModule module;
 		public DbSet<Sensor> sensors { get; set; }
 		public DbSet<Node> nodes { get; set; }
 		public DbSet<Room> rooms { get; set; }
@@ -15,15 +14,15 @@ namespace SensorCloud.datamodel
         public DbSet<DashboardItem> dashboardItems { get; set; }
         public DbSet<DashboardCard> dashboardCards { get; set; }
 
-        public SensorCloudContext(DbModule module)
+ /*       public SensorCloudContext(DbModule module)
 		{
 			this.module = module;
-		}
+		}*/
 
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			module.OnConfiguring(optionsBuilder);
+	//		module.OnConfiguring(optionsBuilder);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

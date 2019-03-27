@@ -4,6 +4,7 @@ using SensorCloud.datamodel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SensorCloud.modules
@@ -51,5 +52,10 @@ namespace SensorCloud.modules
 			});
 
 		}
-	}
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

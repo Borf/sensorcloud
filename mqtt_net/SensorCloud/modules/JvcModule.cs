@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SensorCloud.modules
@@ -33,7 +34,12 @@ namespace SensorCloud.modules
 
 		}
 
-		private void InstallTelegramHandlers(TelegramModule telegram)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void InstallTelegramHandlers(TelegramModule telegram)
 		{
 			projectorMenu = new Menu(title: "Projector", afterMenuText: () => projector.Status.ToString());
 

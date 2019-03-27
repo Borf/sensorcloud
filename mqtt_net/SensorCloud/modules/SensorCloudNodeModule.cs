@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SensorCloud.modules
@@ -31,7 +32,12 @@ namespace SensorCloud.modules
 			mqtt.On("(" + node.Room.topic + "/" + node.topic + ")/(.*)", onData);
 		}
 
-		private void onData(Match match, string payload)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void onData(Match match, string payload)
 		{
 			if (match.Groups[2].Value == "ping")
 			{

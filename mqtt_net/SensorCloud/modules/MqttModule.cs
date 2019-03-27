@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SensorCloud.modules
@@ -84,6 +85,8 @@ namespace SensorCloud.modules
 
 		private async Task mqttReconnect()
 		{
+            
+
 			var options = new MqttClientOptionsBuilder()
 				.WithClientId("SensorCloudServer")
 				.WithTcpServer(broker)
@@ -129,6 +132,12 @@ namespace SensorCloud.modules
 			if (!lastValues.ContainsKey(topic))
 				lastValues[topic] = "";
 		}
-		public Dictionary<string, string> lastValues = new Dictionary<string, string>();
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Dictionary<string, string> lastValues = new Dictionary<string, string>();
 	}
 }

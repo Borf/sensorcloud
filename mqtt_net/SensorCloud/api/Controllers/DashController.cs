@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using SensorCloud.datamodel;
-using SensorCloud.modules;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +13,7 @@ namespace SensorCloud.api.Controllers
     [ApiController]
     public class DashController : Controller
     {
-        SensorCloudContext db;
+      /*  SensorCloudContext db;
 
         public DashController()
         {
@@ -32,6 +31,6 @@ namespace SensorCloud.api.Controllers
         public IEnumerable<DashboardItem> Cards(int id)
         {
             return db.dashboardItems.Where(i => i.cardid == id);
-        }
+        }*/
     }
 }

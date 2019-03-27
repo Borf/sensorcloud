@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SensorCloud.modules
 {
@@ -22,7 +24,12 @@ namespace SensorCloud.modules
 		{
 			optionsBuilder.UseMySQL(configString);
 		}
-	}
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            throw new NotImplementedException();
+        }
+    }
 
 
 
