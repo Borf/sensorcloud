@@ -32,7 +32,7 @@ namespace SensorCloud.services.mqtt
             mqttClient.Connected += mqttConnect;
             mqttClient.Disconnected += mqttDisconnect;
             mqttClient.ApplicationMessageReceived += mqttMessageReceived;
-            await mqttReconnect();
+            mqttReconnect();
         }
 
 

@@ -7,11 +7,11 @@ namespace SensorCloud.services
         public static List<IConfigServiceBase> services = new List<IConfigServiceBase>
         {
             new ConfigService<mqtt.Service, mqtt.Config>("Mqtt"),
+            new ConfigService<sensorcloud.Service, sensorcloud.Config>("Sensorcloud"),
             new ConfigService<onkyo.Service, onkyo.Config>("Onkyo"),
             new ConfigService<kodi.Service, kodi.Config>("Kodi"),
             new ConfigService<jvc.Service, jvc.Config>("Jvc"),
             new ConfigService<dash.Service, dash.Config>("Dashboard"),
-            new ConfigService<sensorcloud.Service, sensorcloud.Config>("Sensorcloud"),
 
 
 
