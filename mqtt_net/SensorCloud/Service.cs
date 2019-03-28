@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -12,7 +14,6 @@ namespace SensorCloud
         private ConsoleColor color = ConsoleColor.Black;
         protected IServiceProvider services { private set; get; }
         public string moduleName { get; private set; }
-
 
         public Service(IServiceProvider services)
         {
@@ -28,7 +29,33 @@ namespace SensorCloud
             lastColor = (lastColor + 1) % usableColors.Length;
             color = usableColors[lastColor];
             Log("Created service");
+        }
 
+        public override async Task StartAsync(CancellationToken cancellationToken)
+        {
+            await base.StartAsync(cancellationToken);
+            var telegram = GetService<services.telegram.Service>();
+            if (telegram != null)
+                InstallTelegramHandlers(telegram);
+
+            var mqtt = GetService<services.mqtt.Service>();
+            if (mqtt != null)
+                InstallMqttHandlers(mqtt);
+        }
+
+
+        // overrides
+        public virtual void HandleCommand(string command)
+        {
+            Console.WriteLine("Unhandled command");
+        }
+
+        public virtual void InstallTelegramHandlers(services.telegram.Service telegram)
+        {
+        }
+
+        public virtual void InstallMqttHandlers(services.mqtt.Service mqtt)
+        {
         }
 
 
@@ -52,10 +79,6 @@ namespace SensorCloud
         }
 
 
-        public virtual void HandleCommand(string command)
-		{
-			Console.WriteLine("Unhandled command");
-		}
 
 		public void Log(string msg)
 		{

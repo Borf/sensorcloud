@@ -159,7 +159,10 @@ namespace Onkyo
 		private int _volume;
 		public int Volume {
 			get { return _volume; }
-			set { SendCommand("MVL" + value.ToString("X2").ToUpper()); }
+			set {
+                int newValue = Math.Clamp(value, 0, 40);
+                SendCommand("MVL" + newValue.ToString("X2").ToUpper());
+            }
 		}
 
 

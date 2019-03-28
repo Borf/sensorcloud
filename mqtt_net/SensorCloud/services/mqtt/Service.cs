@@ -16,13 +16,11 @@ namespace SensorCloud.services.mqtt
 {
     public class Service : SensorCloud.Service
     {
-        private IServiceProvider services;
         private IMqttClient mqttClient;
         private Config config;
 
         public Service(IServiceProvider services, Config config) : base(services)
         {
-            this.services = services;
             this.config = config;
         }
 

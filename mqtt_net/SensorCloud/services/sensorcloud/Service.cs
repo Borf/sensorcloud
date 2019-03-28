@@ -21,7 +21,7 @@ namespace SensorCloud.services.sensorcloud
             this.configuration = configuration;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             mqtt = GetService<mqtt.Service>();
             db = new SensorCloudContext(configuration);
@@ -57,6 +57,7 @@ namespace SensorCloud.services.sensorcloud
             {
 
             });
+            return Task.CompletedTask;
         }
     }
 }

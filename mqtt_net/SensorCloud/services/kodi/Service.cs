@@ -12,7 +12,6 @@ namespace SensorCloud.services.kodi
     {
         private Config config;
 
-        private telegram.Service telegram;
         private telegram.Menu kodiMenu;
 
         public Service(IServiceProvider services, Config config) : base(services)
@@ -23,13 +22,10 @@ namespace SensorCloud.services.kodi
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Log("Starting Kodi");
-            telegram = GetService<telegram.Service>();
-            if (telegram != null)
-                InstallTelegramHandlers();
             return Task.CompletedTask;
         }
 
-        private void InstallTelegramHandlers()
+        public override void InstallTelegramHandlers(telegram.Service telegram)
         {
             kodiMenu = new Menu(title: "Kodi");
 
