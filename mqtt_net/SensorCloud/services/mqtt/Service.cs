@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SensorCloud.services.mtt
+namespace SensorCloud.services.mqtt
 {
     public class Service : SensorCloud.Service
     {

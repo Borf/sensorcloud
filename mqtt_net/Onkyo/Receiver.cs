@@ -185,8 +185,9 @@ namespace Onkyo
 		private Dictionary<string, string> inputMap = new Dictionary<string, string>()
 		{
 			{  "01", "Wiiu" },
-			{  "02", "Aux" },
-			{  "05", "PC" },
+            {  "02", "Aux" },
+            {  "03", "Aux" },
+            {  "05", "PC" },
 			{  "10", "Kodi" },
 			{  "11", "Chromecast" },
 			{  "12", "TV" },
@@ -209,6 +210,7 @@ namespace Onkyo
 			if (!inputMap.ContainsKey(packet))
 			{
 				Console.WriteLine("Onkyo\t\tCould not find input type for " + packet);
+                return "error";
 			}
 			return inputMap[packet];
 		}

@@ -12,9 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using SensorCloud.api;
+using SensorCloud.datamodel;
 using SensorCloud.services;
-using SensorCloud.services.mtt;
-using SensorCloud.services.onkyo;
 
 namespace api
 {
@@ -52,7 +51,7 @@ namespace api
 			}).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddSingleton<IConfiguration>(Configuration);
-
+            services.AddDbContext<SensorCloudContext>();
 
             foreach (var s in ConfigServices.services)
                 s.init(services, Configuration);

@@ -10,7 +10,7 @@ namespace SensorCloud
 	public abstract class Service : BackgroundService
 	{
         private ConsoleColor color = ConsoleColor.Black;
-        private IServiceProvider services;
+        protected IServiceProvider services { private set; get; }
         public string moduleName { get; private set; }
 
 
@@ -27,6 +27,8 @@ namespace SensorCloud
                 moduleName = moduleName.Substring(0, moduleName.IndexOf("SERVICE"));
             lastColor = (lastColor + 1) % usableColors.Length;
             color = usableColors[lastColor];
+            Log("Created service");
+
         }
 
 

@@ -1,12 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 
 namespace SensorCloud.datamodel
 {
 	public class SensorCloudContext : DbContext
 	{
-//		DbModule module;
-		public DbSet<Sensor> sensors { get; set; }
+        private Config config;
+
+        public DbSet<Sensor> sensors { get; set; }
 		public DbSet<Node> nodes { get; set; }
 		public DbSet<Room> rooms { get; set; }
 		public DbSet<Ping> pings { get; set; }
@@ -14,16 +16,18 @@ namespace SensorCloud.datamodel
         public DbSet<DashboardItem> dashboardItems { get; set; }
         public DbSet<DashboardCard> dashboardCards { get; set; }
 
- /*       public SensorCloudContext(DbModule module)
+        public SensorCloudContext(IConfiguration configuration)
 		{
-			this.module = module;
-		}*/
+            config = new Config();
+            configuration.GetSection("Db").Bind(config);
+		}
 
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-	//		module.OnConfiguring(optionsBuilder);
-		}
+            if(config.mysql != null)
+                optionsBuilder.UseMySQL(config.mysql.configstring);
+        }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

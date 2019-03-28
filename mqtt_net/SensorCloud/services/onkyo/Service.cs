@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Onkyo;
-using SensorCloud.services.mtt;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +12,7 @@ namespace SensorCloud.services.onkyo
     public class Service : SensorCloud.Service
     {
         private Receiver receiver;
-        private mtt.Service mqtt;
+        private mqtt.Service mqtt;
         private string host = "192.168.2.200";
 
 
@@ -23,7 +22,7 @@ namespace SensorCloud.services.onkyo
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            mqtt = GetService<mtt.Service>();
+            mqtt = GetService<mqtt.Service>();
 
             receiver = new Receiver();
             receiver.Data += onData;
