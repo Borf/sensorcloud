@@ -13,11 +13,11 @@ namespace SensorCloud.api.Controllers
     [ApiController]
     public class DashController : Controller
     {
-      /*  SensorCloudContext db;
+        SensorCloudContext db;
 
-        public DashController()
+        public DashController(SensorCloudContext db)
         {
-            db = ModuleManager.GetModule<DbModule>().context;
+            this.db = db;
         }
 
         [HttpGet("cards")]
@@ -31,6 +31,6 @@ namespace SensorCloud.api.Controllers
         public IEnumerable<DashboardItem> Cards(int id)
         {
             return db.dashboardItems.Where(i => i.cardid == id);
-        }*/
+        }
     }
 }
