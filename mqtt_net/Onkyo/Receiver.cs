@@ -16,8 +16,9 @@ namespace Onkyo
 
 		public event EventHandler<Command> Data;
 		public event EventHandler<int> VolumeChange;
-		public event EventHandler<Command> TrackChange;
-		public event EventHandler<PlayStatus> PlayStatusChange;
+        public event EventHandler<Command> TrackChange;
+        public event EventHandler<bool> PowerChange;
+        public event EventHandler<PlayStatus> PlayStatusChange;
 		public event EventHandler<RepeatStatus> RepeatStatusChange;
 		public event EventHandler<ShuffleStatus> ShuffleStatusChange;
 
@@ -87,8 +88,11 @@ namespace Onkyo
 						currentSong.title = command.data;
 					if (command.command == "NTR") // index in playlist
 						currentSong.index = int.Parse(command.data.Substring(0, command.data.IndexOf("/")));
-					if (command.command == "PWR")
-						_power = command.data == "01";
+                    if (command.command == "PWR")
+                    {
+                        _power = command.data == "01";
+                        PowerChange(this, _power);
+                    }
 					if (command.command == "SLI")
 						_input = GetInputFromPacket(command.data);
 					if (command.command == "NLS") // net-usb-list-info

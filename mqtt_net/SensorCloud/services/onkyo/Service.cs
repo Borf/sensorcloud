@@ -25,6 +25,7 @@ namespace SensorCloud.services.onkyo
             receiver = new Receiver();
             receiver.Data += onData;
             receiver.VolumeChange += onVolume;
+            receiver.PowerChange += onPower;
             receiver.PlayStatusChange += onPlayStatus;
             receiver.RepeatStatusChange += onRepeatStatus;
             receiver.ShuffleStatusChange += onShuffleStatus;
@@ -43,6 +44,10 @@ namespace SensorCloud.services.onkyo
 
 
 
+        private async void onPower(object sender, bool power)
+        {
+            await mqtt?.Publish("onkyo/power", (power ? "00" : "01"), retain: true);
+        }
 
 
         private async void onShuffleStatus(object sender, ShuffleStatus e)
