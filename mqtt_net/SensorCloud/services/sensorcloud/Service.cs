@@ -24,13 +24,11 @@ namespace SensorCloud.services.sensorcloud
 
         public override void InstallTelegramHandlers(telegram.Service telegram)
         {//TODO: softcode this
-            Menu projectorMenu = telegram.GetRootMenu("Projector");
-            if (projectorMenu != null)
-            {
-                new Menu("Projector screen up", async () => await mqtt.Publish("livingroom/RF/7", "up"), projectorMenu);
-                new Menu("Projector screen down", async () => await mqtt.Publish("livingroom/RF/7", "down"), projectorMenu);
-                new Menu("Projector screen stop", async () => await mqtt.Publish("livingroom/RF/7", "stop"), projectorMenu);
-            }
+            var projectorMenu = new telegram.Menu(title: "Projector");
+            new Menu("Projector screen up", async () => await mqtt.Publish("livingroom/RF/7", "up"), projectorMenu);
+            new Menu("Projector screen down", async () => await mqtt.Publish("livingroom/RF/7", "down"), projectorMenu);
+            new Menu("Projector screen stop", async () => await mqtt.Publish("livingroom/RF/7", "stop"), projectorMenu);
+            telegram.AddRootMenu(projectorMenu);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)

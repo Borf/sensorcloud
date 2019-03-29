@@ -8,7 +8,7 @@ namespace SensorCloud.services.telegram
     {
         public string Title { get; private set; }
         public List<Menu> SubMenus { get; private set; } = new List<Menu>();
-        public Func<string> Callback { get; private set; }
+        public Func<string> Callback { get; set; }
         public Menu Parent { get; private set; }
         public Func<string> AfterMenuText;
 

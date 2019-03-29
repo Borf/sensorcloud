@@ -70,6 +70,18 @@ namespace SensorCloud.services.telegram
 
         public void AddRootMenu(Menu menu)
         {
+            foreach(var m in rootMenu.SubMenus)
+            {
+                if(m.Title == menu.Title)
+                {
+                    m.SubMenus.AddRange(menu.SubMenus);
+                    if (m.Callback == null && menu.Callback != null)
+                        m.Callback = menu.Callback;
+                    if (m.AfterMenuText == null && menu.AfterMenuText != null)
+                        m.AfterMenuText = menu.Callback;
+                    return;
+                }
+            }
             rootMenu.Add(menu);
         }
 
