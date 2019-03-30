@@ -46,7 +46,7 @@ namespace SensorCloud.services.onkyo
 
         private async void onPower(object sender, bool power)
         {
-            await mqtt?.Publish("onkyo/power", (power ? "00" : "01"), retain: true);
+            await mqtt?.Publish("onkyo/power", (power ? "on" : "standby"), retain: true);
         }
 
 
