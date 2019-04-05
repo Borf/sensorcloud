@@ -55,16 +55,19 @@ namespace SensorCloud.services.P1Meter
 
             db.sensordata.Add(new SensorData()
             {
+                stamp = DateTime.Now,
                 type = "power1",
                 value = (double)data.PowerConsumptionTariff1
             });
             db.sensordata.Add(new SensorData()
             {
+                stamp = DateTime.Now,
                 type = "power2",
                 value = (double)data.PowerConsumptionTariff2
             });
             db.sensordata.Add(new SensorData()
             {
+                stamp = DateTime.Now,
                 type = "gas",
                 value = (double)data.GasUsage
             });
@@ -84,6 +87,7 @@ namespace SensorCloud.services.P1Meter
             {
                 await mqtt.Publish("p1/power1", data.PowerConsumptionTariff1 + "");
                 await mqtt.Publish("p1/power2", data.PowerConsumptionTariff2 + "");
+                await mqtt.Publish("p1/power", data.PowerConsumptionTariff1 + data.PowerConsumptionTariff2 + "");
                 await mqtt.Publish("p1/gas", data.GasUsage + "");
 
                 await mqtt.Publish("p1/use/1/power", powerOneMinute + "");
