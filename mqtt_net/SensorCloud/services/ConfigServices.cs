@@ -11,6 +11,7 @@ namespace SensorCloud.services
             new ConfigService<onkyo.Service, onkyo.Config>("Onkyo"),
             new ConfigService<kodi.Service, kodi.Config>("Kodi"),
             new ConfigService<jvc.Service, jvc.Config>("Jvc"),
+            new ConfigService<P1Meter.Service, P1Meter.Config>("P1Meter"),
             new ConfigService<dash.Service, dash.Config>("Dashboard"),
 
 

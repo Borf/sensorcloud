@@ -48,7 +48,7 @@ namespace api
 				{
 					ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
 				}, ArrayPool<char>.Shared));
-			}).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+			}).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddDbContext<SensorCloudContext>();

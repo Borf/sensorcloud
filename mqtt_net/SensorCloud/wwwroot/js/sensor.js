@@ -1,8 +1,12 @@
 apiurl = "http://api.sensorcloud.borf.info/";
 
+if (location.hostname === "localhost")
+    apiurl = "http://" + location.host + "/";
+
+
 $(function() {
 	$.ajax({
-		url: apiurl + "login",
+        url: apiurl + "user/login",
 		method: "post",
 		data: JSON.stringify({ 'username' : 'borf', 'password' : 'borf' }),
 		contentType: "application/json",
@@ -11,7 +15,10 @@ $(function() {
 		{
 			if(!data.auth)
 				alert("Could not log in. Something is wrong");
-		}
+        },
+        error: function (data) {
+            alert("Could not log in. Something is wrong");
+        }
 	});
 
 

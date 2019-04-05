@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v2.2",
+    "signature": "1df9d4fae08c2af00c0c8f5f90e25438f422bca2"
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v2.2": {
+      "P1Meter/1.0.0": {
+        "dependencies": {
+          "NetCoreSerial": "1.1.1"
+        },
+        "runtime": {
+          "P1Meter.dll": {}
+        }
+      },
+      "NetCoreSerial/1.1.1": {
+        "runtime": {
+          "lib/netstandard2.0/NetCoreSerial.dll": {
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "P1Meter/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "NetCoreSerial/1.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-hmV2qRQoxKmjtv2dN3YG22Dq3pQhpqu52Nb0hdbh2Moj5AiX/6pjJbOS9O4DheW+vnWV9qs+zCwEL08algGkyA==",
+      "path": "netcoreserial/1.1.1",
+      "hashPath": "netcoreserial.1.1.1.nupkg.sha512"
+    }
+  }
+}

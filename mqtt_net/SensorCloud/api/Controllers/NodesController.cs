@@ -16,9 +16,9 @@ namespace SensorCloud.api.Controllers
 	{
 		SensorCloudContext db;
 
-        /*public NodesController()
+        public NodesController(SensorCloudContext db)
 		{
-			db = ModuleManager.GetModule<DbModule>().context;
+            this.db = db;
 		}
 
         [HttpGet]
@@ -50,6 +50,6 @@ namespace SensorCloud.api.Controllers
 		[HttpDelete("{id}")]
 		public void Delete(int id)
 		{
-		}*/
+		}
 	}
 }

@@ -46,7 +46,8 @@ namespace SensorCloud.services.onkyo
 
         private async void onPower(object sender, bool power)
         {
-            await mqtt?.Publish("onkyo/power", (power ? "on" : "standby"), retain: true);
+            if(mqtt != null)
+                await mqtt.Publish("onkyo/power", (power ? "on" : "standby"), retain: true);
         }
 
 
@@ -71,6 +72,8 @@ namespace SensorCloud.services.onkyo
 
         private async void onPlayStatus(object sender, PlayStatus e)
         {
+            if (mqtt == null)
+                return;
             switch (e)
             {
                 case PlayStatus.Playing: await mqtt?.Publish("onkyo/status", "paused", retain: true); break;
@@ -95,13 +98,14 @@ namespace SensorCloud.services.onkyo
 
         private async void onVolume(object sender, int newVolume)
         {
-            await mqtt?.Publish("onkyo/volume", newVolume + "", true);
+            if(mqtt != null)
+                await mqtt.Publish("onkyo/volume", newVolume + "", true);
         }
 
         private async void onData(object sender, Command cmd)
         {
             //Log($"Got onkyo data: {cmd.command}");
-            if (cmd.command == "NTM")
+            if (cmd.command == "NTM" && mqtt != null)
                 await mqtt?.Publish("onkyo/playtime", cmd.data);
             else
                 Log($"Got onkyo data: {cmd.command} -> {cmd.data}");

@@ -73,7 +73,7 @@ namespace SensorCloud
         {
             using (var scope = services.CreateScope())
             {
-                return scope.ServiceProvider.GetRequiredService<T>();
+                return scope.ServiceProvider.GetService<T>();
 
             }
         }
