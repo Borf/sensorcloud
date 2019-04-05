@@ -23,6 +23,7 @@ namespace SensorCloud.services.dash
             else
             {
                 string value = mqtt.lastValues[options[0]];
+                item.value = value;
                 for (int i = 1; i < options.Length; i++)
                 {
                     var v = options[i].Split("=");
