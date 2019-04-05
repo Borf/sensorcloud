@@ -71,8 +71,8 @@ namespace SensorCloud.services.P1Meter
 
             if (measurements.Count > 0)
             {
-                DataPacket minuteOne = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(1) <= DateTime.Now).Last().data;
-                DataPacket minuteTen = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(10) <= DateTime.Now).Last().data;
+                DataPacket minuteOne = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(1) >= DateTime.Now).Last().data;
+                DataPacket minuteTen = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(10) >= DateTime.Now).Last().data;
 
                 powerOneMinute = (data.PowerConsumptionTariff1 - minuteOne.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteOne.PowerConsumptionTariff2);
                 powerTenMinute = (data.PowerConsumptionTariff1 - minuteTen.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteTen.PowerConsumptionTariff2);
