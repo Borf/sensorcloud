@@ -1,4 +1,6 @@
-﻿using P1Meter;
+﻿using Microsoft.Extensions.Configuration;
+using P1Meter;
+using SensorCloud.datamodel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +18,11 @@ namespace SensorCloud.services.P1Meter
     public partial class Service : SensorCloud.Service
     {
         private Config config;
+        private SensorCloudContext db;
         private SmartMeter meter;
 
         List<Measurement> measurements = new List<Measurement>();
+        private IConfiguration configuration;
 
         public Decimal powerOneMinute { get; private set; }
         public Decimal powerTenMinute { get; private set; }
@@ -27,13 +31,16 @@ namespace SensorCloud.services.P1Meter
         public Decimal gasTenMinute { get; private set; }
 
 
-        public Service(IServiceProvider services, Config config) : base(services)
+        public Service(IServiceProvider services, IConfiguration configuration, Config config) : base(services)
         {
             this.config = config;
+            this.configuration = configuration;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            db = new SensorCloudContext(configuration);
+
             meter = new SmartMeter();
             meter.OnData += OnData;
             meter.Connect(config.serial);
@@ -45,6 +52,22 @@ namespace SensorCloud.services.P1Meter
             measurements.Add(new Measurement() { data = data, time = DateTime.Now });
             while (measurements.Count > 0 && measurements[0].time.AddMinutes(10) < DateTime.Now)
                 measurements.RemoveAt(0);
+
+            db.sensordata.Add(new SensorData()
+            {
+                type = "power1",
+                value = (double)data.PowerConsumptionTariff1
+            });
+            db.sensordata.Add(new SensorData()
+            {
+                type = "power2",
+                value = (double)data.PowerConsumptionTariff2
+            });
+            db.sensordata.Add(new SensorData()
+            {
+                type = "gas",
+                value = (double)data.GasUsage
+            });
 
             DataPacket minuteOne = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(1) < DateTime.Now).Last().data;
             DataPacket minuteTen = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(10) < DateTime.Now).Last().data;
