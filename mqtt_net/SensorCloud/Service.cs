@@ -28,7 +28,6 @@ namespace SensorCloud
                 moduleName = moduleName.Substring(0, moduleName.IndexOf("SERVICE"));
             lastColor = (lastColor + 1) % usableColors.Length;
             color = usableColors[lastColor];
-            Log("Created service");
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)

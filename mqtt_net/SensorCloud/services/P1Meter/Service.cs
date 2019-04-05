@@ -69,15 +69,17 @@ namespace SensorCloud.services.P1Meter
                 value = (double)data.GasUsage
             });
 
-            DataPacket minuteOne = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(1) < DateTime.Now).Last().data;
-            DataPacket minuteTen = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(10) < DateTime.Now).Last().data;
+            if (measurements.Count > 0)
+            {
+                DataPacket minuteOne = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(1) < DateTime.Now).Last().data;
+                DataPacket minuteTen = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(10) < DateTime.Now).Last().data;
 
-            powerOneMinute = (data.PowerConsumptionTariff1 - minuteOne.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteOne.PowerConsumptionTariff2);
-            powerTenMinute = (data.PowerConsumptionTariff1 - minuteTen.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteTen.PowerConsumptionTariff2);
+                powerOneMinute = (data.PowerConsumptionTariff1 - minuteOne.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteOne.PowerConsumptionTariff2);
+                powerTenMinute = (data.PowerConsumptionTariff1 - minuteTen.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteTen.PowerConsumptionTariff2);
 
-            gasOneMinute = data.GasUsage - minuteOne.GasUsage;
-            gasTenMinute = data.GasUsage - minuteTen.GasUsage;
-
+                gasOneMinute = data.GasUsage - minuteOne.GasUsage;
+                gasTenMinute = data.GasUsage - minuteTen.GasUsage;
+            }
             if (mqtt != null)
             {
                 await mqtt.Publish("p1/power1", data.PowerConsumptionTariff1 + "");
