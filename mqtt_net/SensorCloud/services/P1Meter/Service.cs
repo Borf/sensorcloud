@@ -56,21 +56,26 @@ namespace SensorCloud.services.P1Meter
             db.sensordata.Add(new SensorData()
             {
                 stamp = DateTime.Now,
+                nodeid = 0,
                 type = "power1",
                 value = (double)data.PowerConsumptionTariff1
             });
             db.sensordata.Add(new SensorData()
             {
                 stamp = DateTime.Now,
+                nodeid = 0,
                 type = "power2",
                 value = (double)data.PowerConsumptionTariff2
             });
             db.sensordata.Add(new SensorData()
             {
                 stamp = DateTime.Now,
+                nodeid = 0,
                 type = "gas",
                 value = (double)data.GasUsage
             });
+            await db.SaveChangesAsync();
+
 
             if (measurements.Count > 0)
             {

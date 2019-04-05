@@ -1,4 +1,4 @@
-﻿using SensorCloud.datamodel;
+using SensorCloud.datamodel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
