@@ -1,29 +1,49 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Ports;
+using System.Diagnostics;
 
 namespace P1Meter
 {
-    public class SmartMeter
+    class SmartMeter
     {
         SerialDevice serial;
         string buffer;
 
         public event EventHandler<DataPacket> OnData;
 
-        public void Connect(string port)
+        public async void Connect(string port)
         {
-            serial = new SerialDevice(port, BaudRate.B9600, Parity.Even, 7, StopBits.One, Handshake.None);
-            
+			Console.WriteLine("Starting");
 
-            serial.DataReceived += DataReceived;
-            serial.Open();
-            System.Console.WriteLine("Connected");
+			ProcessStartInfo startInfo = new ProcessStartInfo() 
+			{ 
+				FileName = "/bin/stty", 
+				Arguments = "-F /dev/ttyUSB0 9600 cs7 -cstopb parenb -parodd -cmspar -hupcl -crtscts -ixon", 
+			}; 
+			Process proc = new Process() { StartInfo = startInfo, };
+			proc.Start();
+			proc.WaitForExit();
+			
+			using (StreamReader sr = new StreamReader("/dev/ttyUSB0"))
+			{
+				while(true)
+				{
+					string line = await sr.ReadLineAsync();
+					if(line != null)
+						DataReceived(this, line + "\n");
+				}
+			}
+
+//            serial.DataReceived += DataReceived;
+			Console.WriteLine("Opening...");
+//            serial.Open();
+//            System.Console.WriteLine("Connected");
         }
 
-        private void DataReceived(object sender, byte[] data)
+        private void DataReceived(object sender, string data)
         {
-            buffer += System.Text.Encoding.UTF8.GetString(data);
+            buffer += data;
             if (buffer.EndsWith("!\n"))
             {
                 DataPacket packet = new DataPacket();
@@ -31,12 +51,15 @@ namespace P1Meter
                 for (var i = 0; i < lines.Length; i++)
                 {
                     if(lines[i].StartsWith("0-1:24.3"))
-                        packet.ParseLine("0-1:24.2.1" + lines[i+2]);
+                        packet.ParseLine("0-1:24.2.1" + lines[i+1]);
                     else
                         packet.ParseLine(lines[i]);
                 }
+                
                 if(packet.IsValid)
                     OnData?.Invoke(this, packet);
+				else
+					Console.WriteLine("Could not parse packet");
                 buffer = "";
             }
         }
