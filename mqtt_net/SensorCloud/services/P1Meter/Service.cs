@@ -40,10 +40,11 @@ namespace SensorCloud.services.P1Meter
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             db = new SensorCloudContext(configuration);
-
+            Log("Starting smart meter");
             meter = new SmartMeter();
             meter.OnData += OnData;
             meter.Connect(config.serial);
+            Log("Started");
             return Task.CompletedTask;
         }
 

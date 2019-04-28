@@ -1,9 +1,0 @@
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\obj\Debug\netcoreapp2.2\P1Meter.csproj.CoreCompileInputs.cache
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\obj\Debug\netcoreapp2.2\P1Meter.AssemblyInfoInputs.cache
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\obj\Debug\netcoreapp2.2\P1Meter.AssemblyInfo.cs
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\bin\Debug\netcoreapp2.2\P1Meter.deps.json
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\bin\Debug\netcoreapp2.2\P1Meter.dll
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\bin\Debug\netcoreapp2.2\P1Meter.pdb
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\obj\Debug\netcoreapp2.2\P1Meter.csprojAssemblyReference.cache
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\obj\Debug\netcoreapp2.2\P1Meter.dll
-C:\Users\johan\Desktop\git\sensorcloud\mqtt_net\P1Meter\obj\Debug\netcoreapp2.2\P1Meter.pdb

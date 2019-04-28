@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace P1Meter
 {
-    class SmartMeter
+    public class SmartMeter
     {
         SerialDevice serial;
         string buffer;

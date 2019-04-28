@@ -19,6 +19,10 @@ namespace SensorCloud.services.mqtt
         private IMqttClient mqttClient;
         private Config config;
 
+        private string lastTopic;
+        private string lastValue;
+
+
         public Service(IServiceProvider services, Config config) : base(services)
         {
             this.config = config;
@@ -55,6 +59,9 @@ namespace SensorCloud.services.mqtt
         public async Task Publish(string topic, string value, bool retain = false)
         {
             await IsStarted();
+            lastTopic = topic;
+            lastValue = value;
+
             await mqttClient.PublishAsync(new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
                 .WithPayload(value)
@@ -120,8 +127,11 @@ namespace SensorCloud.services.mqtt
                 }
             }
 
-            if (!handled && !e.ApplicationMessage.Retain)
-                Log($"Message on topic {e.ApplicationMessage.Topic} is not handled");
+            if (!handled)
+            {
+                if(e.ApplicationMessage.Topic != lastTopic || Encoding.UTF8.GetString(e.ApplicationMessage.Payload) != lastValue)
+                    Log($"Message on topic {e.ApplicationMessage.Topic} is not handled");
+            }
         }
 
         public void storeLastValue(string topic)
