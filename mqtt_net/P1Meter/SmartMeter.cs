@@ -13,7 +13,8 @@ namespace P1Meter
 
         public void Connect(string port)
         {
-            serial = new SerialDevice(port, BaudRate.B9600);
+            serial = new SerialDevice(port, BaudRate.B9600, Parity.Even, 7, StopBits.One, Handshake.None);
+            
 
             serial.DataReceived += DataReceived;
             serial.Open();

@@ -81,11 +81,11 @@ namespace Onkyo
 					if (command.command == "NST") //status
 						handleStatus(command);
 					if (command.command == "NAT") // artist
-						currentSong.artist = command.data;
+						currentSong.artist = Escape(command.data);
 					if (command.command == "NAL") // album
-						currentSong.album = command.data;
+						currentSong.album = Escape(command.data);
 					if (command.command == "NTI") // title
-						currentSong.title = command.data;
+						currentSong.title = Escape(command.data);
 					if (command.command == "NTR") // index in playlist
 						currentSong.index = int.Parse(command.data.Substring(0, command.data.IndexOf("/")));
                     if (command.command == "PWR")
@@ -111,9 +111,13 @@ namespace Onkyo
 			}
 		}
 
+        private string Escape(string data)
+        {
+            data = data.Replace("&apos;", "&");
+            return data;
+        }
 
-
-		private void handleStatus(Command command)
+        private void handleStatus(Command command)
 		{
 			string data = command.data;
 
