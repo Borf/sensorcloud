@@ -1,13 +1,11 @@
 using System;
 using System.IO;
-using System.IO.Ports;
 using System.Diagnostics;
 
 namespace P1Meter
 {
     public class SmartMeter
     {
-        SerialDevice serial;
         string buffer;
 
         public event EventHandler<DataPacket> OnData;
@@ -34,11 +32,6 @@ namespace P1Meter
 						DataReceived(this, line + "\n");
 				}
 			}
-
-//            serial.DataReceived += DataReceived;
-			Console.WriteLine("Opening...");
-//            serial.Open();
-//            System.Console.WriteLine("Connected");
         }
 
         private void DataReceived(object sender, string data)

@@ -7,3 +7,6 @@ SensorCloud/Properties
 config.json
 .vs
 *.user
+appsettings.json
+appsettings.Development.json
+out

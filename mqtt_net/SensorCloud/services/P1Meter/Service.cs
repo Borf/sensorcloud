@@ -24,13 +24,6 @@ namespace SensorCloud.services.P1Meter
         List<Measurement> measurements = new List<Measurement>();
         private IConfiguration configuration;
 
-        public Decimal powerOneMinute { get; private set; }
-        public Decimal powerTenMinute { get; private set; }
-
-        public Decimal gasOneMinute { get; private set; }
-        public Decimal gasTenMinute { get; private set; }
-
-
         public Service(IServiceProvider services, IConfiguration configuration, Config config) : base(services)
         {
             this.config = config;
@@ -78,29 +71,33 @@ namespace SensorCloud.services.P1Meter
             await db.SaveChangesAsync();
 
 
-            if (measurements.Count > 0)
-            {
-                DataPacket minuteOne = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(1) >= DateTime.Now).Last().data;
-                DataPacket minuteTen = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(10) >= DateTime.Now).Last().data;
-
-                powerOneMinute = (data.PowerConsumptionTariff1 - minuteOne.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteOne.PowerConsumptionTariff2);
-                powerTenMinute = (data.PowerConsumptionTariff1 - minuteTen.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - minuteTen.PowerConsumptionTariff2);
-
-                gasOneMinute = data.GasUsage - minuteOne.GasUsage;
-                gasTenMinute = data.GasUsage - minuteTen.GasUsage;
-            }
             if (mqtt != null)
             {
+
+                var values = new Dictionary<String, int>
+                {
+                    { "1m", 1 },
+                    { "10m", 10 },
+                    { "1h", 60 },
+                    { "24h", 60*24 },
+                };
+                if (measurements.Count > 0)
+                {
+                    foreach (var v in values)
+                    {
+                        DataPacket firstValue = measurements.AsEnumerable().Reverse().TakeWhile(m => m.time.AddMinutes(v.Value) >= DateTime.Now).Last().data;
+                        decimal power = (data.PowerConsumptionTariff1 - firstValue.PowerConsumptionTariff1) + (data.PowerConsumptionTariff2 - firstValue.PowerConsumptionTariff2);
+                        decimal gas = data.GasUsage - firstValue.GasUsage;
+                        await mqtt.Publish($"p1/use/{v.Key}/power", power + "");
+                        await mqtt.Publish($"p1/use/{v.Key}/gas", gas + "");
+                    }
+                }
+
+
                 await mqtt.Publish("p1/power1", data.PowerConsumptionTariff1 + "");
                 await mqtt.Publish("p1/power2", data.PowerConsumptionTariff2 + "");
                 await mqtt.Publish("p1/power", data.PowerConsumptionTariff1 + data.PowerConsumptionTariff2 + "");
                 await mqtt.Publish("p1/gas", data.GasUsage + "");
-
-                await mqtt.Publish("p1/use/1/power", powerOneMinute + "");
-                await mqtt.Publish("p1/use/10/power", powerTenMinute + "");
-                await mqtt.Publish("p1/use/1/gas", gasOneMinute + "");
-                await mqtt.Publish("p1/use/10/gas", gasTenMinute + "");
-
             }
         }
     }
