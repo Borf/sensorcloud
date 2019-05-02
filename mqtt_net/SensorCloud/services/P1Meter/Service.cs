@@ -44,7 +44,7 @@ namespace SensorCloud.services.P1Meter
         private async void OnData(object sender, DataPacket data)
         {
             measurements.Add(new Measurement() { data = data, time = DateTime.Now });
-            while (measurements.Count > 0 && measurements[0].time.AddMinutes(10) < DateTime.Now)
+            while (measurements.Count > 0 && measurements[0].time.AddMinutes(60*24) < DateTime.Now)
                 measurements.RemoveAt(0);
 
             db.sensordata.Add(new SensorData()
