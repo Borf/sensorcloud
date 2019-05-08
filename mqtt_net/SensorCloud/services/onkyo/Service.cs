@@ -53,10 +53,13 @@ namespace SensorCloud.services.onkyo
 
         private async void onShuffleStatus(object sender, ShuffleStatus e)
         {
-            switch (e)
+            if (mqtt != null)
             {
-                case ShuffleStatus.No: await mqtt?.Publish("onkyo/status/shuffle", "no", retain: true); break;
-                case ShuffleStatus.Yes: await mqtt?.Publish("onkyo/status/shuffle", "shuffle", retain: true); break;
+                switch (e)
+                {
+                    case ShuffleStatus.No: await mqtt?.Publish("onkyo/status/shuffle", "no", retain: true); break;
+                    case ShuffleStatus.Yes: await mqtt?.Publish("onkyo/status/shuffle", "shuffle", retain: true); break;
+                }
             }
         }
 

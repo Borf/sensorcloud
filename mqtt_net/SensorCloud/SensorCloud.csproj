@@ -40,6 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.4.10" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="MQTTnet" Version="2.8.5" />
@@ -55,6 +56,7 @@
     <ProjectReference Include="..\JvcProjector\JvcProjector.csproj" />
     <ProjectReference Include="..\Onkyo\Onkyo.csproj" />
     <ProjectReference Include="..\P1Meter\P1Meter.csproj" />
+    <ProjectReference Include="..\SpotNet\SpotNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -3,6 +3,10 @@ Onkyo/out
 JvcProjector/out
 P1Meter/obj
 P1Meter/bin
+NNTP/obj
+NNTP/bin
+SpotNet/obj
+SpotNet/bin
 SensorCloud/Properties
 config.json
 .vs

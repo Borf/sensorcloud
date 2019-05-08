@@ -48,8 +48,14 @@ namespace P1Meter
                     string[] _params = line.Split(",");
                     if (_params[0].Contains("*"))
                         _params[0] = _params[0].Substring(0, _params[0].IndexOf("*"));
-                    decimal d = decimal.Parse(_params[0]);
-                    attributes[header].SetValue(this, d);
+                    try
+                    {
+                        decimal d = decimal.Parse(_params[0]);
+                        attributes[header].SetValue(this, d);
+                    }catch(NotFiniteNumberException e)
+                    {
+                        Console.WriteLine(e);
+                    }
                 }
             }
         }

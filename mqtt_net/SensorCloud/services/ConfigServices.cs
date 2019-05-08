@@ -14,6 +14,7 @@ namespace SensorCloud.services
             new ConfigService<P1Meter.Service, P1Meter.Config>("P1Meter"),
             new ConfigService<dash.Service, dash.Config>("Dashboard"),
             new ConfigService<HG659.Service, HG659.Config>("HG659"),
+            new ConfigService<spotnet.Service, spotnet.Config>("Spotnet"),
 
 
 

@@ -1,11 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using System.Threading.Tasks;
 
 namespace SensorCloud.datamodel
 {
 	public class SensorCloudContext : DbContext
 	{
+        public static readonly LoggerFactory MyLoggerFactory = new LoggerFactory(new[] { new ConsoleLoggerProvider((_, __) => true, true) });
+
         private Config config;
 
         public DbSet<Sensor> sensors { get; set; }
@@ -15,6 +19,10 @@ namespace SensorCloud.datamodel
 		public DbSet<SensorData> sensordata { get; set; }
         public DbSet<DashboardItem> dashboardItems { get; set; }
         public DbSet<DashboardCard> dashboardCards { get; set; }
+
+        public DbSet<Spot> spots { get; set; }
+        public DbSet<SpotNzb> spotNzbs { get; set; }
+
 
         public SensorCloudContext(IConfiguration configuration)
 		{
@@ -26,7 +34,10 @@ namespace SensorCloud.datamodel
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
             if(config.mysql != null)
-                optionsBuilder.UseMySQL(config.mysql.configstring);
+                optionsBuilder
+                    .UseMySQL(config.mysql.configstring)
+//                    .UseLoggerFactory(MyLoggerFactory)
+                    ;
         }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -73,7 +84,17 @@ namespace SensorCloud.datamodel
                 entity.HasOne(e => e.card).WithMany(c => c.items);
             });
 
+            modelBuilder.Entity<Spot>(entity =>
+            {
+                entity.HasKey(e => e.article);
+                entity.HasMany(e => e.nzbs).WithOne(n => n.spot);
+            });
+            modelBuilder.Entity<SpotNzb>(entity =>
+            {
+                entity.HasKey(e => e.article);
+                entity.HasOne(e => e.spot).WithMany(s => s.nzbs);
+            });
 
         }
-	}
+    }
 }
