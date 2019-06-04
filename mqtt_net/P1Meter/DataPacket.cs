@@ -52,7 +52,7 @@ namespace P1Meter
                     {
                         decimal d = decimal.Parse(_params[0]);
                         attributes[header].SetValue(this, d);
-                    }catch(NotFiniteNumberException e)
+                    }catch(System.FormatException e)
                     {
                         Console.WriteLine(e);
                     }

@@ -8,6 +8,8 @@ COPY ["SensorCloud/SensorCloud.csproj", "SensorCloud/"]
 COPY ["Onkyo/Onkyo.csproj", "Onkyo/"]
 COPY ["JvcProjector/JvcProjector.csproj", "JvcProjector/"]
 COPY ["P1Meter/P1Meter.csproj", "P1Meter/"]
+COPY ["NNTP/NNTP.csproj", "NNTP/"]
+COPY ["SpotNet/SpotNet.csproj", "SpotNet/"]
 RUN dotnet restore "SensorCloud/SensorCloud.csproj"
 COPY . .
 WORKDIR "/src/SensorCloud"
