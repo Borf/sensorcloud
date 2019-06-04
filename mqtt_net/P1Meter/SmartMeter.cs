@@ -51,8 +51,6 @@ namespace P1Meter
                 
                 if(packet.IsValid)
                     OnData?.Invoke(this, packet);
-				else
-					Console.WriteLine("Could not parse packet");
                 buffer = "";
             }
         }
