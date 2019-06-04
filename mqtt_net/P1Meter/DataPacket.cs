@@ -54,7 +54,7 @@ namespace P1Meter
                         attributes[header].SetValue(this, d);
                     }catch(System.FormatException e)
                     {
-                        Console.WriteLine(l);
+                        Console.WriteLine(line);
                         Console.WriteLine(e);
                     }
                 }
