@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace SpotNet
 {
-    public class Spotnet
+    public class Spotnet : IDisposable
     {
         Connection nntp = new Connection();
         private string host;
@@ -42,43 +42,61 @@ namespace SpotNet
         public async Task<long> Update(long start)
         {
             GroupInfo = await nntp.Group("free.pt");
-
+            if(start < GroupInfo.high)
+                Console.WriteLine("Found new spots, fetching");
             for (long id = start; id <= GroupInfo.high; id++)
             {
-                Console.WriteLine($"Getting spot {id}");
-                Header h = await nntp.Headers(id);
-                if (h != null && h.headers.ContainsKey("X-XML"))
-                {
-                    try
-                    {
-                        Spot spot = new Spot(h);
-                        OnSpot?.Invoke(this, spot);
-                    }
-                    catch (XmlException e)
-                    {
-                      //  Console.WriteLine("Could not parse spot: " + e + "\n\n" + h.headers["X-XML"]);
-                    }
-                    catch(Exception e)
-                    {
-                        Console.WriteLine($"Exception thrown while parsing spot: {id}, {e}");
-                    }
-                }
-                else
-                    Console.WriteLine($"{id} not a spotnet spot");
+                await Get(id);
+                if(id % 50 == 0)
+                    System.GC.Collect();
             }
+            Console.WriteLine("Done");
             return GroupInfo.high+1;
+        }
+
+        public async Task Get(long id)
+        {
+            Console.WriteLine($"Getting spot {id}");
+            Header h = await nntp.Headers(id);
+            if (h != null && h.headers.ContainsKey("X-XML"))
+            {
+                try
+                {
+                    Spot spot = new Spot(h);
+                    if (spot.segments != null)
+                        OnSpot?.Invoke(this, spot);
+                }
+                catch (XmlException e)
+                {
+                    //  Console.WriteLine("Could not parse spot: " + e + "\n\n" + h.headers["X-XML"]);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Exception thrown while parsing spot: {id}, {e}");
+                }
+            }
+            else
+                Console.WriteLine($"{id} not a spotnet spot");
         }
 
 
         public async Task<string> Nzb(Spot spot)
         {
+            return await Nzb(spot.segments[0]);
+        }
+
+        public async Task<string> Nzb(string segment)
+        {
             await nntp.Group("alt.binaries.ftd");
-            var data = await nntp.Body("<" + spot.segments[0] + ">");
+            var data = await nntp.Body("<" + segment + ">");
             var reader = new StreamReader(new DeflateStream(new MemoryStream(Encoding.GetEncoding("ISO-8859-1").GetBytes(data)), CompressionMode.Decompress));
             var output = await reader.ReadToEndAsync();
             return output;
         }
 
-
+        public void Dispose()
+        {
+            nntp.Dispose();
+        }
     }
 }

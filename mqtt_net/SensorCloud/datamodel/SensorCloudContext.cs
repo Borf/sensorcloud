@@ -36,7 +36,9 @@ namespace SensorCloud.datamodel
             if(config.mysql != null)
                 optionsBuilder
                     .UseMySQL(config.mysql.configstring)
-//                    .UseLoggerFactory(MyLoggerFactory)
+/*                    .UseLoggerFactory(MyLoggerFactory)
+                      .EnableSensitiveDataLogging()
+                      .EnableDetailedErrors()*/
                     ;
         }
 
@@ -91,7 +93,7 @@ namespace SensorCloud.datamodel
             });
             modelBuilder.Entity<SpotNzb>(entity =>
             {
-                entity.HasKey(e => e.article);
+                entity.HasKey(e => new { e.article, e.articleid, e.segment });
                 entity.HasOne(e => e.spot).WithMany(s => s.nzbs);
             });
 

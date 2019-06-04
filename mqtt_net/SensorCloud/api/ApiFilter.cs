@@ -15,7 +15,7 @@ namespace SensorCloud.api
             
         }
 
-        string[] hosts = { "localhost", "api.sensorcloud.borf.nl", "api.sensorcloud.borf.info" };
+        string[] hosts = { "localhost", "api.sensorcloud.borf.nl", "api.sensorcloud.borf.info", "10.10.0.198" };
         public void OnActionExecuting(ActionExecutingContext context)
         {
             if(!hosts.Contains(context.HttpContext.Request.Host.Host))

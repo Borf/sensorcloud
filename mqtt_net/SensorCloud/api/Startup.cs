@@ -48,8 +48,12 @@ namespace api
 				{
 					ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
 				}, ArrayPool<char>.Shared));
-			}).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+                options.OutputFormatters.Add(new MyOutputFormatter());
+                
+			}).SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+            .AddXmlSerializerFormatters();
 
+            
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddDbContext<SensorCloudContext>();
 
@@ -82,4 +86,12 @@ namespace api
 			app.UseMvc();
 		}
 	}
+
+    public class MyOutputFormatter : StringOutputFormatter
+    {
+        public MyOutputFormatter()
+        {
+            SupportedMediaTypes.Add("text/poop");
+        }
+    }
 }

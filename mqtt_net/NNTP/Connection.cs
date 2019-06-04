@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace NNTP
 {
-    public class Connection
+    public class Connection : IDisposable
     {
         private string host;
         private int port;
@@ -173,6 +173,12 @@ namespace NNTP
                 await Task.Delay(1);
             }*/
 
+        }
+
+        public void Dispose()
+        {
+            client.Dispose();
+            stream.Dispose();
         }
     }
 }
