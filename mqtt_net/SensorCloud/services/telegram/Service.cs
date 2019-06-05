@@ -1,5 +1,11 @@
-﻿using System;
+﻿using SixLabors.Fonts;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +36,18 @@ namespace SensorCloud.services.telegram
             botClient = new TelegramBotClient(config.bottoken);
             botClient.OnMessage += OnMessage;
             botClient.StartReceiving();
+
+            currentMenu.Add(new Menu("test", callback: async () =>
+            {
+                using (Image<Rgba32> img = new Image<Rgba32>(200, 200))
+                {
+                    img.Mutate(ctx => ctx
+                        .Fill(Rgba32.Pink)
+                        .DrawText("Hello", SystemFonts.CreateFont("Arial", 39), Rgba32.Black, new PointF(40, 40))
+                        );
+                    await SendPicture("Test", img);
+                }
+            }));
             await SendMessageAsync("Sensorcloud bot started", showNotification: false);
         }
 
@@ -41,19 +59,37 @@ namespace SensorCloud.services.telegram
                 {
                     if (item.Callback != null)
                     {
-                        string ret = item.Callback();
-                        if (ret == "")
+                        var ret = item.Callback();
+
+                        if (ret.returnAfterClick && currentMenu.Parent != null)
+                            currentMenu = currentMenu.Parent;
+                        else if (item.SubMenus.Count > 0)
+                            currentMenu = item;
+
+
+                        if ((ret.message == null || ret.message == "") && ret.image == null)
                             await SendMessageAsync("Action done");
+                        else if(ret.image == null)
+                            await SendMessageAsync(ret.message);
                         else
-                            await SendMessageAsync(ret);
+                            await SendPicture(ret.message, ret.image);
                     }
                     else
                     {
                         currentMenu = item;
                         string text = currentMenu.Title + " menu";
-                        if (currentMenu.AfterMenuText != null)
-                            text += " - " + currentMenu.AfterMenuText();
-                        await SendMessageAsync(text);
+                        var afterMenu = currentMenu.AfterMenuText;
+                        if (afterMenu != null)
+                        {
+                            var ret = afterMenu();
+                            text += " - " + ret.message;
+                            if (ret.image == null)
+                                await SendMessageAsync(text);
+                            else
+                                await SendPicture(text, ret.image);
+                        }
+                        else
+                            await SendMessageAsync(text);
                         break;
                     }
                 }
@@ -89,12 +125,30 @@ namespace SensorCloud.services.telegram
         {
             List<List<KeyboardButton>> buttons = currentMenu.BuildMenu();
 
+
             await botClient.SendTextMessageAsync(
               chatId: config.chatid,
               text: message,
               disableNotification: !showNotification,
               replyMarkup: new ReplyKeyboardMarkup(keyboard: buttons, resizeKeyboard: false, oneTimeKeyboard: false)
             );
+        }
+
+        public async Task SendPicture(string caption, Image<Rgba32> img)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                img.SaveAsPng(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+
+                List<List<KeyboardButton>> buttons = currentMenu.BuildMenu();
+                await botClient.SendPhotoAsync(
+                    chatId: config.chatid,
+                    caption: caption,
+                    photo: stream,
+                    replyMarkup: new ReplyKeyboardMarkup(keyboard: buttons, resizeKeyboard: false, oneTimeKeyboard: false)
+                    );
+            }
         }
 
         public bool IsInMenu(Menu menu)

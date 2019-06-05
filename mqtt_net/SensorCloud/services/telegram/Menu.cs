@@ -1,18 +1,31 @@
-﻿using System;
+﻿using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using System;
 using System.Collections.Generic;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace SensorCloud.services.telegram
 {
+    public class Reply
+    {
+        public string message;
+        public Image<Rgba32> image = null;
+        public bool returnAfterClick = false;
+
+        public static implicit operator Reply(string message)
+        {
+            return new Reply() { message = message };
+        }
+    }
     public class Menu
     {
-        public string Title { get; private set; }
+        public string Title { get; set; }
         public List<Menu> SubMenus { get; private set; } = new List<Menu>();
-        public Func<string> Callback { get; set; }
+        public Func<Reply> Callback { get; set; }
         public Menu Parent { get; private set; }
-        public Func<string> AfterMenuText;
+        public Func<Reply> AfterMenuText;
 
-        public Menu(string title, Menu parent = null, Func<string> callback = null, Func<string> afterMenuText = null)
+        public Menu(string title, Menu parent = null, Func<Reply> callback = null, Func<Reply> afterMenuText = null)
         {
             this.Title = title;
             this.Parent = parent;
@@ -31,6 +44,11 @@ namespace SensorCloud.services.telegram
         {
             menu.Parent = this;
             SubMenus.Add(menu);
+        }
+
+        public void Clear()
+        {
+            SubMenus.Clear();
         }
 
         internal List<List<KeyboardButton>> BuildMenu()

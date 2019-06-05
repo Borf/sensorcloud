@@ -17,7 +17,8 @@ namespace JvcProjector
 		public PowerStatus Status {
 			get { return _status; }
 			set {
-				stream.Write(new byte[] { 0x21, 0x89, 0x01, 80,87, (byte)((value == PowerStatus.poweron) ? 49 : 48), 0x0A });
+                if(this.ready)
+				    stream.Write(new byte[] { 0x21, 0x89, 0x01, 80,87, (byte)((value == PowerStatus.poweron) ? 49 : 48), 0x0A });
 			}
 		}
 
@@ -46,8 +47,10 @@ namespace JvcProjector
 			catch (SocketException e)
 			{
 				Console.WriteLine($"JVC\t\tException when connecting to socket: {e}");
-			}
-		}
+                await Task.Delay(30000);
+                Task.Run(async () => await Connect(address)); //run in background
+            }
+        }
 
 		private async Task ReadPackets()
 		{

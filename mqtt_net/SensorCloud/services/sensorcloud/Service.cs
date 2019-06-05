@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SensorCloud.datamodel;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace SensorCloud.services.sensorcloud
 {
-    public class Service : SensorCloud.Service
+    public partial class Service : SensorCloud.Service
     {
         private mqtt.Service mqtt;
         private SensorCloudContext db;
@@ -22,16 +23,7 @@ namespace SensorCloud.services.sensorcloud
             this.configuration = configuration;
         }
 
-        public override void InstallTelegramHandlers(telegram.Service telegram)
-        {//TODO: softcode this
-            var projectorMenu = new telegram.Menu(title: "Projector");
-            new Menu("Projector screen up", async () => await mqtt.Publish("livingroom/RF/7", "up"), projectorMenu);
-            new Menu("Projector screen down", async () => await mqtt.Publish("livingroom/RF/7", "down"), projectorMenu);
-            new Menu("Projector screen stop", async () => await mqtt.Publish("livingroom/RF/7", "stop"), projectorMenu);
-            telegram.AddRootMenu(projectorMenu);
-        }
-
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             mqtt = GetService<mqtt.Service>();
             db = new SensorCloudContext(configuration);
@@ -70,8 +62,22 @@ namespace SensorCloud.services.sensorcloud
 
 
 
+            while (true)
+            {
+                using (var db2 = new SensorCloudContext(configuration))
+                {
+                    Log("Updating backlog");
+                    await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.hourly`  (`stamp`, `nodeid`, `type`, `value`) SELECT DATE_FORMAT(`stamp`, '%Y-%m-%d %H:00:00') as `date`, `nodeid`, `type`, round(avg(`value`), 2) FROM `sensordata` WHERE `type` = 'TEMPERATURE' OR `type` = 'HUMIDITY' GROUP BY `nodeid`, `type`, `date`");
+                    await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.daily`   (`date`, `nodeid`, `type`, `value`)  SELECT DATE_FORMAT(`stamp`, '%Y-%m-%d') as `date`, `nodeid`, `type`, round(avg(`value`), 2) FROM `sensordata` WHERE `type` = 'TEMPERATURE' OR `type` = 'HUMIDITY' GROUP BY `nodeid`, `type`, `date`");
+                    await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.weekly`  (`year`, `week`, `nodeid`, `type`, `value`)  SELECT year(`date`) as `year`, week(`date`) as `week`,`nodeid`, `type`, round(avg(`value`), 2) FROM `sensordata.daily` WHERE `type` = 'TEMPERATURE' OR `type` = 'HUMIDITY' GROUP BY `nodeid`, `type`, `date`, `year`, `week`");
+                    await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.monthly` (`year`, `month`, `nodeid`, `type`, `value`)  SELECT year(`date`) as `year`, month(`date`) as `month`,`nodeid`, `type`, round(avg(`value`), 2) FROM `sensordata.daily` WHERE `type` = 'TEMPERATURE' OR `type` = 'HUMIDITY' GROUP BY `nodeid`, `type`, `year`, `month`");
+                    
+                    Log("Done updating backlog");
+                }
 
-            return Task.CompletedTask;
+                await Task.Delay(1000 * 60 * 30);
+
+            }
         }
     }
 }
