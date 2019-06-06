@@ -176,9 +176,7 @@ namespace SensorCloud.services.sensorcloud
 
                 if (timeSpan == "day")
                 {
-                    var myFonts = new PrivateFontCollection();
-                    myFonts.AddFontFile("tahoma.ttf");
-                    var fontbottom = new Font(myFonts.Families[0], 10);
+                    var fontbottom = new Font(new FontFamily("Tahoma"), 10);
 
                     var tickWidth = (width - marginLeft - marginRight) / 24f;
                     foreach (var e in Enumerable.Range(0, 25))
