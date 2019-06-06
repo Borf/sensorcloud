@@ -23,7 +23,6 @@ WORKDIR /app
 COPY --from=publish /app .
 #COPY config.json /app/
 COPY eiscp-commands.json /app
-COPY tahoma.ttf /app
 COPY SensorCloud/wwwroot /app/SensorCloud/wwwroot
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends libc6-dev libgdiplus

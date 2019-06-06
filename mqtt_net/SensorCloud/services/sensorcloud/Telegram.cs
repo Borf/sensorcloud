@@ -137,9 +137,9 @@ namespace SensorCloud.services.sensorcloud
 
                 nodesIn = "6";//
                 var between = $"addtime(CURDATE(), '23:59:59') - interval {1+timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
-                var table = "hourly";
+                var table = "";
                 var type = "TEMPERATURE";
-                string sql = $"SELECT * FROM `sensordata.{table}` WHERE `type` = '{type}' AND `stamp` BETWEEN {between} AND `nodeid` IN ({nodesIn})";
+                string sql = $"SELECT * FROM `sensordata{table}` WHERE `type` = '{type}' AND `stamp` BETWEEN {between} AND `nodeid` IN ({nodesIn})";
                 var sensorData = db.sensordata.FromSql(sql).ToList();
                 if (sensorData.Count == 0)
                     return "No data found";
@@ -153,8 +153,8 @@ namespace SensorCloud.services.sensorcloud
                 }
 
 
-                int height = 200,
-                    width = 400,
+                int height = 400,
+                    width = 800,
                     markerHeight = 5,
                     bigMarkerHeight = 8,
                     marginBottom = 30,
