@@ -1,12 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SensorCloud.services.telegram;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -168,43 +165,39 @@ namespace SensorCloud.services.sensorcloud
 
                 float yFactor = (height - marginTop - marginBottom) / (max - min);
 
-                Image<Rgba32> image = new Image<Rgba32>(width, height);
-                image.Mutate(ctx => ctx
-                    .Fill(Rgba32.Transparent)
-//                    .DrawText(timeSpan, SystemFonts.CreateFont("Arial", 39), Rgba32.Black, new PointF(40, 40))
-                    .DrawLines(new Pen<Rgba32>(Rgba32.Black, 2), new PointF[]
+                Bitmap image = new Bitmap(width, height);
+                var graphics = Graphics.FromImage(image);
+                graphics.FillRectangle(Brushes.Transparent, 0, 0, width, height);
+                graphics.DrawLines(Pens.Black, new PointF[]
                         {
                             new PointF(30, 0),          new PointF(30, height-30),
                             new PointF(30, height-30),  new PointF(width, height-30)
-                        })
-                    );
-                if(timeSpan == "day")
+                        });
+
+                if (timeSpan == "day")
                 {
-                    FontCollection fontCollection = new FontCollection();
-                    fontCollection.Install("tahoma.ttf");
-                    var fontbottom = fontCollection.CreateFont("Tahoma", 10);
+                    var myFonts = new PrivateFontCollection();
+                    myFonts.AddFontFile("tahoma.ttf");
+                    var fontbottom = new Font(myFonts.Families[0], 10);
+
                     var tickWidth = (width - marginLeft - marginRight) / 24f;
                     foreach (var e in Enumerable.Range(0, 25))
                     {
-                        image.Mutate(ctx => ctx
-                            .DrawLines(new Pen<Rgba32>(Rgba32.Black, 1),
-                                new PointF[] { new PointF(marginLeft + tickWidth * e, height - marginBottom), new PointF(marginLeft + tickWidth * e, height - marginBottom + (e% markerMod == 0 ? bigMarkerHeight : markerHeight)) })
-                        );
+                        graphics.DrawLines(Pens.Black,
+                                new PointF[] { new PointF(marginLeft + tickWidth * e, height - marginBottom), new PointF(marginLeft + tickWidth * e, height - marginBottom + (e % markerMod == 0 ? bigMarkerHeight : markerHeight)) });
 
                         if (e % markerMod == 0)
                         {
-                            float w = TextMeasurer.Measure(e + ":00", new RendererOptions(fontbottom)).Width;
-                            image.Mutate(ctx => ctx.DrawText(e + ":00", fontbottom, Rgba32.Black, new PointF(marginLeft + e * tickWidth - w/2, height - marginBottom + 10)));
+                            float w = graphics.MeasureString(e + ":00", fontbottom).Width;
+                            graphics.DrawString(e + ":00", fontbottom, Brushes.Black, new PointF(marginLeft + e * tickWidth - w/2, height - marginBottom + 10));
                         }
                     }
-                    image.Mutate(ctx => ctx
-                        .DrawLines(new Pen<Rgba32>(Rgba32.Black, 1),
-                            sensorData.Select(d => new PointF(marginLeft + tickWidth * (d.stamp.Hour + d.stamp.Minute / 60.0f), height - marginBottom - (float)(d.value-min) * yFactor)).ToArray())
-                        );
-                    image.Mutate(ctx => ctx.DrawText(min + "", fontbottom, Rgba32.Black, new PointF(0, height - marginBottom - 10)));
-                    image.Mutate(ctx => ctx.DrawText(max + "", fontbottom, Rgba32.Black, new PointF(0, marginTop)));
+                    graphics.DrawLines(Pens.Black,
+                            sensorData.Select(d => new PointF(marginLeft + tickWidth * (d.stamp.Hour + d.stamp.Minute / 60.0f), height - marginBottom - (float)(d.value - min) * yFactor)).ToArray());
+                    graphics.DrawString(min + "", fontbottom, Brushes.Black, new PointF(0, height - marginBottom - 10));
+                    graphics.DrawString(max + "", fontbottom, Brushes.Black, new PointF(0, marginTop));
 
-
+    
 
                 }
 

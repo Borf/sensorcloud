@@ -1,10 +1,7 @@
-﻿using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -36,18 +33,6 @@ namespace SensorCloud.services.telegram
             botClient = new TelegramBotClient(config.bottoken);
             botClient.OnMessage += OnMessage;
             botClient.StartReceiving();
-
-            currentMenu.Add(new Menu("test", callback: async () =>
-            {
-                using (Image<Rgba32> img = new Image<Rgba32>(200, 200))
-                {
-                    img.Mutate(ctx => ctx
-                        .Fill(Rgba32.Pink)
-                        .DrawText("Hello", SystemFonts.CreateFont("Arial", 39), Rgba32.Black, new PointF(40, 40))
-                        );
-                    await SendPicture("Test", img);
-                }
-            }));
             await SendMessageAsync("Sensorcloud bot started", showNotification: false);
         }
 
@@ -134,11 +119,11 @@ namespace SensorCloud.services.telegram
             );
         }
 
-        public async Task SendPicture(string caption, Image<Rgba32> img)
+        public async Task SendPicture(string caption, Bitmap img)
         {
             using (MemoryStream stream = new MemoryStream())
             {
-                img.SaveAsPng(stream);
+                img.Save(stream, ImageFormat.Png);
                 stream.Seek(0, SeekOrigin.Begin);
 
                 List<List<KeyboardButton>> buttons = currentMenu.BuildMenu();

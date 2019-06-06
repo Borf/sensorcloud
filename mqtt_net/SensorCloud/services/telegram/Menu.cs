@@ -1,7 +1,6 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace SensorCloud.services.telegram
@@ -9,7 +8,7 @@ namespace SensorCloud.services.telegram
     public class Reply
     {
         public string message;
-        public Image<Rgba32> image = null;
+        public Bitmap image = null;
         public bool returnAfterClick = false;
 
         public static implicit operator Reply(string message)
