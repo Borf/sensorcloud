@@ -34,7 +34,7 @@ namespace SensorCloud.services.kodi
             kodiMenu.Add(new Menu(title: "Up", callback: async () => await CallRpc("Input.Up")));
             kodiMenu.Add(new Menu(title: "Down", callback: async () => await CallRpc("Input.Down")));
             kodiMenu.Add(new Menu(title: "Select", callback: async () => await CallRpc("Input.Select")));
-            kodiMenu.Add(new Menu(title: "Back", callback: async () => await CallRpc("Input.Back")));
+            kodiMenu.Add(new Menu(title: "Return", callback: async () => await CallRpc("Input.Back")));
             telegram.AddRootMenu(kodiMenu);
         }
 
@@ -42,18 +42,24 @@ namespace SensorCloud.services.kodi
         private async Task CallRpc(string command)
         {
             //[{jsonrpc: "2.0", method: "Input.Down", params: [], id: 8}]
-            HttpClient client = new HttpClient();
-            await client.PostAsJsonAsync("http://192.168.2.22:8080/jsonrpc?" + command, new[]
+            try
             {
-                new
+                HttpClient client = new HttpClient();
+                await client.PostAsJsonAsync("http://192.168.2.22:8080/jsonrpc?" + command, new[]
                 {
-                    jsonrpc = "2.0",
-                    method = command,
-                    @params = new int[] { },
-                    id = id
-                }
-            });
-            id++;
+                    new
+                    {
+                        jsonrpc = "2.0",
+                        method = command,
+                        @params = new int[] { },
+                        id = id
+                    }
+                });
+                id++;
+            } catch(System.Net.Sockets.SocketException e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 }
