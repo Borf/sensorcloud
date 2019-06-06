@@ -31,7 +31,7 @@ namespace SensorCloud.services.sensorcloud
             List<datamodel.Node> nodes = new List<datamodel.Node>();
 
 
-            sensorDataMenu = new Menu(title: "Sensordata", afterMenuText: showSensorData(timeSpan, timeOffset, nodes));
+            sensorDataMenu = new Menu(title: "Sensordata", afterMenuText: showSensorData(timeSpan, timeOffset, value, nodes));
             {
                 var timespanMenu = new Menu(title: "Timespan: day", parent: sensorDataMenu);
                 Func<string, Func<Reply>> timespanCallback = (newSpan) =>
@@ -40,7 +40,7 @@ namespace SensorCloud.services.sensorcloud
                     {
                         timeSpan = newSpan;
                         timespanMenu.Title = "Timespan: " + newSpan;
-                        var reply = showSensorData(timeSpan, timeOffset, nodes)();
+                        var reply = showSensorData(timeSpan, timeOffset, value, nodes)();
                         reply.returnAfterClick = true;
                         return reply;
                     };
@@ -61,15 +61,15 @@ namespace SensorCloud.services.sensorcloud
                             timeOffset = 0;
 
                         timeOffsetMenu.Title = "Time offset: " + timeOffset;
-                        var reply = showSensorData(timeSpan, timeOffset, nodes)();
+                        var reply = showSensorData(timeSpan, timeOffset, value, nodes)();
                         reply.returnAfterClick = true;
                         return reply;
                     };
                 };
-                new Menu(title: "1 day back", parent: timeOffsetMenu, callback: timeOffsetCallback(-1));
-                new Menu(title: "1 day forward", parent: timeOffsetMenu, callback: timeOffsetCallback(1));
-                new Menu(title: "1 week back", parent: timeOffsetMenu, callback: timeOffsetCallback(-7));
-                new Menu(title: "1 week forward", parent: timeOffsetMenu, callback: timeOffsetCallback(7));
+                new Menu(title: "1 day back", parent: timeOffsetMenu, callback: timeOffsetCallback(1));
+                new Menu(title: "1 day forward", parent: timeOffsetMenu, callback: timeOffsetCallback(-1));
+                new Menu(title: "1 week back", parent: timeOffsetMenu, callback: timeOffsetCallback(7));
+                new Menu(title: "1 week forward", parent: timeOffsetMenu, callback: timeOffsetCallback(-7));
             }
 
             {
@@ -80,7 +80,7 @@ namespace SensorCloud.services.sensorcloud
                     {
                         value = newValue;
                         valueMenu.Title = "Value: " + newValue;
-                        var reply = showSensorData(timeSpan, timeOffset, nodes)();
+                        var reply = showSensorData(timeSpan, timeOffset, value, nodes)();
                         reply.returnAfterClick = true;
                         return reply;
                     };
@@ -108,7 +108,7 @@ namespace SensorCloud.services.sensorcloud
 
 
                         nodeMenu.Title = "Nodes: " + nodes.Aggregate("", (n, next) => n + ", " + next.name);
-                        var reply = showSensorData(timeSpan, timeOffset, nodes)();
+                        var reply = showSensorData(timeSpan, timeOffset, value, nodes)();
                         return reply;
                     };
                 };
@@ -132,21 +132,29 @@ namespace SensorCloud.services.sensorcloud
             telegram.AddRootMenu(sensorDataMenu);
         }
 
-        private Func<Reply> showSensorData(string timeSpan, int timeOffset, List<datamodel.Node> nodes)
+        private Func<Reply> showSensorData(string timeSpan, int timeOffset, string value, List<datamodel.Node> nodes)
         {
             return () =>
             {
                 var nodesIn = string.Join(",", nodes.Select(n => n.id));
 
                 nodesIn = "6";//
-                var between = "addtime(CURDATE(), '23:59:59') - interval 1 day AND addtime(CURDATE(), '23:59:59') - interval 0 day";
+                var between = $"addtime(CURDATE(), '23:59:59') - interval {1+timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
                 var table = "hourly";
                 var type = "TEMPERATURE";
                 string sql = $"SELECT * FROM `sensordata.{table}` WHERE `type` = '{type}' AND `stamp` BETWEEN {between} AND `nodeid` IN ({nodesIn})";
                 var sensorData = db.sensordata.FromSql(sql).ToList();
-
+                if (sensorData.Count == 0)
+                    return "No data found";
                 float max = (float)sensorData.Max(e => e.value);
                 float min = (float)sensorData.Min(e => e.value);
+
+                if (value == "temperature")
+                {
+                    min = Math.Min(0, min);
+                    max = Math.Max(30, max);
+                }
+
 
                 int height = 200,
                     width = 400,
@@ -172,7 +180,9 @@ namespace SensorCloud.services.sensorcloud
                     );
                 if(timeSpan == "day")
                 {
-                    var fontbottom = SystemFonts.CreateFont("Arial", 10);
+                    FontCollection fontCollection = new FontCollection();
+                    fontCollection.Install("tahoma.ttf");
+                    var fontbottom = fontCollection.CreateFont("Tahoma", 10);
                     var tickWidth = (width - marginLeft - marginRight) / 24f;
                     foreach (var e in Enumerable.Range(0, 25))
                     {
