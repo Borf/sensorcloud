@@ -14,20 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="modules\DashModule.cs" />
-    <Compile Remove="modules\DbModule.cs" />
-    <Compile Remove="modules\JvcModule.cs" />
-    <Compile Remove="modules\KodiModule.cs" />
-    <Compile Remove="modules\MqttModule.cs" />
-    <Compile Remove="modules\MysqlModule.cs" />
-    <Compile Remove="modules\OnkyoModule.cs" />
-    <Compile Remove="modules\SensorCloudBootModule.cs" />
-    <Compile Remove="modules\SensorCloudNodeModule.cs" />
-    <Compile Remove="modules\SensorCloudTelegramModule.cs" />
-    <Compile Remove="modules\TelegramModule.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="wwwroot\fonts\fontawesome-webfont.svg" />
     <None Include="wwwroot\fonts\fontawesome-webfont.woff2" />
     <None Include="wwwroot\js\bootstrap.min.js" />
@@ -59,10 +45,6 @@
     <ProjectReference Include="..\Onkyo\Onkyo.csproj" />
     <ProjectReference Include="..\P1Meter\P1Meter.csproj" />
     <ProjectReference Include="..\SpotNet\SpotNet.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="modules\" />
   </ItemGroup>
 
 </Project>

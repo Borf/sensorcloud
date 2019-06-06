@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SensorCloud.services.telegram;
+using SensorCloud.util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -133,71 +134,94 @@ namespace SensorCloud.services.sensorcloud
         {
             return () =>
             {
-                var nodesIn = string.Join(",", nodes.Select(n => n.id));
+                var colors = new Color[]
+                {
+                    Color.Red,
+                    Color.Green,
+                    Color.Blue,
+                    Color.DarkViolet,
+                    Color.Salmon,
+                    Color.PowderBlue,
+                    Color.GreenYellow,
+                    Color.DarkOrange
+                };
+                var colorLookup = new Dictionary<int, Color>();
 
-                nodesIn = "6";//
+                if (nodes.Count == 0)
+                    return "No nodes";
+
+                var nodesIn = string.Join(",", nodes.Select(n => n.id));
                 var between = $"addtime(CURDATE(), '23:59:59') - interval {1+timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
                 var table = "";
                 var type = "TEMPERATURE";
+                var config = new Graph.Config();
+
+                switch (value)
+                {
+                    case "temperature":
+                        config.min = 0;
+                        config.max = 30;
+                        type = "TEMPERATURE";
+                        break;
+                    case "humidity":
+                        config.min = 0;
+                        config.max = 100;
+                        type = "HUMIDITY";
+                        break;
+                    case "power":
+                        config.min = 0;
+                        config.max = 1;
+                        break;
+                }
+
+                switch(timeSpan)
+                {
+                    case "day":
+                        config.markerCount = 24;
+                        config.markerMod = 4;
+                        config.markerFunc = (e) => $"{e * 4:02}:00";
+//                        between = $"addtime(CURDATE(), '23:59:59') - interval {1 + timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
+                        break;
+                    case "week":
+                        config.markerCount = 7*4;
+                        config.markerMod = 4;
+                        config.markerFunc = (e) => e < 7 ? ((DayOfWeek)e).ToString() : "";
+                        table = ".hourly";
+                        between = $"addtime(SUBDATE(CURDATE(), WEEKDAY(CURDATE())), '23:59:59') - interval {timeOffset} week AND addtime(SUBDATE(CURDATE(), WEEKDAY(CURDATE())), '23:59:59') - interval {(timeOffset-1)} week";
+                        break;
+                    case "month":
+                        config.markerCount = 31; //TODO
+                        config.markerMod = 7;
+                        config.markerFunc = (e) => $"{e*7+1}";
+                        table = ".daily";
+                        between = $"addtime(SUBDATE(CURDATE(), DAYOFMONTH(CURDATE())), '23:59:59') - interval {timeOffset} month AND addtime(SUBDATE(CURDATE(), DAYOFMONTH(CURDATE())), '23:59:59') - interval {(timeOffset - 1)} month";
+                        break;
+                }
+
                 string sql = $"SELECT * FROM `sensordata{table}` WHERE `type` = '{type}' AND `stamp` BETWEEN {between} AND `nodeid` IN ({nodesIn})";
-                var sensorData = db.sensordata.FromSql(sql).ToList();
+                Console.WriteLine(sql);
+
+                var sensorData = db.sensordata.FromSql(sql).OrderBy(d => d.stamp).ToList();
                 if (sensorData.Count == 0)
                     return "No data found";
-                float max = (float)sensorData.Max(e => e.value);
-                float min = (float)sensorData.Min(e => e.value);
 
-                if (value == "temperature")
+                foreach (var d in sensorData)
                 {
-                    min = Math.Min(0, min);
-                    max = Math.Max(30, max);
-                }
-
-
-                int height = 400,
-                    width = 800,
-                    markerHeight = 5,
-                    bigMarkerHeight = 8,
-                    marginBottom = 30,
-                    marginLeft = 30,
-                    marginRight = 10,
-                    marginTop = 10,
-                    markerMod = 4;
-
-                float yFactor = (height - marginTop - marginBottom) / (max - min);
-
-                Bitmap image = new Bitmap(width, height);
-                var graphics = Graphics.FromImage(image);
-                graphics.FillRectangle(Brushes.Transparent, 0, 0, width, height);
-                graphics.DrawLines(Pens.Black, new PointF[]
-                        {
-                            new PointF(30, 0),          new PointF(30, height-30),
-                            new PointF(30, height-30),  new PointF(width, height-30)
-                        });
-
-                if (timeSpan == "day")
-                {
-                    var fontbottom = new Font(new FontFamily("Tahoma"), 10);
-
-                    var tickWidth = (width - marginLeft - marginRight) / 24f;
-                    foreach (var e in Enumerable.Range(0, 25))
+                    if (!colorLookup.ContainsKey(d.nodeid))
                     {
-                        graphics.DrawLines(Pens.Black,
-                                new PointF[] { new PointF(marginLeft + tickWidth * e, height - marginBottom), new PointF(marginLeft + tickWidth * e, height - marginBottom + (e % markerMod == 0 ? bigMarkerHeight : markerHeight)) });
-
-                        if (e % markerMod == 0)
-                        {
-                            float w = graphics.MeasureString(e + ":00", fontbottom).Width;
-                            graphics.DrawString(e + ":00", fontbottom, Brushes.Black, new PointF(marginLeft + e * tickWidth - w/2, height - marginBottom + 10));
-                        }
+                        colorLookup[d.nodeid] = colors[colorLookup.Count];
+                        config.values[colorLookup[d.nodeid]] = new List<KeyValuePair<float, float>>(sensorData.Count / nodes.Count);
                     }
-                    graphics.DrawLines(Pens.Black,
-                            sensorData.Select(d => new PointF(marginLeft + tickWidth * (d.stamp.Hour + d.stamp.Minute / 60.0f), height - marginBottom - (float)(d.value - min) * yFactor)).ToArray());
-                    graphics.DrawString(min + "", fontbottom, Brushes.Black, new PointF(0, height - marginBottom - 10));
-                    graphics.DrawString(max + "", fontbottom, Brushes.Black, new PointF(0, marginTop));
-
-    
-
+                    if (timeSpan == "day")
+                        config.values[colorLookup[d.nodeid]].Add(new KeyValuePair<float, float>(d.stamp.Hour + d.stamp.Minute / 60.0f, (float)d.value));
+                    if (timeSpan == "week")
+                        config.values[colorLookup[d.nodeid]].Add(new KeyValuePair<float, float>(4*((int)d.stamp.DayOfWeek + d.stamp.Hour / 24.0f), (float)d.value));
+                    if (timeSpan == "month")
+                        config.values[colorLookup[d.nodeid]].Add(new KeyValuePair<float, float>((int)d.stamp.Day-1, (float)d.value));
                 }
+
+
+                var image = Graph.buildImage(config);
 
                 return new Reply()
                 {
