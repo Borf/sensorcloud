@@ -19,8 +19,7 @@ namespace SensorCloud.services.mqtt
         private IMqttClient mqttClient;
         private Config config;
 
-        private string lastTopic;
-        private string lastValue;
+        private List<Tuple<string, string> > lastMessages = new List<Tuple<string, string>>();
 
 
         public Service(IServiceProvider services, Config config) : base(services)
@@ -59,8 +58,9 @@ namespace SensorCloud.services.mqtt
         public async Task Publish(string topic, string value, bool retain = false)
         {
             await IsStarted();
-            lastTopic = topic;
-            lastValue = value;
+            lastMessages.Add(new Tuple<string, string>(topic, value));
+            if (lastMessages.Count > 50)
+                lastMessages.RemoveRange(0, lastMessages.Count-50);
 
             await mqttClient.PublishAsync(new MqttApplicationMessageBuilder()
                 .WithTopic(topic)
@@ -129,7 +129,7 @@ namespace SensorCloud.services.mqtt
 
             if (!handled)
             {
-                if(e.ApplicationMessage.Topic != lastTopic || Encoding.UTF8.GetString(e.ApplicationMessage.Payload) != lastValue)
+                if(!lastMessages.Contains(new Tuple<string, string>(e.ApplicationMessage.Topic, Encoding.UTF8.GetString(e.ApplicationMessage.Payload))))
                     Log($"Message on topic {e.ApplicationMessage.Topic} is not handled");
             }
         }
