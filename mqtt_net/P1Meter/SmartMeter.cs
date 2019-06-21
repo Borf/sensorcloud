@@ -36,6 +36,8 @@ namespace P1Meter
 
         private void DataReceived(object sender, string data)
         {
+        	if(data.Trim() == "")
+        		return;
             buffer += data;
             if (buffer.EndsWith("!\n"))
             {
@@ -44,13 +46,17 @@ namespace P1Meter
                 for (var i = 0; i < lines.Length; i++)
                 {
                     if(lines[i].StartsWith("0-1:24.3"))
+                    {
                         packet.ParseLine("0-1:24.2.1" + lines[i+1]);
+					}
                     else
                         packet.ParseLine(lines[i]);
                 }
                 
                 if(packet.IsValid)
                     OnData?.Invoke(this, packet);
+				else
+					Console.WriteLine($"Invalid packet: {packet.ToString()}");
                 buffer = "";
             }
         }

@@ -22,6 +22,10 @@ namespace P1Meter
         [Marker("0-1:24.2.1")]
         public decimal GasUsage { get; private set; } = 0M;
 
+		public override string ToString()
+		{
+			return $"P1 packet: P1: {PowerConsumptionTariff1}, P2 {PowerConsumptionTariff2}, Gas {GasUsage}";
+		}
 
         static Dictionary<string, PropertyInfo> attributes = new Dictionary<string, PropertyInfo>();
         static DataPacket()

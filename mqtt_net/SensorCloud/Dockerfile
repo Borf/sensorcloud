@@ -26,4 +26,5 @@ COPY eiscp-commands.json /app
 COPY SensorCloud/wwwroot /app/SensorCloud/wwwroot
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends libc6-dev libgdiplus
+RUN apt-get install -y --no-install-recommends coreutils
 ENTRYPOINT ["dotnet", "SensorCloud.dll"]
