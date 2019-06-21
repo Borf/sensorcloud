@@ -14,13 +14,13 @@ namespace P1Meter
         }
 
         [Marker("1-0:1.8.1")]
-        public decimal PowerConsumptionTariff1 { get; private set; } = 0M;
+        public decimal PowerConsumptionTariff1 { get; set; } = 0M;
 
         [Marker("1-0:1.8.2")]
-        public decimal PowerConsumptionTariff2 { get; private set; } = 0M;
+        public decimal PowerConsumptionTariff2 { get; set; } = 0M;
 
         [Marker("0-1:24.2.1")]
-        public decimal GasUsage { get; private set; } = 0M;
+        public decimal GasUsage { get; set; } = 0M;
 
 		public override string ToString()
 		{

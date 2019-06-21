@@ -32,12 +32,36 @@ namespace SensorCloud.services.P1Meter
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            db = new SensorCloudContext(configuration);
-            Log("Starting smart meter");
+
+            using (db = new SensorCloudContext(configuration))
+            {
+                Dictionary<DateTime, DataPacket> measurementLookup = new Dictionary<DateTime, DataPacket>();
+                db.sensordata
+                    .Where(d => d.nodeid == 0 && (d.type == "power1" || d.type == "power2" || d.type == "gas") && d.stamp.AddDays(1) > DateTime.Now)
+                    .OrderByDescending(d => d.id)
+                    .ToList().ForEach(m =>
+                    {
+                        if (!measurementLookup.ContainsKey(m.stamp))
+                            measurementLookup[m.stamp] = new DataPacket();
+                        if (m.type == "gas")
+                            measurementLookup[m.stamp].GasUsage = (Decimal)m.value;
+                        if (m.type == "power1")
+                            measurementLookup[m.stamp].PowerConsumptionTariff1 = (Decimal)m.value;
+                        if (m.type == "power2")
+                            measurementLookup[m.stamp].PowerConsumptionTariff2 = (Decimal)m.value;
+                    });
+                measurementLookup.Keys.ToList().ForEach(k => measurements.Add(new Measurement()
+                {
+                    time = k,
+                    data = measurementLookup[k]
+                }));
+                measurements.Sort((m1,m2) => m1.time.CompareTo(m2.time));
+            }
+
             meter = new SmartMeter();
             meter.OnData += OnData;
             meter.Connect(config.serial);
-            Log("Started");
+
             return Task.CompletedTask;
         }
 
@@ -47,29 +71,31 @@ namespace SensorCloud.services.P1Meter
             while (measurements.Count > 0 && measurements[0].time.AddMinutes(60*24) < DateTime.Now)
                 measurements.RemoveAt(0);
 
-            db.sensordata.Add(new SensorData()
+            using (db = new SensorCloudContext(configuration))
             {
-                stamp = DateTime.Now,
-                nodeid = 0,
-                type = "power1",
-                value = (double)data.PowerConsumptionTariff1
-            });
-            db.sensordata.Add(new SensorData()
-            {
-                stamp = DateTime.Now,
-                nodeid = 0,
-                type = "power2",
-                value = (double)data.PowerConsumptionTariff2
-            });
-            db.sensordata.Add(new SensorData()
-            {
-                stamp = DateTime.Now,
-                nodeid = 0,
-                type = "gas",
-                value = (double)data.GasUsage
-            });
-            await db.SaveChangesAsync();
-
+                db.sensordata.Add(new SensorData()
+                {
+                    stamp = DateTime.Now,
+                    nodeid = 0,
+                    type = "power1",
+                    value = (double)data.PowerConsumptionTariff1
+                });
+                db.sensordata.Add(new SensorData()
+                {
+                    stamp = DateTime.Now,
+                    nodeid = 0,
+                    type = "power2",
+                    value = (double)data.PowerConsumptionTariff2
+                });
+                db.sensordata.Add(new SensorData()
+                {
+                    stamp = DateTime.Now,
+                    nodeid = 0,
+                    type = "gas",
+                    value = (double)data.GasUsage
+                });
+                await db.SaveChangesAsync();
+            }
 
             if (mqtt != null)
             {
