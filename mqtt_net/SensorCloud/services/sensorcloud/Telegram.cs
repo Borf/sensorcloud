@@ -182,9 +182,15 @@ namespace SensorCloud.services.sensorcloud
                         valueName = "SUM(`value`)";
                         title = "Power ";
                         break;
+                    case "gas":
+                        config.min = 0;
+                        config.max = 1;
+                        type = "gas"; //ewww
+                        title = "Gas ";
+                        break;
                 }
 
-                switch(timeSpan)
+                switch (timeSpan)
                 {
                     case "day":
                         config.markerCount = 24;
@@ -192,7 +198,7 @@ namespace SensorCloud.services.sensorcloud
                         config.markerFunc = (e) => $"{(e * 4):00}:00";
                         //                        between = $"addtime(CURDATE(), '23:59:59') - interval {1 + timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
                         title += " day graph for " + DateTime.Now.Subtract(TimeSpan.FromDays(timeOffset)).ToString("dddd, dd MMMM yyyy") + " (" + timeOffset + " days ago)";
-                        if (value == "power")
+                        if (value == "power" || value == "gas")
                             table = ".hourly";
                         break;
                     case "week":
