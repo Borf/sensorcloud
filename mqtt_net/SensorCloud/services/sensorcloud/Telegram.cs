@@ -117,6 +117,8 @@ namespace SensorCloud.services.sensorcloud
                     IQueryable<datamodel.Node> dbNodes;
                     if (value == "temperature" || value == "humidity")
                         dbNodes = db.nodes.Where(n => n.sensors.Any(s => s.type == 1 || s.type == 2));
+                    else if(value == "power" || value == "gas")
+                        return "No nodes needed!";
                     else
                         return "No nodes found!";
 
@@ -181,12 +183,14 @@ namespace SensorCloud.services.sensorcloud
                         groupby = "GROUP BY `stamp`";
                         valueName = "SUM(`value`)";
                         title = "Power ";
+                        nodesIn = "0";
                         break;
                     case "gas":
                         config.min = 0;
                         config.max = 1;
-                        type = "gas"; //ewww
+                        type = "gas";
                         title = "Gas ";
+                        nodesIn = "0";
                         break;
                 }
 
