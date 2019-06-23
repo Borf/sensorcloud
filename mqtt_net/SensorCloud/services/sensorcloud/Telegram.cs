@@ -156,6 +156,8 @@ namespace SensorCloud.services.sensorcloud
                 var between = $"addtime(CURDATE(), '23:59:59') - interval {1+timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
                 var table = "";
                 var type = "TEMPERATURE";
+                var valueName = "`value`";
+                var groupby = "";
                 var config = new Graph.Config();
 
                 switch (value)
@@ -175,6 +177,9 @@ namespace SensorCloud.services.sensorcloud
                     case "power":
                         config.min = 0;
                         config.max = 1;
+                        type = "power1' OR `type` = 'power2"; //ewww
+                        groupby = "GROUP BY `stamp`";
+                        valueName = "SUM(`value`)";
                         title = "Power ";
                         break;
                 }
@@ -187,7 +192,8 @@ namespace SensorCloud.services.sensorcloud
                         config.markerFunc = (e) => $"{(e * 4):00}:00";
                         //                        between = $"addtime(CURDATE(), '23:59:59') - interval {1 + timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
                         title += " day graph for " + DateTime.Now.Subtract(TimeSpan.FromDays(timeOffset)).ToString("dddd, dd MMMM yyyy") + " (" + timeOffset + " days ago)";
-
+                        if (value == "power")
+                            table = ".hourly";
                         break;
                     case "week":
                         config.markerCount = 7*4;
@@ -207,7 +213,12 @@ namespace SensorCloud.services.sensorcloud
                         break;
                 }
 
-                string sql = $"SELECT * FROM `sensordata{table}` WHERE `type` = '{type}' AND `stamp` BETWEEN {between} AND `nodeid` IN ({nodesIn}) ORDER BY `stamp`";
+                string sql = $"SELECT `id`, `stamp`, `nodeid`, `type`, {valueName} as `value` " +
+                                $"FROM `sensordata{table}` " +
+                                $"WHERE (`type` = '{type}') AND `stamp` BETWEEN {between} AND " +
+                                $"`nodeid` IN ({nodesIn}) " +
+                                groupby +
+                                $"ORDER BY `stamp`";
                 Console.WriteLine(sql);
 
 #pragma warning disable EF1000 // Possible SQL injection vulnerability.

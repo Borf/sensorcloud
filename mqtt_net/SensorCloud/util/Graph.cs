@@ -34,7 +34,7 @@ namespace SensorCloud.util
         public static Bitmap buildImage(Config config)
         {
             var min = Math.Min(config.min, config.values.Min(e => e.Value.Min(ee => ee.Value)));
-            var max = Math.Max(config.max, config.values.Min(e => e.Value.Min(ee => ee.Value)));
+            var max = Math.Max(config.max, config.values.Max(e => e.Value.Max(ee => ee.Value)));
             float yFactor = (config.height - config.marginTop - config.marginBottom) / (max - min);
 
             Bitmap image = new Bitmap(config.width, config.height);

@@ -71,7 +71,10 @@ namespace SensorCloud.services.sensorcloud
                     await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.daily`   (`stamp`, `nodeid`, `type`, `value`)  SELECT DATE_FORMAT(`stamp`, '%Y-%m-%d') as `date`, `nodeid`, `type`, round(avg(`value`), 2) FROM `sensordata` WHERE `type` = 'TEMPERATURE' OR `type` = 'HUMIDITY' GROUP BY `nodeid`, `type`, `date`");
                     await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.weekly`  (`year`, `week`, `nodeid`, `type`, `value`)  SELECT year(`stamp`) as `year`, week(`stamp`) as `week`,`nodeid`, `type`, round(avg(`value`), 2) FROM `sensordata.daily` WHERE `type` = 'TEMPERATURE' OR `type` = 'HUMIDITY' GROUP BY `nodeid`, `type`, `stamp`, `year`, `week`");
                     await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.monthly` (`year`, `month`, `nodeid`, `type`, `value`)  SELECT year(`stamp`) as `year`, month(`stamp`) as `month`,`nodeid`, `type`, round(avg(`value`), 2) FROM `sensordata.daily` WHERE `type` = 'TEMPERATURE' OR `type` = 'HUMIDITY' GROUP BY `nodeid`, `type`, `year`, `month`");
-                    
+
+                    //aggregration for power/gas
+                    await db2.Database.ExecuteSqlCommandAsync("REPLACE INTO `sensordata.hourly`  (`stamp`, `nodeid`, `type`, `value`) SELECT DATE_FORMAT(`stamp`, '%Y-%m-%d %H:00:00') as `date`, `nodeid`, `type`, max(`value`) - min(`value`) as `value` FROM `sensordata` WHERE `type` = 'power1' OR `type` = 'power2' OR `type` = 'gas' GROUP BY `nodeid`, `type`, `date`");
+
                     Log("Done updating backlog");
                 }
 
