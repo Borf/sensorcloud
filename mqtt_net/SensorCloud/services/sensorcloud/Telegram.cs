@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SensorCloud.datamodel;
 using SensorCloud.services.telegram;
 using SensorCloud.util;
 using System;
@@ -130,7 +131,7 @@ namespace SensorCloud.services.sensorcloud
             telegram.AddRootMenu(sensorDataMenu);
         }
 
-        private Func<Reply> showSensorData(string timeSpan, int timeOffset, string value, List<datamodel.Node> nodes)
+        public Func<Reply> showSensorData(string timeSpan, int timeOffset, string value, List<datamodel.Node> nodes)
         {
             return () =>
             {
@@ -146,6 +147,7 @@ namespace SensorCloud.services.sensorcloud
                     Color.DarkOrange
                 };
                 var colorLookup = new Dictionary<int, Color>();
+                var title = "";
 
                 if (nodes.Count == 0)
                     return "No nodes";
@@ -162,15 +164,18 @@ namespace SensorCloud.services.sensorcloud
                         config.min = 0;
                         config.max = 30;
                         type = "TEMPERATURE";
+                        title = "Temperature ";
                         break;
                     case "humidity":
                         config.min = 0;
                         config.max = 100;
                         type = "HUMIDITY";
+                        title = "Humidity ";
                         break;
                     case "power":
                         config.min = 0;
                         config.max = 1;
+                        title = "Power ";
                         break;
                 }
 
@@ -179,15 +184,18 @@ namespace SensorCloud.services.sensorcloud
                     case "day":
                         config.markerCount = 24;
                         config.markerMod = 4;
-                        config.markerFunc = (e) => $"{e * 4:02}:00";
-//                        between = $"addtime(CURDATE(), '23:59:59') - interval {1 + timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
+                        config.markerFunc = (e) => $"{(e * 4):00}:00";
+                        //                        between = $"addtime(CURDATE(), '23:59:59') - interval {1 + timeOffset} day AND addtime(CURDATE(), '23:59:59') - interval {timeOffset} day";
+                        title += " day graph for " + DateTime.Now.Subtract(TimeSpan.FromDays(timeOffset)).ToString("dddd, dd MMMM yyyy") + " (" + timeOffset + " days ago)";
+
                         break;
                     case "week":
                         config.markerCount = 7*4;
                         config.markerMod = 4;
                         config.markerFunc = (e) => e < 7 ? ((DayOfWeek)e).ToString() : "";
                         table = ".hourly";
-                        between = $"addtime(SUBDATE(CURDATE(), WEEKDAY(CURDATE())), '23:59:59') - interval {timeOffset} week AND addtime(SUBDATE(CURDATE(), WEEKDAY(CURDATE())), '23:59:59') - interval {(timeOffset-1)} week";
+                        between = $"addtime(SUBDATE(CURDATE(), 1+WEEKDAY(CURDATE())), '00:00:00') - interval {timeOffset} week AND addtime(SUBDATE(CURDATE(), 1+WEEKDAY(CURDATE())), '00:00:00') - interval {(timeOffset-1)} week";
+                        title += " week graph for " + timeOffset + " weeks ago";
                         break;
                     case "month":
                         config.markerCount = 31; //TODO
@@ -195,13 +203,18 @@ namespace SensorCloud.services.sensorcloud
                         config.markerFunc = (e) => $"{e*7+1}";
                         table = ".daily";
                         between = $"addtime(SUBDATE(CURDATE(), DAYOFMONTH(CURDATE())), '23:59:59') - interval {timeOffset} month AND addtime(SUBDATE(CURDATE(), DAYOFMONTH(CURDATE())), '23:59:59') - interval {(timeOffset - 1)} month";
+                        title += " month graph for " + DateTime.Now.AddMonths(-timeOffset).ToString("MMMM");
                         break;
                 }
 
-                string sql = $"SELECT * FROM `sensordata{table}` WHERE `type` = '{type}' AND `stamp` BETWEEN {between} AND `nodeid` IN ({nodesIn})";
+                string sql = $"SELECT * FROM `sensordata{table}` WHERE `type` = '{type}' AND `stamp` BETWEEN {between} AND `nodeid` IN ({nodesIn}) ORDER BY `stamp`";
                 Console.WriteLine(sql);
 
-                var sensorData = db.sensordata.FromSql(sql).OrderBy(d => d.stamp).ToList();
+#pragma warning disable EF1000 // Possible SQL injection vulnerability.
+                List<SensorData> sensorData;
+                using (var db = new SensorCloudContext(configuration))
+                    sensorData = db.sensordata.FromSql(sql).OrderBy(d => d.stamp).ToList();
+#pragma warning restore EF1000 // Possible SQL injection vulnerability.
                 if (sensorData.Count == 0)
                     return "No data found";
 
@@ -225,7 +238,7 @@ namespace SensorCloud.services.sensorcloud
 
                 return new Reply()
                 {
-                    message = timeSpan + " graph for ",
+                    message = title,
                     image = image
                 };
             };

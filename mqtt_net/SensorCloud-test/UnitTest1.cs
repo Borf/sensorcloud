@@ -1,0 +1,32 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.AspNetCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+using System.Collections.Generic;
+using SensorCloud.datamodel;
+using System.IO;
+
+namespace SensorCloud_test
+{
+    [TestClass]
+    public class UnitTest1
+    {
+        [TestMethod]
+        public void TestMethod1()
+        {
+            ConfigurationBuilder builder = new ConfigurationBuilder();
+            builder.AddJsonFile(Path.GetFullPath("../../../../appsettings.json")); //ewww
+
+            IConfiguration configuration = builder.Build();
+            
+
+            var service = new SensorCloud.services.sensorcloud.Service(null, configuration);
+            
+            var bla = service.showSensorData("week", 0, "temperature", new List<Node>() { new Node() { id = 6 } });
+            var reply = bla.Invoke();
+            reply.image.Save("test.png");
+            
+        }
+    }
+
+}

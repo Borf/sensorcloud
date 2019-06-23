@@ -78,8 +78,21 @@ namespace SensorCloud.util
                 //draw graph
                 foreach (var item in config.values)
                 {
-                    graphics.DrawLines(new Pen(item.Key, 1),
-                        item.Value.Select(d => new PointF(config.marginLeft + tickWidth * d.Key, config.height - config.marginBottom - (float)(d.Value - min) * yFactor)).ToArray());
+                    PointF lastPoint = new PointF(-1,-1);
+                    foreach (var d in item.Value)
+                    {
+                        PointF point = new PointF(config.marginLeft + tickWidth * d.Key, config.height - config.marginBottom - (float)(d.Value - min) * yFactor);
+                        if (lastPoint.X != -1)
+                            if(point.X - lastPoint.X < tickWidth * 3)
+                                graphics.DrawLines(new Pen(item.Key, 1),
+                                    new PointF[]
+                                    {
+                                        lastPoint,
+                                        point
+                                    }
+                                );
+                        lastPoint = point;
+                    }
                 }
 
 

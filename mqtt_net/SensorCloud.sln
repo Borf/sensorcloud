@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NNTP", "NNTP\NNTP.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotNet", "SpotNet\SpotNet.csproj", "{1A3ECE68-FD13-4DB0-9133-FCB7EC243C5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorCloud-test", "SensorCloud-test\SensorCloud-test.csproj", "{03C592F6-8BD3-43C9-9291-9DADB6FACE24}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{1A3ECE68-FD13-4DB0-9133-FCB7EC243C5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A3ECE68-FD13-4DB0-9133-FCB7EC243C5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A3ECE68-FD13-4DB0-9133-FCB7EC243C5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03C592F6-8BD3-43C9-9291-9DADB6FACE24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03C592F6-8BD3-43C9-9291-9DADB6FACE24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03C592F6-8BD3-43C9-9291-9DADB6FACE24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03C592F6-8BD3-43C9-9291-9DADB6FACE24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

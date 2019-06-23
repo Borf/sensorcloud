@@ -26,8 +26,8 @@ namespace SensorCloud.services.sensorcloud
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             mqtt = GetService<mqtt.Service>();
-            db = new SensorCloudContext(configuration);
-
+            db = new SensorCloudContext(configuration); //TODO: move to a construction using 'using' keyword
+            
             mqtt.On("boot/whoami$", async (match, message) =>
             {
                 dynamic data = JObject.Parse(message);
