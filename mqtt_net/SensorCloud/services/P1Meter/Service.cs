@@ -37,8 +37,9 @@ namespace SensorCloud.services.P1Meter
             {
                 Dictionary<DateTime, DataPacket> measurementLookup = new Dictionary<DateTime, DataPacket>();
                 db.sensordata
-                    .Where(d => d.nodeid == 0 && (d.type == "power1" || d.type == "power2" || d.type == "gas") && d.stamp.AddDays(1) > DateTime.Now)
+                    .Where(d => d.nodeid == 0 && (d.type == "power1" || d.type == "power2" || d.type == "gas"))
                     .OrderByDescending(d => d.id)
+                    .Take(10000)
                     .ToList().ForEach(m =>
                     {
                         if (!measurementLookup.ContainsKey(m.stamp))
