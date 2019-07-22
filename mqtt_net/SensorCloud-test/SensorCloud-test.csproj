@@ -5,6 +5,8 @@
     <RootNamespace>SensorCloud_test</RootNamespace>
 
     <IsPackable>false</IsPackable>
+
+    <StartupObject>SensorCloud_test.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

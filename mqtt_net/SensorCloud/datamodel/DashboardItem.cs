@@ -10,8 +10,9 @@ namespace SensorCloud.datamodel
 		public int cardid { get; set; }
 		public string name { get; set; }
 		public string type { get; set; }
-		public string parameter { get; set; }
-		public DateTime time { get; set; }
+        public string parameter { get; set; }
+        public string displaytype { get; set; }
+        public DateTime time { get; set; }
 		public string value { get; set; }
 
         [ForeignKey("cardid")]

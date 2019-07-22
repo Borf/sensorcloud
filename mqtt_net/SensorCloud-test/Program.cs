@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace SensorCloud_test
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            new UnitTest1().TestMethod1();
+            System.Diagnostics.Process.Start(@"c:\Program Files\IrfanView\i_view64.exe", "test.png");
+        }
+    }
+}

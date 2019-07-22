@@ -207,8 +207,8 @@ namespace SensorCloud.services.sensorcloud
                         break;
                     case "week":
                         config.markerCount = 7*4;
-                        config.markerMod = 4;
-                        config.markerFunc = (e) => e < 7 ? ((DayOfWeek)e).ToString() : "";
+                        config.markerMod = 4;                        
+                        config.markerFunc = (e) => e < 7 ? (((DayOfWeek)e).ToString() + " " + DateTime.Now.Subtract(TimeSpan.FromDays((int)DateTime.Now.DayOfWeek-e + 7 * timeOffset)).Day + " - " + DateTime.Now.Subtract(TimeSpan.FromDays((int)DateTime.Now.DayOfWeek-e+7*timeOffset)).Month) : "";
                         table = ".hourly";
                         between = $"addtime(SUBDATE(CURDATE(), 1+WEEKDAY(CURDATE())), '00:00:00') - interval {timeOffset} week AND addtime(SUBDATE(CURDATE(), 1+WEEKDAY(CURDATE())), '00:00:00') - interval {(timeOffset-1)} week";
                         title += " week graph for " + timeOffset + " weeks ago";

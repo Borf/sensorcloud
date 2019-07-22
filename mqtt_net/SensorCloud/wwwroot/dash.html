@@ -1,6 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
-
+<!-- TODO:
+    Graphs for various info
+    disk usage, CPU usage as tiny circle gauges
+    last doorbell screenshot
+    camera views
+    -->
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -15,7 +20,32 @@
     </style>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+    <script>
+Chart.pluginService.register({
+  beforeDraw: function(chart) {
+    var width = chart.chart.width,
+        height = chart.chart.height,
+        ctx = chart.chart.ctx;
+    ctx.restore();
+    var fontSize = (height / 114).toFixed(2);
+    ctx.font = fontSize + "em sans-serif";
+    ctx.textBaseline = "bottom";
+    ctx.fillStyle = '#ffffff';
 
+        var lines = chart.options.title.text.split("\n");
+        var textY = height - 20 * fontSize * (lines.length - 1);
+        for (var t in lines) {
+            var text = lines[t];
+            var textX = Math.round((width - ctx.measureText(text).width) / 2);
+
+            ctx.fillText(text, textX, Math.round(textY));
+            textY += fontSize * 20;
+        }
+    ctx.save();
+  }
+});
+    </script>
     <style>
         body
         {
@@ -64,6 +94,7 @@
             max-width: 100%;
             max-height: 100%;
         }
+
     </style>
 </head>
 

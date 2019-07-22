@@ -22,7 +22,7 @@ namespace SensorCloud_test
 
             var service = new SensorCloud.services.sensorcloud.Service(null, configuration);
             
-            var bla = service.showSensorData("day", 0, "power", new List<Node>() { new Node() { id = 0 } });
+            var bla = service.showSensorData("week", 1, "power", new List<Node>() { new Node() { id = 0 } });
             var reply = bla.Invoke();
             reply.image.Save("test.png");
             

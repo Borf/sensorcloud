@@ -35,13 +35,16 @@ namespace SensorCloud.util
         {
             var min = Math.Min(config.min, config.values.Min(e => e.Value.Min(ee => ee.Value)));
             var max = Math.Max(config.max, config.values.Max(e => e.Value.Max(ee => ee.Value)));
+
+            max = (float)Math.Ceiling(max * 10) / 10.0f;
+
             float yFactor = (config.height - config.marginTop - config.marginBottom) / (max - min);
 
             Bitmap image = new Bitmap(config.width, config.height);
             using (var fontBottom = new Font(new FontFamily("Tahoma"), 10))
             using (var graphics = Graphics.FromImage(image))
             {
-                graphics.FillRectangle(Brushes.Transparent, 0, 0, config.width, config.height);
+                graphics.FillRectangle(Brushes.White, 0, 0, config.width, config.height);
 
                 //draw bottom axis details
                 var tickWidth = (config.width - config.marginLeft - config.marginRight) / (float)config.markerCount;
@@ -83,7 +86,7 @@ namespace SensorCloud.util
                     {
                         PointF point = new PointF(config.marginLeft + tickWidth * d.Key, config.height - config.marginBottom - (float)(d.Value - min) * yFactor);
                         if (lastPoint.X != -1)
-                            if(point.X - lastPoint.X < tickWidth * 3)
+                            if(point.X > lastPoint.X)
                                 graphics.DrawLines(new Pen(item.Key, 1),
                                     new PointF[]
                                     {
