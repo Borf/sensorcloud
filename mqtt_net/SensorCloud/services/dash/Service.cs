@@ -16,9 +16,11 @@ namespace SensorCloud.services.dash
         private SensorCloudContext db;
         private mqtt.Service mqtt;
         private IConfiguration configuration;
+        private Config config;
 
-        public Service(IServiceProvider services, IConfiguration configuration) : base(services)
+        public Service(IServiceProvider services, IConfiguration configuration, Config config) : base(services)
         {
+            this.config = config;
             this.configuration = configuration;
         }
 
@@ -51,6 +53,7 @@ namespace SensorCloud.services.dash
                         case "get": await handleGetAsync(item); break;
                         case "mqtt": HandleMqtt(item); break;
                         case "http": await handleHttpAsync(item); break;
+                        case "sshcommand": handleSshCommand(item); break;
                         case "socket":
                         case "sensor":
 
