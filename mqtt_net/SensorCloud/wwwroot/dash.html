@@ -34,13 +34,13 @@ Chart.pluginService.register({
     ctx.fillStyle = '#ffffff';
 
         var lines = chart.options.title.text.split("\n");
-        var textY = height - 20 * fontSize * (lines.length - 1);
+        var textY = height - 10 * fontSize * (lines.length - 1);
         for (var t in lines) {
             var text = lines[t];
             var textX = Math.round((width - ctx.measureText(text).width) / 2);
 
             ctx.fillText(text, textX, Math.round(textY));
-            textY += fontSize * 20;
+            textY += fontSize * 10;
         }
     ctx.save();
   }
