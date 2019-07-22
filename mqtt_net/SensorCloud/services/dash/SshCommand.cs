@@ -13,14 +13,20 @@ namespace SensorCloud.services.dash
     {
         public void handleSshCommand(DashboardItem item)
         {
-            var options = item.parameter.Split("|", 2);
-            var host = config.hosts[options[0]];
-            using (var client = new SshClient(host.Host, host.User, Encoding.UTF8.GetString(Convert.FromBase64String(host.Pass))))
+            try
             {
-                client.Connect();
-                string ret = client.RunCommand(options[1]).Execute().Trim();
-                item.value = ret;
-                client.Disconnect();
+                var options = item.parameter.Split("|", 2);
+                var host = config.hosts[options[0]];
+                using (var client = new SshClient(host.Host, host.User, Encoding.UTF8.GetString(Convert.FromBase64String(host.Pass))))
+                {
+                    client.Connect();
+                    string ret = client.RunCommand(options[1]).Execute().Trim();
+                    item.value = ret;
+                    client.Disconnect();
+                }
+            }catch(Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
     }
