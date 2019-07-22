@@ -86,7 +86,7 @@ function updateCard(cardIndex)
                                 data: {
                                     datasets: [{
                                         data: [v, 100-v],
-                                        backgroundColor: ['rgb('+v+','+(100-v)+',0)', 'rgba(0,0,0,0)']
+                                        backgroundColor: ['rgb('+2*v+','+(200-2*v)+',0)', 'rgba(0,0,0,0)']
                                     }],
                                     labels: [data[i].name, 'free']
                                 },
@@ -128,8 +128,11 @@ function updateCard(cardIndex)
 				else
                 {
                     if (data[i].displaytype == "circle") {
-
-
+                        var v = parseInt(data[i].value);
+                        card.items[found].chart.data.datasets[0].data[0] = v;
+                        card.items[found].chart.data.datasets[0].data[1] = 100 - v;
+                        card.items[found].chart.data.datasets[0].backgroundColor[0] = 'rgb(' + 2 * v + ',' + (200 - 2 * v) + ',0)';
+                        card.items[found].chart.update();
                     }
                     else {
                         card.items[found].badge.removeClass("badge-danger");
