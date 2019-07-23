@@ -31,7 +31,6 @@ namespace SensorCloud.services
                 Config config = new Config();
                 configuration.GetSection(configSectionName).Bind(config);
                 services.AddSingleton<Config>(config);
-
                 services.AddSingleton<IHostedService, Service>();
                 services.AddSingleton<Service>(sp => sp.GetServices<IHostedService>().ToList().Find(x => x.GetType() == typeof(Service)) as Service);
             }

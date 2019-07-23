@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -56,6 +57,9 @@ namespace api
             
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddDbContext<SensorCloudContext>();
+            services.AddSingleton<IHostedService, SensorCloud.services.rulemanager.Service>();
+            services.AddSingleton<SensorCloud.services.rulemanager.Service>(sp => sp.GetServices<IHostedService>().ToList().Find(x => x.GetType() == typeof(SensorCloud.services.rulemanager.Service)) as SensorCloud.services.rulemanager.Service);
+
 
             foreach (var s in ConfigServices.services)
                 s.init(services, Configuration);

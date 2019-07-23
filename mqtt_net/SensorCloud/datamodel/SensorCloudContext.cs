@@ -8,15 +8,16 @@ namespace SensorCloud.datamodel
 {
 	public class SensorCloudContext : DbContext
 	{
-        public static readonly LoggerFactory MyLoggerFactory = new LoggerFactory(new[] { new ConsoleLoggerProvider((_, __) => true, true) });
+        //public static readonly LoggerFactory MyLoggerFactory = new LoggerFactory(new[] { new ConsoleLoggerProvider((_, __) => true, true) });
 
         private Config config;
 
         public DbSet<Sensor> sensors { get; set; }
 		public DbSet<Node> nodes { get; set; }
 		public DbSet<Room> rooms { get; set; }
-		public DbSet<Ping> pings { get; set; }
-		public DbSet<SensorData> sensordata { get; set; }
+        public DbSet<Ping> pings { get; set; }
+        public DbSet<Rule> rules { get; set; }
+        public DbSet<SensorData> sensordata { get; set; }
         public DbSet<DashboardItem> dashboardItems { get; set; }
         public DbSet<DashboardCard> dashboardCards { get; set; }
 
@@ -73,6 +74,11 @@ namespace SensorCloud.datamodel
 			{
 				entity.HasKey(e => e.id);
 			});
+
+            modelBuilder.Entity<Rule>(entity =>
+            {
+                entity.HasKey(e => e.id);
+            });
 
             modelBuilder.Entity<DashboardCard>(entity =>
             {

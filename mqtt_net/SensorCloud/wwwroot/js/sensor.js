@@ -44,14 +44,14 @@ $(function() {
 					{
 						var memclass = "";
 						console.log(data[i].heapspace);
-						if(!data[i].heapspace)
-							memclass = "danger";
-						else if(data[i].heapspace < 20000)
-							memclass = "warning";
-						else if(data[i].heapspace < 15000)
-							memclass = "fatal";
-						else
-							memclass = "success"
+                        if (!data[i].heapspace)
+                            memclass = "danger";
+                        else if (data[i].heapspace < 20000)
+                            memclass = "warning";
+                        else if (data[i].heapspace < 15000)
+                            memclass = "fatal";
+                        else
+                            memclass = "success";
 
 
 						if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
@@ -261,13 +261,22 @@ $(function() {
 				}
 			});
 		});
-	});
+    });
+
+    
 
 
-	if(location.hash == "#nodes")		$("a#btnNodes").click();
-	else if(location.hash == "#sensors")$("a#btnSensors").click();
-	else if(location.hash == "#map")	$("a#btnMap").click();
-	else								$("a#btnDashboard").click();
+    $("a#btnRules").click(function () {
+        setPage("rules.html").then(function () {
+
+        });
+    });
+
+	if(location.hash == "#nodes")		    $("a#btnNodes").click();
+    else if (location.hash == "#sensors")   $("a#btnSensors").click();
+	else if (location.hash == "#rules")     $("a#btnRules").click();
+	else if(location.hash == "#map")	    $("a#btnMap").click();
+	else								    $("a#btnDashboard").click();
 
 	function setPage(url)
 	{

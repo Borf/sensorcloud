@@ -1,0 +1,89 @@
+<nav class="navbar">
+    <form class="form-inline">
+        <button class="btn" type="button" id="btnRulesNew">New</button>
+        <button class="btn" type="button" id="btnRulesSave">Save</button>
+        <button class="btn" type="button" id="btnRulesLoad">Load</button>
+        <input id="rulesName" value="telegram test" />
+        <select id="rulesNames"></select>
+    </form>
+</nav>
+
+<div id="rete" style=""></div>
+
+<script>
+    const container = document.querySelector('#rete');
+    const editor = new Rete.NodeEditor('demo@0.1.0', container);
+    editor.use(ConnectionPlugin.default);
+    editor.use(VueRenderPlugin.default);
+    editor.use(ContextMenuPlugin.default);
+    
+    const numComponent = new NumComponent();
+    editor.register(numComponent);
+    editor.register(new LogComponent());
+    editor.register(new TextComponent());
+    editor.register(new TelegramMessageComponent());
+    editor.register(new TelegramMessageReceivedComponent());
+    editor.register(new MqttPublishComponent());
+    editor.register(new MqttSubscribeComponent());
+    editor.view.resize();
+
+
+    $("button#btnRulesLoad").click(function () {
+        $.ajax({
+            url: apiurl + "rules/:" + $("#rulesName").val(),
+			dataType: 'json',
+			success : function(data)
+            {
+                editor.fromJSON(JSON.parse(data.data));
+			},
+			error : function(data, bla)
+			{
+				alert("Error loading rule:\n" + data.responseText);
+			}
+		});
+    });
+    $("button#btnRulesSave").click(function () {
+        $.ajax({
+            url: apiurl + "rules/update/:" + $("#rulesName").val(),
+		    method: "post",
+		    data: JSON.stringify({ 'data' : JSON.stringify(editor.toJSON()) }),
+		    contentType: "application/json",
+		    dataType: "json",
+			success : function(data)
+            {
+                updateNames();
+			},
+			error : function(data, bla)
+			{
+				alert("Error loading rule:\n" + data.responseText);
+			}
+		});
+    });
+
+    $("#rulesNames").change(function () {
+        $("#rulesName").val($(this).val());
+        $("button#btnRulesLoad").click();
+    })
+
+    function updateNames()
+    {
+        $.ajax({
+            url: apiurl + "rules",
+			dataType: 'json',
+			success : function(data)
+            {
+                var names = $("#rulesNames");
+                names.empty();
+                for (var i in data) {
+                    names.append('<option value="'+data[i].name+'">'+data[i].name+'</option>')
+                }
+			},
+			error : function(data, bla)
+			{
+				alert("Error loading rule:\n" + data.responseText);
+			}
+		});
+    }
+    updateNames();
+
+</script>

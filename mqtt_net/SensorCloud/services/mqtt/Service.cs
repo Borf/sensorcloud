@@ -116,6 +116,14 @@ namespace SensorCloud.services.mqtt
             if (lastValues.ContainsKey(e.ApplicationMessage.Topic))
                 lastValues[e.ApplicationMessage.Topic] = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
 
+            GetService<rulemanager.Service>().Trigger("Mqtt Subscribe", new Dictionary<string, object>()
+            {
+                { "topic" , e.ApplicationMessage.Topic },
+                { "payload" , Encoding.UTF8.GetString(e.ApplicationMessage.Payload) },
+
+            });
+
+
             bool handled = false;
             foreach (var item in callbacks.ToList())
             {

@@ -38,6 +38,10 @@ namespace SensorCloud.services.telegram
 
         private async void OnMessage(object sender, MessageEventArgs e)
         {
+            GetService<rulemanager.Service>().Trigger("Receive Telegram Message", new Dictionary<string, object>()
+            {
+                {"text" ,e.Message.Text }
+            });
             foreach (var item in currentMenu.SubMenus)
             {
                 if (e.Message.Text == item.Title)
@@ -108,6 +112,8 @@ namespace SensorCloud.services.telegram
 
         public async Task SendMessageAsync(string message, bool showNotification = true)
         {
+            if (botClient == null)
+                return;
             List<List<KeyboardButton>> buttons = currentMenu.BuildMenu();
 
 
