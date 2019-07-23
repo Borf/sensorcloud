@@ -51,10 +51,10 @@ namespace SensorCloud.services.P1Meter
                         if (m.type == "power2")
                             measurementLookup[m.stamp].PowerConsumptionTariff2 = (Decimal)m.value;
                     });
-                measurementLookup.Keys.ToList().ForEach(k => measurements.Add(new Measurement()
+                measurementLookup.Where(k => k.Value.IsValid).ToList().ForEach(k => measurements.Add(new Measurement()
                 {
-                    time = k,
-                    data = measurementLookup[k]
+                    time = k.Key,
+                    data = k.Value
                 }));
                 measurements.Sort((m1,m2) => m1.time.CompareTo(m2.time));
             }

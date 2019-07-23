@@ -9,7 +9,7 @@ using System.IO;
 namespace SensorCloud_test
 {
     [TestClass]
-    public class UnitTest1
+    public class GraphTest
     {
         [TestMethod]
         public void TestMethod1()
