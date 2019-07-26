@@ -275,7 +275,8 @@ $(function() {
 	if(location.hash == "#nodes")		    $("a#btnNodes").click();
     else if (location.hash == "#sensors")   $("a#btnSensors").click();
 	else if (location.hash == "#rules")     $("a#btnRules").click();
-	else if(location.hash == "#map")	    $("a#btnMap").click();
+    else if (location.hash == "#map") $("a#btnMap").click();
+    else if (location.hash == "#nodeedit") setPage("nodeedit.html").then(function () {});
 	else								    $("a#btnDashboard").click();
 
 	function setPage(url)
@@ -284,7 +285,7 @@ $(function() {
 			url : url,
 			success : function(data, status, xhr)
 			{
-				$("div#page-wrapper").html(data);
+				$("main").html(data);
 			}
 		});
 	}

@@ -1,0 +1,86 @@
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Node Editor</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">New</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Save</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">Load</button>
+            <input id="rulesName" value="telegram test" />
+            <select id="rulesNames"></select>
+        </div>
+    </div>
+</div>
+<style>
+    .node {
+        position: absolute;
+        cursor: move;
+        z-index: 1;
+    }
+    .node .outputsocket {
+        background-color: green;
+        border: 1px solid black;
+        border-radius: 12px;
+        height: 24px;
+        width: 24px;
+        float: right;
+        margin-right: -32px;
+    }
+    .node .inputsocket {
+        background-color: green;
+        border: 1px solid black;
+        border-radius: 12px;
+        height: 24px;
+        width: 24px;
+        float: left;
+        margin-left: -32px;
+        margin-top: 26px;
+    }
+    .connection {
+        overflow: visible !important;
+        position: absolute;
+        z-index: 0;
+        pointer-events: none;
+    }
+    .connection .main-path {
+        fill: none;
+        stroke-width: 5px;
+        stroke: steelblue;
+    }
+
+</style>
+<div id="editor" class="card bg-light" style="height: 800px">
+    <div class="node card bg-dark text-white" style="left: 100px; top: 5px;">
+        <div class="card-header">Text Value</div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-dark">Value<br /><input class="" /><div class="outputsocket"></div></li>
+            <li class="list-group-item bg-dark">Value<br /><input class="" /><div class="outputsocket"></div></li>
+            <li class="list-group-item bg-dark"><div class="inputsocket"></div>Value<br /><input class="" /></li>
+        </ul>
+    </div>
+
+    <svg class="connection"><path class="main-path" d="M 50 50 C 100 50 50 300 100 300"></path></svg>
+
+
+    <div class="node card bg-dark text-white" style="left: 500px; top: 15px;">
+        <div class="card-header">Text Value</div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-dark">Value<br /><input class="" /><div class="outputsocket"></div></li>
+            <li class="list-group-item bg-dark">Value<br /><input class="" /><div class="outputsocket"></div></li>
+            <li class="list-group-item bg-dark"><div class="inputsocket"></div>Value<br /><input class="" /></li>
+        </ul>
+    </div>
+
+</div>
+
+    <script>
+        var editor = new NodeEditor($("#editor"));
+
+        editor.registerComponent(new NumberComponent());
+        editor.registerComponent(new AddComponent());
+
+//        editor.fromJSON({ "id": "demo@0.1.0", "nodes": { "1": { "id": 1, "data": {}, "inputs": {}, "outputs": { "num": { "connections": [] } }, "position": [172, 125], "name": "Number" } } });
+        editor.fromJSON({ 'id': 'demo@0.1.0', 'nodes': { '1': { 'id': 1, 'data': { 'num': 2 }, 'inputs': {}, 'outputs': { 'num': { 'connections': [{ 'node': 3, 'input': 'num', 'data': {} }] } }, 'position': [80, 200], 'name': 'Number' }, '2': { 'id': 2, 'data': { 'num': 0 }, 'inputs': {}, 'outputs': { 'num': { 'connections': [{ 'node': 3, 'input': 'num2', 'data': {} }] } }, 'position': [80, 400], 'name': 'Number' }, '3': { 'id': 3, 'data': {}, 'inputs': { 'num': { 'connections': [{ 'node': 1, 'output': 'num', 'data': {} }] }, 'num2': { 'connections': [{ 'node': 2, 'output': 'num', 'data': {} }] } }, 'outputs': { 'num': { 'connections': [] } }, 'position': [500, 240], 'name': 'Add' } }, 'comments': [] });
+
+
+
+    </script>

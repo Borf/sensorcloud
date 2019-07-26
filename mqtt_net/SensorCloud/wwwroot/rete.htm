@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+</head>
+<body>
+
+    <div id="rete" style="width: 1000px; height: 500px;"></div>
+</body>
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/raphael-min.js"></script>
+<script src="js/morris.min.js"></script>
+<script src="js/sb-admin-2.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rete@1.4.1-rc.1/build/rete.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rete-vue-render-plugin@0.4.0/build/vue-render-plugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rete-connection-plugin@0.8.1/build/connection-plugin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/rete-context-menu-plugin@0.4.1/build/context-menu-plugin.min.js"></script>
+<script>
+    const numSocket = new Rete.Socket('Number value');
+
+var VueNumControl = {
+    props: ['readonly', 'emitter', 'ikey', 'getData', 'putData'],
+    template: '<input type="number" :readonly="readonly" :value="value" @input="change($event)" @dblclick.stop="" @pointermove.stop=""/>',
+    data() {
+        return {
+            value: 0,
+        }
+    },
+    methods: {
+        change(e) {
+            this.value = +e.target.value;
+            this.update();
+        },
+        update() {
+            if (this.ikey)
+                this.putData(this.ikey, this.value);
+            this.emitter.trigger('process');
+        }
+    },
+    mounted() {
+        this.value = this.getData(this.ikey);
+    }
+}
+
+class NumControl extends Rete.Control {
+
+    constructor(emitter, key, readonly) {
+        super(key);
+        this.component = {};
+        this.props = { emitter, ikey: key, readonly };
+    }
+
+    setValue(val) {
+        this.vueContext.value = val;
+    }
+    }
+
+    class NumComponent extends Rete.Component {
+
+    constructor() {
+        super("Number");
+    }
+
+    builder(node) {
+        var out1 = new Rete.Output('num', "Number", numSocket);
+
+        return node.addControl(new NumControl(this.editor, 'num')).addOutput(out1);
+    }
+
+    worker(node, inputs, outputs) {
+        outputs['num'] = node.data.num;
+    }
+    }
+
+    const container = document.querySelector('#rete');
+    const editor = new Rete.NodeEditor('demo@0.1.0', container);
+    editor.use(ConnectionPlugin.default);
+    editor.use(VueRenderPlugin.default);
+    editor.use(ContextMenuPlugin.default);
+    
+    const numComponent = new NumComponent();
+    editor.register(numComponent);
+    editor.fromJSON({"id":"demo@0.1.0","nodes":{"1":{"id":1,"data":{},"inputs":{},"outputs":{"num":{"connections":[]}},"position":[172,125],"name":"Number"}}});
+    editor.view.resize();
+
+
+</script>
+
+</html>
