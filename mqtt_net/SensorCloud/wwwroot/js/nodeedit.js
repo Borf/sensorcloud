@@ -154,7 +154,12 @@ class Node {
                     foundInput.connection = null;
                 }
 
-                editor.buildConnection(node, foundInput, foundNode, output);
+                if (output.type.name != foundInput.type.name) {
+                    alert("Incompatible types");
+                    return;
+                }
+
+                editor.buildConnection(foundNode, foundInput, node, output);
             }
             $('body')
                 .on('mouseup', handle_mouseup)
@@ -166,9 +171,61 @@ class Node {
         editor.el.append(this.el.card);
     }
 
+    toJSON() {
+        var outs = {};
+        for (var o in this.outputs) {
+            for (var c in this.outputs[o].controls) {
+                this.data[this.outputs[o].name] = this.outputs[o].controls[c].value;
+            }
+            var out = { connections: [] };
+            for (var c in this.outputs[o].connections)
+                out.connections.push({
+                    node: this.outputs[o].connections[c].node,
+                    input: this.outputs[o].connections[c].input,
+                    data: {}
+                });
+            outs[this.outputs[o].name] = out;
+        }
+        var ins = {};
+        for (var i in this.inputs) {
+            for (var c in this.inputs[i].controls) {
+                this.data[this.inputs[i].name] = this.inputs[i].controls[c].value;
+            }
+            var in_ = { connections: [] };
+            if(this.inputs[i].connection)
+                in_.connections.push({
+                    node: this.inputs[i].connection.node,
+                    output: this.inputs[i].connection.output,
+                    data: {}
+                });
+            ins[this.inputs[i].name] = in_;
+        }
+
+
+        return {
+            id: this.id,
+            data: this.data,
+            inputs: ins,
+            outputs: outs,
+            position: [parseInt(this.el.card.css("left")), parseInt(this.el.card.css("top"))],
+            name: this.component.name,
+        }
+    }
 
     handle_dragnode(e) {
         var node = e.data;
+        if (editor.selectedNode != null) {
+            editor.selectedNode.el.card.removeClass("bg-primary");
+            editor.selectedNode.el.card.addClass("bg-dark");
+            editor.selectedNode.el.card.find(".bg-primary").addClass("bg-dark");
+            editor.selectedNode.el.card.find(".bg-primary").removeClass("bg-primary");
+        }
+        editor.selectedNode = node;
+        editor.selectedNode.el.card.addClass("bg-primary");
+        editor.selectedNode.el.card.removeClass("bg-dark");
+        editor.selectedNode.el.card.find(".bg-dark").addClass("bg-primary");
+        editor.selectedNode.el.card.find(".bg-dark").removeClass("bg-dark");
+
         window.my_dragging = {};
         my_dragging.pageX0 = e.pageX;
         my_dragging.pageY0 = e.pageY;
@@ -194,22 +251,34 @@ class Node {
 
     addOutput(output, data) {
         this.outputs.push(output);
-        output.el = $(`<li class="list-group-item bg-dark">` + output.title + `<br /></li>`);
+        output.el = $(`<li class="list-group-item bg-dark">` + output.title + `</li>`);
         output.control = output.build();
-        output.el.append(output.control);
-        if(data && data.data && data.data[output.name])
+        if (output.control) {
+            output.el.append($("<br />"));
+            output.el.append(output.control);
+        }
+
+        if (data && data.data && data.data[output.name] != null) {
             output.value = data.data[output.name];
-        output.el.append($(`<div class="outputsocket"></div>`));
+            this.data[output.name] = data.data[output.name];
+        }
+
+        output.el.append($(`<div class="outputsocket socket-` + output.type.name.toLowerCase() +`"></div>`));
         this.el.connections.append(output.el);
         return this;
     }
     addInput(input, data) {
         this.inputs.push(input);
-        input.el = $(`<li class="list-group-item bg-dark"><div class="inputsocket"></div>` + input.title + `<br /></li>`);
+        input.el = $(`<li class="list-group-item bg-dark"><div class="inputsocket socket-` + input.type.name.toLowerCase()+`"></div>` + input.title + `</li>`);
         input.control = input.build();
-        input.el.append(input.control);
-        if(data && data.data && data.data[input.name])
+        if (input.control) {
+            input.el.append($("<br />"));
+            input.el.append(input.control);
+        }
+        if (data && data.data && data.data[input.name]) {
             input.value = data.data[input.name];
+            this.data[input.name] = data.data[input.name];
+        }
         this.el.connections.append(input.el);
         return this;
     }
@@ -218,9 +287,10 @@ class Node {
     updateConnectionPositions() {
         for (var i in this.inputs) {
             var input = this.inputs[i];
-            input.connection.path.setAttributeNS(null, "d", this.editor.createPathString(
-                this.editor.findSocketPos(input.connection.out.el.find(".outputsocket")),
-                this.editor.findSocketPos(input.el.find(".inputsocket"))));
+            if (input.connection)
+                input.connection.path.setAttributeNS(null, "d", this.editor.createPathString(
+                    this.editor.findSocketPos(input.connection.out.el.find(".outputsocket")),
+                    this.editor.findSocketPos(input.el.find(".inputsocket"))));
         }
 
         for (var o in this.outputs) {
@@ -245,6 +315,8 @@ class Node {
                 for (var i in editor.nodes[con.node].inputs)
                     if (editor.nodes[con.node].inputs[i].name == con.input)
                         input = editor.nodes[con.node].inputs[i];
+                if (input == null)
+                    console.log("Could not find input " + con.input + " in node " + con.node);
                 editor.buildConnection(editor.nodes[con.node], input, this, output);
             }
         }
@@ -256,13 +328,72 @@ class Node {
 class NodeEditor {
     nodes = {}
     components = {}
+    selectedNode = null;
+    componentList = null;
+    el = null;
+    componentCategories = {};
 
-    constructor(element) {
+    constructor(element, componentList) {
         this.el = element;
+        this.el.css("overflow: hidden");
+        this.componentList = componentList;
+        var editor = this;
+        element.keydown(e => {
+            if (e.keyCode == 46) //delete
+            {
+                if (editor.selectedNode != null) {
+                    for (var i in editor.selectedNode.inputs) {
+                        if (editor.selectedNode.inputs[i].connection) {
+                            var con = editor.selectedNode.inputs[i].connection;
+                            con.el.remove();
+                            con.out.connections = con.out.connections.filter(e => { alert("not working yet"); });
+                            
+                        }
+                    }
+                    for (var o in editor.selectedNode.outputs) {
+                        for (var c in editor.selectedNode.outputs[o].connections) {
+                            var con = editor.selectedNode.outputs[o].connections[c];
+                            con.el.remove();
+                            con.in.connection = null;
+                        }
+                    }
+                            
+
+                    editor.selectedNode.el.card.remove();
+                    delete editor.nodes[editor.selectedNode];
+                }
+            }
+        });
+        this.el.append(this.nodeList);
+
     }
 
     registerComponent(component) {
         this.components[component.name] = component;
+        if (!this.componentCategories[component.cat]) {
+            var header = $(`<li class="list-group-item bg-primary">` + component.cat + `</li>`);
+            this.componentList.append(header);
+            this.componentCategories[component.cat] = header;
+        }
+
+        var el = $(`<li class="list-group-item bg-dark" style="cursor: pointer">` + component.name + `</li>`);
+        el.insertAfter(this.componentCategories[component.cat]);
+        el.mousedown(e => {
+            var newId = 1;
+            while (editor.nodes[newId])
+                newId++;
+
+            editor.nodes[newId] = new Node(
+                {
+                    id: newId,
+                    name: component.name,
+                    position: [ 100,100 ]
+                }, editor);
+
+
+        });
+
+
     }
 
 
@@ -279,7 +410,7 @@ class NodeEditor {
             position.left -= 14; //center
             position.top -= 10;
         } else {
-            position.left += 14; //center
+            position.left += 10; //center
             position.top -= 36;
         }
         return position;
@@ -293,9 +424,17 @@ class NodeEditor {
             p2.left + ' ' + p2.top;
     }
 
+    empty() {
+        this.el.empty();
+        this.nodes = {};
+        this.selectedNode = null;
+    }
 
     fromJSON(obj) {
         this.el.empty();
+        this.nodes = {};
+        this.selectedNode = null;
+
         for (var n in obj.nodes) {
             var node = obj.nodes[n];
             this.nodes[node.id] = new Node(node, this);
@@ -304,6 +443,17 @@ class NodeEditor {
             var node = obj.nodes[n];
             this.nodes[node.id].buildConnections(node, this);
         }
+    }
+
+    toJSON() {
+        var nodes = {};
+        for (var n in this.nodes)
+            nodes[n] = this.nodes[n].toJSON();
+        return {
+            id: "demo@0.1.0",
+            nodes: nodes,
+            comments: []
+            };
     }
 
     buildConnection(nodeIn, socketIn, nodeOut, socketOut) {

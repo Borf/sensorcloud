@@ -3,6 +3,18 @@ apiurl = "http://api.sensorcloud.borf.info/";
 if (location.hostname === "localhost")
     apiurl = "http://" + location.host + "/";
 
+function alert(msg, className) {
+    if (!className)
+        className = "danger";
+    var alert = $(`<li class="list-group-item list-group-item-`+className+` px-4">` + msg + `</li>`);
+    $("#alerts").append(alert);
+    alert.slideDown();
+    setTimeout(function () {
+        alert.slideUp(() => alert.remove());
+    },2000);
+    alert.click(e => alert.slideUp(() => alert.remove()));
+}
+
 
 $(function() {
 	$.ajax({
@@ -12,7 +24,7 @@ $(function() {
 		contentType: "application/json",
 		dataType: "json",
 		success : function(data)
-		{
+        {
 			if(!data.auth)
 				alert("Could not log in. Something is wrong");
         },

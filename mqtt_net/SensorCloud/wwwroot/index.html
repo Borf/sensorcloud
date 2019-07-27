@@ -41,15 +41,15 @@ body {
  * Sidebar
  */
 
-.sidebar {
+/*.sidebar {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 100; /* Behind the navbar */
-  padding: 48px 0 0; /* Height of navbar */
+  z-index: 100; 
+  padding: 48px 0 0; 
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-}
+}*/
 
 .sidebar-sticky {
   position: relative;
@@ -91,19 +91,6 @@ body {
   text-transform: uppercase;
 }
 
-/*
- * Content
- */
-
-[role="main"] {
-  padding-top: 133px; /* Space for fixed navbar */
-}
-
-@media (min-width: 768px) {
-  [role="main"] {
-    padding-top: 48px; /* Space for fixed navbar */
-  }
-}
 
 /*
  * Navbar
@@ -139,7 +126,8 @@ body {
 
 <body>
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-sm-2 col-md-2 mr-0" href="#">Borf's Sensorcloud Control Panel</a>
+        <a class="navbar-brand col-md-1" href="#">Sensorcloud</a>
+        <h2 class="text-white">Control Panel</h2>
         <ul class="navbar-nav px-3">
             <li class="nav-item text-nowrap">
                 <a class="nav-link" href="#">Alerts</a>
@@ -149,7 +137,7 @@ body {
 
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-1 d-none d-md-block bg-light sidebar">
+            <nav class="col-md-1 bg-light sidebar">
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
@@ -191,57 +179,59 @@ body {
                     </ul>
 
                     <!--<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                        <span>Saved reports</span>
-                        <a class="d-flex align-items-center text-muted" href="#">
-                            <span data-feather="plus-circle"></span>
-                        </a>
-                    </h6>
-                    <ul class="nav flex-column mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Current month
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Last quarter
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Social engagement
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">
-                                <span data-feather="file-text"></span>
-                                Year-end sale
-                            </a>
-                        </li>
-                    </ul>-->
+                <span>Saved reports</span>
+                <a class="d-flex align-items-center text-muted" href="#">
+                    <span data-feather="plus-circle"></span>
+                </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span data-feather="file-text"></span>
+                        Current month
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span data-feather="file-text"></span>
+                        Last quarter
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span data-feather="file-text"></span>
+                        Social engagement
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <span data-feather="file-text"></span>
+                        Year-end sale
+                    </a>
+                </li>
+            </ul>-->
                 </div>
             </nav>
-
-            <main role="main" class="col-md-10 ml-sm-auto col-lg-10 px-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Dashboard</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group mr-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+            <div class="col-md-11 p-0" style="margin-top: 48px">
+                <ul class="list-group" id="alerts" style="position: fixed; width: 100%; z-index: 10;"></ul>
+                <main role="main" class="px-4">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Dashboard</h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group mr-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+                                <span data-feather="calendar"></span>
+                                This week
+                            </button>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                            <span data-feather="calendar"></span>
-                            This week
-                        </button>
                     </div>
-                </div>
 
 
-            </main>
+                </main>
+            </div>
         </div>
     </div>
     <script src="js/jquery.min.js"></script>

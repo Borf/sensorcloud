@@ -31,6 +31,7 @@ class NumberComponent extends Component {
     constructor() {
         super("Number");
     }
+    cat = "Inputs";
 
     build(node, data) {
         var out1 = new Output('num', "Value", numSocket);
@@ -44,6 +45,7 @@ class TextComponent extends Component {
     constructor() {
         super("Text");
     }
+    cat = "Inputs";
 
     build(node, data) {
         var out1 = new Output('text', "Value", textSocket);
@@ -57,6 +59,7 @@ class TelegramReceiveMessage extends Component {
     constructor() {
         super("Receive Telegram Message");
     }
+    cat = "Telegram";
 
     build(node, data) {
         return node
@@ -69,6 +72,7 @@ class TelegramSendMessage extends Component {
     constructor() {
         super("Send Telegram Message");
     }
+    cat = "Telegram";
 
     build(node, data) {
         return node
@@ -77,10 +81,25 @@ class TelegramSendMessage extends Component {
     }
 }
 
+class MqttSubscribeComponent extends Component {
+    constructor() {
+        super("Mqtt Subscribe");
+    }
+    cat = "mqtt";
+
+    build(node, data) {
+        return node
+            .addOutput(new Output('trigger', 'trigger', actionSocket))
+            .addInput(new Input('topic', 'Topic', textSocket));
+    }
+}
+
+
 class AddComponent extends Component {
     constructor() {
         super("Add");
     }
+    cat = "Operations";
 
     build(node, data) {
         var out1 = new Output('num', "Value", numSocket);
