@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using SensorCloud.datamodel;
+using SensorCloud.services.rulemanager;
 
 namespace SensorCloud.api.Controllers
 {
@@ -14,10 +15,12 @@ namespace SensorCloud.api.Controllers
     public class RulesController : ControllerBase
     {
         private SensorCloudContext db;
+        private services.rulemanager.Service rulesManager;
 
-        public RulesController(SensorCloudContext db)
+        public RulesController(SensorCloudContext db, services.rulemanager.Service rulesManager)
         {
             this.db = db;
+            this.rulesManager = rulesManager;
         }
 
         [HttpGet(":{name}")]
@@ -60,11 +63,14 @@ namespace SensorCloud.api.Controllers
             var rule = db.rules.FirstOrDefault(r => r.name == name);
             if (rule == null)
             {
-                rule = new Rule() { name = name, enabled = 1 };
+                rule = new datamodel.Rule() { name = name, enabled = 1 };
                 db.rules.Add(rule);
             }
             rule.data = value["data"].ToObject<string>();
             await db.SaveChangesAsync();
+
+            rulesManager.ReloadRule(rule.id);
+
             return "ok";
         }
 

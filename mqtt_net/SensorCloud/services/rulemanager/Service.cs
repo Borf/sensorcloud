@@ -39,6 +39,24 @@ namespace SensorCloud.services.rulemanager
             return Task.CompletedTask;
         }
 
+        public void ReloadRule(int id)
+        {
+            Log($"Reloading rule {id}");
+            using (SensorCloudContext db = new SensorCloudContext(configuration))
+            {
+                rules.RemoveAll(r => r.id == id);
+                var rule = db.rules.FirstOrDefault(r => r.id == id && r.enabled == 1);
+                if(rule != null)
+                    rules.Add(new Rule()
+                    {
+                        engine = new Engine(rule.data),
+                        name = rule.name,
+                        id = rule.id
+                    });
+            }
+            UpdateLists();
+        }
+
         public void UpdateLists()
         {
             cache.Clear();
