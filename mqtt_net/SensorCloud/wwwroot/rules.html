@@ -1,67 +1,96 @@
-<nav class="navbar">
-    <form class="form-inline">
-        <button class="btn" type="button" id="btnRulesNew">New</button>
-        <button class="btn" type="button" id="btnRulesSave">Save</button>
-        <button class="btn" type="button" id="btnRulesLoad">Load</button>
-        <input id="rulesName" value="telegram test" />
-        <select id="rulesNames"></select>
-    </form>
-</nav>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Node Editor</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button id="btnRulesNew" type="button" class="btn btn-sm btn-outline-secondary">New</button>
+            <button id="btnRulesSave" type="button" class="btn btn-sm btn-outline-secondary">Save</button>
+            <button id="btnRulesLoad" type="button" class="btn btn-sm btn-outline-secondary">Load</button>
+            <input id="rulesName" value="telegram test" />
+            <select id="rulesNames"></select>
+        </div>
+    </div>
+</div>
+<style>
+    .node {
+        position: absolute;
+        cursor: move;
+        z-index: 1;
+    }
 
-<div id="rete" style=""></div>
+    .node .outputsocket {
+        background-color: green;
+        border: 1px solid black;
+        border-radius: 12px;
+        height: 24px;
+        width: 24px;
+        float: right;
+        margin-right: -32px;
+    }
+
+    .node .inputsocket {
+        background-color: green;
+        border: 1px solid black;
+        border-radius: 12px;
+        height: 24px;
+        width: 24px;
+        float: left;
+        margin-left: -32px;
+        margin-top: 26px;
+    }
+
+    .connection {
+        overflow: visible !important;
+        position: absolute;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .connection .main-path {
+        fill: none;
+        stroke-width: 5px;
+        stroke: steelblue;
+    }
+</style>
+<div id="editor" class="card bg-light" style="height: 800px"></div>
 
 <script>
+    var editor = new NodeEditor($("#editor"));
 
+    editor.registerComponent(new NumberComponent());
+    editor.registerComponent(new TextComponent());
+    editor.registerComponent(new AddComponent());
+    editor.registerComponent(new TelegramReceiveMessage());
+    editor.registerComponent(new TelegramSendMessage());
 
-    const container = document.querySelector('#rete');
-    const editor = new Rete.NodeEditor('demo@0.1.0', container);
-    editor.use(ConnectionPlugin.default);
-    editor.use(VueRenderPlugin.default);
-    editor.use(ContextMenuPlugin.default);
-    
-    const numComponent = new NumComponent();
-    editor.register(numComponent);
-    editor.register(new LogComponent());
-    editor.register(new TextComponent());
-    editor.register(new TelegramMessageComponent());
-    editor.register(new TelegramMessageReceivedComponent());
-    editor.register(new MqttPublishComponent());
-    editor.register(new MqttSubscribeComponent());
-    editor.register(new ModuleActionComponent());
-    editor.register(new ModuleTriggerComponent());
-    editor.view.resize();
-
+    //        editor.fromJSON({ "id": "demo@0.1.0", "nodes": { "1": { "id": 1, "data": {}, "inputs": {}, "outputs": { "num": { "connections": [] } }, "position": [172, 125], "name": "Number" } } });
+    editor.fromJSON({ 'id': 'demo@0.1.0', 'nodes': { '1': { 'id': 1, 'data': { 'num': 2 }, 'inputs': {}, 'outputs': { 'num': { 'connections': [{ 'node': 3, 'input': 'num', 'data': {} }] } }, 'position': [80, 200], 'name': 'Number' }, '2': { 'id': 2, 'data': { 'num': 0 }, 'inputs': {}, 'outputs': { 'num': { 'connections': [{ 'node': 3, 'input': 'num2', 'data': {} }] } }, 'position': [80, 400], 'name': 'Number' }, '3': { 'id': 3, 'data': {}, 'inputs': { 'num': { 'connections': [{ 'node': 1, 'output': 'num', 'data': {} }] }, 'num2': { 'connections': [{ 'node': 2, 'output': 'num', 'data': {} }] } }, 'outputs': { 'num': { 'connections': [] } }, 'position': [500, 240], 'name': 'Add' } }, 'comments': [] });
 
     $("button#btnRulesLoad").click(function () {
         $.ajax({
             url: apiurl + "rules/:" + $("#rulesName").val(),
-			dataType: 'json',
-			success : function(data)
-            {
+            dataType: 'json',
+            success: function (data) {
                 editor.fromJSON(JSON.parse(data.data));
-			},
-			error : function(data, bla)
-			{
-				alert("Error loading rule:\n" + data.responseText);
-			}
-		});
+            },
+            error: function (data, bla) {
+                alert("Error loading rule:\n" + data.responseText);
+            }
+        });
     });
     $("button#btnRulesSave").click(function () {
         $.ajax({
             url: apiurl + "rules/update/:" + $("#rulesName").val(),
-		    method: "post",
-		    data: JSON.stringify({ 'data' : JSON.stringify(editor.toJSON()) }),
-		    contentType: "application/json",
-		    dataType: "json",
-			success : function(data)
-            {
+            method: "post",
+            data: JSON.stringify({ 'data': JSON.stringify(editor.toJSON()) }),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data) {
                 updateNames();
-			},
-			error : function(data, bla)
-			{
-				alert("Error loading rule:\n" + data.responseText);
-			}
-		});
+            },
+            error: function (data, bla) {
+                alert("Error loading rule:\n" + data.responseText);
+            }
+        });
     });
 
     $("#rulesNames").change(function () {
@@ -69,24 +98,21 @@
         $("button#btnRulesLoad").click();
     })
 
-    function updateNames()
-    {
+    function updateNames() {
         $.ajax({
             url: apiurl + "rules",
-			dataType: 'json',
-			success : function(data)
-            {
+            dataType: 'json',
+            success: function (data) {
                 var names = $("#rulesNames");
                 names.empty();
                 for (var i in data) {
-                    names.append('<option value="'+data[i].name+'">'+data[i].name+'</option>')
+                    names.append('<option value="' + data[i].name + '">' + data[i].name + '</option>')
                 }
-			},
-			error : function(data, bla)
-			{
-				alert("Error loading rule:\n" + data.responseText);
-			}
-		});
+            },
+            error: function (data, bla) {
+                alert("Error loading rule:\n" + data.responseText);
+            }
+        });
     }
     updateNames();
 
