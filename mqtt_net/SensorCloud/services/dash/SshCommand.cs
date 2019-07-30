@@ -4,6 +4,7 @@ using SensorCloud.datamodel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,7 +25,9 @@ namespace SensorCloud.services.dash
                     item.value = ret;
                     client.Disconnect();
                 }
-            }catch(Exception e)
+            }catch(SocketException)
+            {
+            } catch(Exception e)
             {
                 Console.WriteLine(e);
             }
