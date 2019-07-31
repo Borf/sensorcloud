@@ -33,7 +33,7 @@ namespace SensorCloud.services.sensorcloud
             var ruleManager = GetService<rulemanager.Service>();
             ruleManager.AddFunction(new Function()
             {
-                Module = this.moduleName,
+                Module = this.moduleNameFirstCap,
                 FunctionName = "Activate",
                 Parameters = new List<Tuple<string, rules.Socket>>() { new Tuple<string, rules.Socket>("nodeid", new rules.NumberSocket()) },
                 Callback = this.Activate
@@ -94,7 +94,7 @@ namespace SensorCloud.services.sensorcloud
         }
 
 
-        public void Activate()
+        public void Activate(Dictionary<string, object> parameters)
         {
 
         }

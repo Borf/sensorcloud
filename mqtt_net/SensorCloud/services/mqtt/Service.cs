@@ -33,13 +33,13 @@ namespace SensorCloud.services.mqtt
             var ruleManager = GetService<rulemanager.Service>();
             ruleManager.AddFunction(new Function()
             {
-                Module = this.moduleName,
+                Module = this.moduleNameFirstCap,
                 FunctionName = "Publish",
                 Parameters = new List<Tuple<string, rules.Socket>>() {
                     new Tuple<string, rules.Socket>("topic", new rules.TextSocket()),
                     new Tuple<string, rules.Socket>("payload", new rules.TextSocket())
                 },
-                Callback = (() => this.Publish("",""))
+                Callback = (async (parameters) => await this.Publish((string)parameters["topic"],(string)parameters["payload"]))
             });
 
 

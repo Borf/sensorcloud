@@ -38,7 +38,7 @@ namespace SensorCloud.rules
         {
             foreach (var kp in inputs)
             {
-                if (component.inputs[kp.Key] is ActionSocket)
+                if (component.inputs.ContainsKey(kp.Key) && component.inputs[kp.Key] is ActionSocket)
                     continue;
                 engine.nodes[kp.Value.node].SetInputs(engine);
                 engine.nodes[kp.Value.node].SetOutputs();

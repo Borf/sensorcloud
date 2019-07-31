@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using SensorCloud.datamodel;
 using SensorCloud.rules;
 using System;
@@ -10,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SensorCloud.services.rulemanager
 {
-    public class Service : SensorCloud.Service
+    public partial class Service : SensorCloud.Service
     {
         private IConfiguration configuration;
 
@@ -75,20 +74,16 @@ namespace SensorCloud.services.rulemanager
                 rule => rule.engine.trigger(triggerObject, 
                 parameters));
         }
-
-        public class Function
-        {
-            public string Module { get; set; }
-            public string FunctionName { get; set; }
-            public List<Tuple<string, Socket>> Parameters { get; set; }
-            [JsonIgnore]
-            public Action Callback { get; set; }
-        }
         public List<Function> functions = new List<Function>();
 
         public void AddFunction(Function function)
         {
             this.functions.Add(function);
+        }
+
+        public void RemoveFunction(Function function)
+        {
+            this.functions.Remove(function);
         }
 
 

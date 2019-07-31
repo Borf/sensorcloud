@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types.ReplyMarkups;
+using static SensorCloud.services.rulemanager.Service;
 
 namespace SensorCloud.services.telegram
 {
@@ -29,6 +30,18 @@ namespace SensorCloud.services.telegram
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var ruleManager = GetService<rulemanager.Service>();
+            ruleManager.AddFunction(new Function()
+            {
+                Module = this.moduleNameFirstCap,
+                FunctionName = "SendMessage",
+                Parameters = new List<Tuple<string, rules.Socket>>() {
+                    new Tuple<string, rules.Socket>("message", new rules.TextSocket()),
+                },
+                Callback = (async (parameters) => await this.SendMessageAsync((string)parameters["message"]))
+            });
+
+
             Log("Starting Telegram");
             botClient = new TelegramBotClient(config.bottoken);
             botClient.OnMessage += OnMessage;

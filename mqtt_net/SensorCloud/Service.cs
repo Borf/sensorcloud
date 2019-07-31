@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +15,8 @@ namespace SensorCloud
         private ConsoleColor color = ConsoleColor.Black;
         protected IServiceProvider services { private set; get; }
         public string moduleName { get; private set; }
+
+        public string moduleNameFirstCap {  get { return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(moduleName.ToLower()); }  }
 
         public Service(IServiceProvider services)
         {

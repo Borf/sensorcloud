@@ -174,7 +174,7 @@ class ModuleActionComponent extends Component {
     build(node, data) {
         var c = this;
         node
-            .addInput(new Output('trigger', 'Trigger', actionSocket))
+            .addInput(new Input('trigger', 'Trigger', actionSocket))
             .addInput(new Input('module', 'Module', textSocket)
                 .addControl(this.moduleSelect = new SelectControl()))
             .addInput(new Input('function', 'Function', textSocket)

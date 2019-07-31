@@ -89,6 +89,7 @@ namespace SensorCloud.rules
             registerComponent(new TelegramMessageReceivedComponent());
             registerComponent(new MqttSubscribeComponent());
             registerComponent(new IfComponent());
+            registerComponent(new ModuleFunctionsComponent(service));
         }
 
         static void registerComponent(Component component)
