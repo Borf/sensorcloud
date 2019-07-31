@@ -3,12 +3,14 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SensorCloud.datamodel;
+using SensorCloud.services.rulemanager;
 using SensorCloud.services.telegram;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using static SensorCloud.services.rulemanager.Service;
 
 namespace SensorCloud.services.sensorcloud
 {
@@ -27,7 +29,17 @@ namespace SensorCloud.services.sensorcloud
         {
             mqtt = GetService<mqtt.Service>();
             db = new SensorCloudContext(configuration); //TODO: move to a construction using 'using' keyword
+
+            var ruleManager = GetService<rulemanager.Service>();
+            ruleManager.AddFunction(new Function()
+            {
+                Module = this.moduleName,
+                FunctionName = "Activate",
+                Parameters = new List<Tuple<string, rules.Socket>>() { new Tuple<string, rules.Socket>("nodeid", new rules.NumberSocket()) },
+                Callback = this.Activate
+            });
             
+
             mqtt.On("boot/whoami$", async (match, message) =>
             {
                 dynamic data = JObject.Parse(message);
@@ -64,6 +76,7 @@ namespace SensorCloud.services.sensorcloud
 
             while (true)
             {
+                await Task.Delay(1000 * 60 * 30);
                 using (var db2 = new SensorCloudContext(configuration))
                 {
                     Log("Updating backlog");
@@ -77,10 +90,13 @@ namespace SensorCloud.services.sensorcloud
 
                     Log("Done updating backlog");
                 }
-
-                await Task.Delay(1000 * 60 * 30);
-
             }
+        }
+
+
+        public void Activate()
+        {
+
         }
     }
 }

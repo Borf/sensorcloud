@@ -35,6 +35,16 @@ namespace SensorCloud.api.Controllers
             return db.rules.Select(s => new { id = s.id, name = s.name, enabled = s.enabled });
         }
 
+        [HttpGet("functions")]
+        public object Functions(string name)
+        {
+
+            return rulesManager.functions;
+
+
+
+        }
+
         [HttpPost("enable:{name}")]
         public async Task<object> Enable(string name)
         {

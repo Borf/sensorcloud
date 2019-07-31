@@ -5,7 +5,7 @@
             <button id="btnRulesNew" type="button" class="btn btn-sm btn-outline-secondary">New</button>
             <button id="btnRulesSave" type="button" class="btn btn-sm btn-outline-secondary">Save</button>
             <button id="btnRulesLoad" type="button" class="btn btn-sm btn-outline-secondary">Load</button>
-            <input id="rulesName" value="Deurbel" />
+            <input id="rulesName" value="Test" />
             <select id="rulesNames"></select>
         </div>
     </div>
@@ -83,9 +83,13 @@
     editor.registerComponent(new NumberComponent());
     editor.registerComponent(new TextComponent());
     editor.registerComponent(new AddComponent());
+    editor.registerComponent(new IfComponent());
     editor.registerComponent(new TelegramReceiveMessage());
     editor.registerComponent(new TelegramSendMessage());
     editor.registerComponent(new MqttSubscribeComponent());
+    editor.registerComponent(new MqttPublishComponent());
+    editor.registerComponent(new ModuleActionComponent());
+    editor.registerComponent(new ModuleTriggerComponent());
 
     $("button#btnRulesNew").click(function () {
         editor.empty();
@@ -96,11 +100,13 @@
             dataType: 'json',
             success: function (data) {
                 editor.fromJSON(JSON.parse(data.data));
-                if (JSON.stringify(editor.toJSON()) != data.data) {
-                    alert("Loading inconsistent!");
-                    alert("Original:\n" + data.data);
-                    alert("New:\n" + JSON.stringify(editor.toJSON()));
-                }
+                setTimeout(function () {
+                    if (JSON.stringify(editor.toJSON()) != data.data) {
+                        alert("Loading inconsistent!");
+                        alert("Original:\n" + data.data);
+                        alert("New:\n" + JSON.stringify(editor.toJSON()));
+                    }
+                }, 1000);
 
             },
             error: function (data, bla) {

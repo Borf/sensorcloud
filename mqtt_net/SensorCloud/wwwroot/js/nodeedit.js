@@ -15,10 +15,11 @@ class Input {
     }
     addControl(control) {
         this.controls.push(control);
+        return this;
     }
     build() {
         for (var c in this.controls)
-            this.controls[c].build();
+            return this.controls[c].build(); //TODO: fix multiple controls?
     }
 }
 
@@ -32,6 +33,7 @@ class Output {
     }
     addControl(control) {
         this.controls.push(control);
+        return this;
     }
     build() {
         for (var c in this.controls)
@@ -283,6 +285,12 @@ class Node {
         return this;
     }
 
+    removeInput(index) {
+        //TODO: remove connections
+        this.inputs[index].el.remove();
+        this.inputs.splice(index,1);
+    }
+
 
     updateConnectionPositions() {
         for (var i in this.inputs) {
@@ -309,6 +317,8 @@ class Node {
     buildConnections(data, editor) {
         for (var o in this.outputs) {
             var output = this.outputs[o];
+            if (!data.outputs[output.name])
+                continue;
             for (var c in data.outputs[output.name].connections) {
                 var con = data.outputs[output.name].connections[c];
                 var input = null;
@@ -360,7 +370,7 @@ class NodeEditor {
                             
 
                     editor.selectedNode.el.card.remove();
-                    delete editor.nodes[editor.selectedNode];
+                    delete editor.nodes[editor.selectedNode.id];
                 }
             }
         });
@@ -435,14 +445,21 @@ class NodeEditor {
         this.nodes = {};
         this.selectedNode = null;
 
+        var deferreds = [];
         for (var n in obj.nodes) {
             var node = obj.nodes[n];
             this.nodes[node.id] = new Node(node, this);
+            if (this.nodes[node.id].waiter)
+                deferreds.push(this.nodes[node.id].waiter);
         }
-        for (var n in obj.nodes) {
-            var node = obj.nodes[n];
-            this.nodes[node.id].buildConnections(node, this);
-        }
+
+
+        $.when.apply($, deferreds).done(function () {
+            for (var n in obj.nodes) {
+                var node = obj.nodes[n];
+                editor.nodes[node.id].buildConnections(node, editor);
+            }
+        });
     }
 
     toJSON() {

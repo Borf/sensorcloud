@@ -58,10 +58,11 @@ namespace SensorCloud.rules
 
             if (!component.trigger(this).Result)
                 return;
-            //if this node has any connected objects, trigger them
+            //if this node has any connected triggerable objects, trigger them
             foreach (var kp in outputs)
-                foreach (var connection in kp.Value)
-                    engine.nodes[connection.node].trigger(engine);
+                if(component.outputs[kp.Key].name == "Action")
+                    foreach (var connection in kp.Value)
+                        engine.nodes[connection.node].trigger(engine);
         }
 
         internal object getInputValue(string name)

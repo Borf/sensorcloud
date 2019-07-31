@@ -20,8 +20,11 @@ namespace SensorCloud.rules
                 {
                     var n = e.Value;
                     Component component = components.FirstOrDefault(c => c.name == n["name"].ToObject<string>());
-                    if(component == null)
+                    if (component == null)
+                    {
                         Console.WriteLine($"Could not find component {n["name"]}");
+                        continue;
+                    }
                     Node node = new Node(component);
                     node.id = (int)n["id"];
                     foreach (JProperty ee in n["outputs"])
@@ -85,6 +88,7 @@ namespace SensorCloud.rules
             registerComponent(new TelegramMessageComponent(service));
             registerComponent(new TelegramMessageReceivedComponent());
             registerComponent(new MqttSubscribeComponent());
+            registerComponent(new IfComponent());
         }
 
         static void registerComponent(Component component)

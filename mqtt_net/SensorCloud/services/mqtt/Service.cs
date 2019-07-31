@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using static SensorCloud.services.rulemanager.Service;
 
 namespace SensorCloud.services.mqtt
 {
@@ -29,6 +30,19 @@ namespace SensorCloud.services.mqtt
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            var ruleManager = GetService<rulemanager.Service>();
+            ruleManager.AddFunction(new Function()
+            {
+                Module = this.moduleName,
+                FunctionName = "Publish",
+                Parameters = new List<Tuple<string, rules.Socket>>() {
+                    new Tuple<string, rules.Socket>("topic", new rules.TextSocket()),
+                    new Tuple<string, rules.Socket>("payload", new rules.TextSocket())
+                },
+                Callback = (() => this.Publish("",""))
+            });
+
+
             var factory = new MqttFactory();
             mqttClient = factory.CreateMqttClient();
 

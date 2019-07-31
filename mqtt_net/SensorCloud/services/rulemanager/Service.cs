@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using SensorCloud.datamodel;
 using SensorCloud.rules;
 using System;
@@ -73,8 +74,24 @@ namespace SensorCloud.services.rulemanager
             cache[triggerObject].ForEach(
                 rule => rule.engine.trigger(triggerObject, 
                 parameters));
-
         }
+
+        public class Function
+        {
+            public string Module { get; set; }
+            public string FunctionName { get; set; }
+            public List<Tuple<string, Socket>> Parameters { get; set; }
+            [JsonIgnore]
+            public Action Callback { get; set; }
+        }
+        public List<Function> functions = new List<Function>();
+
+        public void AddFunction(Function function)
+        {
+            this.functions.Add(function);
+        }
+
+
     }
 
 
