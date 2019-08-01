@@ -41,7 +41,23 @@ namespace SensorCloud.services.mqtt
                 },
                 Callback = (async (parameters) => await this.Publish((string)parameters["topic"],(string)parameters["payload"]))
             });
-
+            ruleManager.AddTrigger(new Trigger()
+            {
+                Module = this.moduleNameFirstCap,
+                TriggerName = "Subscribe",
+                Inputs = new List<Tuple<string, rules.Socket>>()
+                {
+                    new Tuple<string, rules.Socket>("topic", new rules.TextSocket())
+                },
+                Outputs = new List<Tuple<string, rules.Socket>>()
+                {
+                    new Tuple<string, rules.Socket>("payload", new rules.TextSocket())
+                },
+                Callback = node =>
+                {
+                    return (string)node.inputValues["topic"] == node.data["in"]["topic"].ToObject<string>();
+                }
+            });
 
             var factory = new MqttFactory();
             mqttClient = factory.CreateMqttClient();
@@ -130,12 +146,19 @@ namespace SensorCloud.services.mqtt
             if (lastValues.ContainsKey(e.ApplicationMessage.Topic))
                 lastValues[e.ApplicationMessage.Topic] = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
 
-            GetService<rulemanager.Service>().Trigger("Mqtt Subscribe", new Dictionary<string, object>()
+            GetService<rulemanager.Service>().trigger("Mqtt Subscribe", new Dictionary<string, object>()
             {
                 { "topic" , e.ApplicationMessage.Topic },
                 { "payload" , Encoding.UTF8.GetString(e.ApplicationMessage.Payload) },
 
             });
+
+            GetService<rulemanager.Service>().triggerModuleCommand(this.moduleNameFirstCap, "Subscribe", 
+                new Dictionary<string, object>()
+                {
+                    { "topic" , e.ApplicationMessage.Topic },
+                    { "payload" , Encoding.UTF8.GetString(e.ApplicationMessage.Payload) },
+                });
 
 
             bool handled = false;

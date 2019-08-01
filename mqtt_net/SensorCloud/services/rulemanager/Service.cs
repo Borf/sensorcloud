@@ -62,7 +62,7 @@ namespace SensorCloud.services.rulemanager
             cache.Clear();
         }
 
-        public void Trigger(string triggerObject, Dictionary<string, object> parameters)
+        public void trigger(string triggerObject, Dictionary<string, object> parameters)
         {
             if (rules == null)
                 return;
@@ -74,7 +74,25 @@ namespace SensorCloud.services.rulemanager
                 rule => rule.engine.trigger(triggerObject, 
                 parameters));
         }
+
+        public void triggerModuleCommand(string module, string triggerName, Dictionary<string, object> parameters)
+        {
+            if (rules == null)
+                return;
+            if (!cache.ContainsKey("Module triggers"))
+                cache["Module triggers"] = rules.Where(r => r.engine.ContainsTrigger("Module triggers")).ToList();
+
+            cache["Module triggers"].Where(e =>
+            {
+                var n = e.engine.FindNode("Module triggers");
+                return n.data["module"].ToObject<string>() == module && n.data["function"].ToObject<string>() == triggerName;
+                }).ToList().ForEach(
+                rule => rule.engine.trigger("Module triggers",
+                parameters));
+        }
+
         public List<Function> functions = new List<Function>();
+        public List<Trigger> triggers= new List<Trigger>();
 
         public void AddFunction(Function function)
         {
@@ -84,6 +102,15 @@ namespace SensorCloud.services.rulemanager
         public void RemoveFunction(Function function)
         {
             this.functions.Remove(function);
+        }
+        public void AddTrigger(Trigger trigger)
+        {
+            this.triggers.Add(trigger);
+        }
+
+        public void RemoveTrigger(Trigger trigger)
+        {
+            this.triggers.Remove(trigger);
         }
 
 

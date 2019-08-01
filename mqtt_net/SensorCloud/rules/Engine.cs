@@ -66,6 +66,11 @@ namespace SensorCloud.rules
             }
         }
 
+        internal Node FindNode(string name)
+        {
+            return nodes.FirstOrDefault(kv => kv.Value.component.name == name).Value;
+        }
+
         internal bool ContainsTrigger(string triggerObject)
         {
             return nodes.Any(kv => kv.Value.component.name == triggerObject);
@@ -90,6 +95,7 @@ namespace SensorCloud.rules
             registerComponent(new MqttSubscribeComponent());
             registerComponent(new IfComponent());
             registerComponent(new ModuleFunctionsComponent(service));
+            registerComponent(new ModuleTriggersComponent(service));
         }
 
         static void registerComponent(Component component)

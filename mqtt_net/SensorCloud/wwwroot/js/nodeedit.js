@@ -84,91 +84,6 @@ class Node {
 
         //interactivity
         this.el.card.mousedown(this, this.handle_dragnode);
-        var node = this;
-        this.el.card.find(".outputsocket").mousedown(function (e) {
-            var output = null;
-            for (var o in node.outputs)
-                if (node.outputs[o].el.find(".outputsocket").is($(this)))
-                    output = node.outputs[o];
-
-            if (e.preventDefault)
-                e.preventDefault();
-
-            var position = editor.findSocketPos($(this));
-
-            var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
-            mousePos.left = e.pageX - mousePos.left;
-            mousePos.top = e.pageY - mousePos.top;
-
-            window.my_dragging = {};
-            my_dragging.svg = $('<svg class="connection"></svg>');
-            my_dragging.position = position;
-
-            my_dragging.path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            my_dragging.svg.append(my_dragging.path);
-            my_dragging.path.setAttributeNS(null, "class", "main-path");
-            my_dragging.path.setAttributeNS(null, "d", editor.createPathString(position, mousePos));
-            editor.el.append(my_dragging.svg);
-            
-            function handle_dragging(e) {
-                var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
-                mousePos.left = e.pageX - mousePos.left;
-                mousePos.top = e.pageY - mousePos.top;
-
-                my_dragging.path.setAttributeNS(null, "d", 'M ' +
-                    my_dragging.position.left + ' ' + my_dragging.position.top + ' C ' +
-                    mousePos.left + ' ' + my_dragging.position.top + ' ' +
-                    my_dragging.position.left + ' ' + mousePos.top + ' ' +
-                    mousePos.left + ' ' + mousePos.top);
-            }
-            function handle_mouseup(e) {
-                var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
-                mousePos.left = e.pageX - mousePos.left;
-                mousePos.top = e.pageY - mousePos.top;
-
-                var foundInput = null;
-                var foundNode = null;
-                $.each(editor.nodes, (i, node) => {
-                    $.each(node.inputs, (i, input) => {
-                        var position = editor.findSocketPos(input.el.find(".inputsocket"));
-                        if (Math.abs(mousePos.left - position.left) < 32 &&
-                            Math.abs(mousePos.top - position.top) < 32) {
-                            foundInput = input;
-                            foundNode = node;
-                        }
-                    });
-                });
-
-                $('body')
-                    .off('mousemove', handle_dragging)
-                    .off('mouseup', handle_mouseup);
-
-                my_dragging.svg.remove();
-                if (!foundInput)
-                    return;
-
-                //if the input we found has a connection, break it
-                if (foundInput.connection) {
-                    foundInput.connection.out.connections =
-                        foundInput.connection.out.connections.filter(
-                            con => con.node != foundNode.id || con.input != foundInput.name);
-                    foundInput.connection.el.remove();
-                    foundInput.connection = null;
-                }
-
-                if (output.type.name != foundInput.type.name) {
-                    alert("Incompatible types");
-                    return;
-                }
-
-                editor.buildConnection(foundNode, foundInput, node, output);
-            }
-            $('body')
-                .on('mouseup', handle_mouseup)
-                .on('mousemove', handle_dragging);
-            return false;
-        });
-
 
         editor.el.append(this.el.card);
     }
@@ -267,6 +182,94 @@ class Node {
 
         output.el.append($(`<div class="outputsocket socket-` + output.type.name.toLowerCase() +`"></div>`));
         this.el.connections.append(output.el);
+
+        var node = this;
+        output.el.find(".outputsocket").mousedown(function (e) {
+            var output = null;
+            for (var o in node.outputs)
+                if (node.outputs[o].el.find(".outputsocket").is($(this)))
+                    output = node.outputs[o];
+
+            if (e.preventDefault)
+                e.preventDefault();
+
+            var position = editor.findSocketPos($(this));
+
+            var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
+            mousePos.left = e.pageX - mousePos.left;
+            mousePos.top = e.pageY - mousePos.top;
+
+            window.my_dragging = {};
+            my_dragging.svg = $('<svg class="connection"></svg>');
+            my_dragging.position = position;
+
+            my_dragging.path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            my_dragging.svg.append(my_dragging.path);
+            my_dragging.path.setAttributeNS(null, "class", "main-path");
+            my_dragging.path.setAttributeNS(null, "d", editor.createPathString(position, mousePos));
+            editor.el.append(my_dragging.svg);
+
+            function handle_dragging(e) {
+                var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
+                mousePos.left = e.pageX - mousePos.left;
+                mousePos.top = e.pageY - mousePos.top;
+
+                my_dragging.path.setAttributeNS(null, "d", 'M ' +
+                    my_dragging.position.left + ' ' + my_dragging.position.top + ' C ' +
+                    mousePos.left + ' ' + my_dragging.position.top + ' ' +
+                    my_dragging.position.left + ' ' + mousePos.top + ' ' +
+                    mousePos.left + ' ' + mousePos.top);
+            }
+            function handle_mouseup(e) {
+                var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
+                mousePos.left = e.pageX - mousePos.left;
+                mousePos.top = e.pageY - mousePos.top;
+
+                var foundInput = null;
+                var foundNode = null;
+                $.each(editor.nodes, (i, node) => {
+                    $.each(node.inputs, (i, input) => {
+                        var position = editor.findSocketPos(input.el.find(".inputsocket"));
+                        if (Math.abs(mousePos.left - position.left) < 32 &&
+                            Math.abs(mousePos.top - position.top) < 32) {
+                            foundInput = input;
+                            foundNode = node;
+                        }
+                    });
+                });
+
+                $('body')
+                    .off('mousemove', handle_dragging)
+                    .off('mouseup', handle_mouseup);
+
+                my_dragging.svg.remove();
+                if (!foundInput)
+                    return;
+
+                //if the input we found has a connection, break it
+                if (foundInput.connection) {
+                    foundInput.connection.out.connections =
+                        foundInput.connection.out.connections.filter(
+                            con => con.node != foundNode.id || con.input != foundInput.name);
+                    foundInput.connection.el.remove();
+                    foundInput.connection = null;
+                }
+
+                if (output.type.name != foundInput.type.name) {
+                    alert("Incompatible types");
+                    return;
+                }
+
+                editor.buildConnection(foundNode, foundInput, node, output);
+            }
+            $('body')
+                .on('mouseup', handle_mouseup)
+                .on('mousemove', handle_dragging);
+            return false;
+        });
+
+
+
         return this;
     }
     addInput(input, data) {
@@ -356,7 +359,11 @@ class NodeEditor {
                         if (editor.selectedNode.inputs[i].connection) {
                             var con = editor.selectedNode.inputs[i].connection;
                             con.el.remove();
-                            con.out.connections = con.out.connections.filter(e => { alert("not working yet"); });
+                            con.out.connections = con.out.connections.filter(e =>
+                            {
+                                return !(e.node == editor.selectedNode.id &&
+                                    e.input == editor.selectedNode.inputs[i].name);
+                            });
                             
                         }
                     }

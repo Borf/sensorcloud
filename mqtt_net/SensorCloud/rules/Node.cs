@@ -60,7 +60,7 @@ namespace SensorCloud.rules
                 return;
             //if this node has any connected triggerable objects, trigger them
             foreach (var kp in outputs)
-                if(component.outputs[kp.Key].name == "Action")
+                if(component.outputs.ContainsKey(kp.Key) && component.outputs[kp.Key].name == "Action")
                     foreach (var connection in kp.Value)
                         engine.nodes[connection.node].trigger(engine);
         }

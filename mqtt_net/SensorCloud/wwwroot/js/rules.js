@@ -244,10 +244,77 @@ class ModuleTriggerComponent extends Component {
     cat = "Module";
 
     build(node, data) {
-        return node
+        var c = this;
+
+        node
             .addOutput(new Output('trigger', 'Trigger', actionSocket))
-            .addInput(new Input('topic', 'Topic', textSocket))
-            .addInput(new Input('payload', 'Payload', textSocket));
+            .addInput(new Input('module', 'Module', textSocket)
+                .addControl(this.moduleSelect = new SelectControl()))
+            .addInput(new Input('function', 'Function', textSocket)
+                .addControl(this.functionSelect = new SelectControl()));
+
+        node.waiter = $.ajax({
+            url: apiurl + "rules/triggers",
+            dataType: "json",
+            success: function (d) {
+                c.moduleSelect.el.empty();
+                var modules = [];
+                for (var i in d) {
+                    var module = d[i].Module;
+                    if (modules.indexOf(module) == -1) {
+                        modules.push(module);
+                        c.moduleSelect.el.append($("<option>" + module + "</option>"));
+                    }
+                }
+
+                c.moduleSelect.el.change(e => {
+                    c.functionSelect.el.empty();
+                    for (var i in d) {
+                        if (d[i].Module == c.moduleSelect.el.val()) {
+                            c.functionSelect.el.append($("<option>" + d[i].TriggerName + "</option>"));
+                        }
+                    }
+                    c.functionSelect.el.change();
+                });
+
+                c.functionSelect.el.change(e => {
+                    while (node.inputs.length > 3) {
+                        node.removeInput(3);
+                    }
+                    for (var i in d) {
+                        if (d[i].Module == c.moduleSelect.el.val() && d[i].TriggerName == c.functionSelect.el.val()) {
+                            for (var p in d[i].Inputs) {
+                                var pp = d[i].Inputs[p];
+                                var sock = null;
+                                if (pp.Item2.name == "Text")
+                                    sock = textSocket;
+                                else if (pp.Item2.name == "Number")
+                                    sock = numSocket;
+                                node.addInput(new Input(pp.Item1, pp.Item1, sock));
+                            }
+                            for (var p in d[i].Outputs) {
+                                var pp = d[i].Outputs[p];
+                                var sock = null;
+                                if (pp.Item2.name == "Text")
+                                    sock = textSocket;
+                                else if (pp.Item2.name == "Number")
+                                    sock = numSocket;
+                                node.addOutput(new Output(pp.Item1, pp.Item1, sock));
+                            }
+
+                        }
+                    }
+                });
+
+                if (data && data.data && data.data.module) {
+                    c.moduleSelect.value = data.data.module;
+                    c.moduleSelect.el.change();
+                }
+                if (data && data.data && data.data.function)
+                    c.functionSelect.value = data.data.function;
+
+            }
+        });
     }
 }
 

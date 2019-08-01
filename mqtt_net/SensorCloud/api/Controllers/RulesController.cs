@@ -36,13 +36,15 @@ namespace SensorCloud.api.Controllers
         }
 
         [HttpGet("functions")]
-        public object Functions(string name)
+        public object Functions()
         {
-
             return rulesManager.functions;
+        }
 
-
-
+        [HttpGet("triggers")]
+        public object Triggers()
+        {
+            return rulesManager.triggers;
         }
 
         [HttpPost("enable:{name}")]
