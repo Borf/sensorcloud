@@ -146,13 +146,6 @@ namespace SensorCloud.services.mqtt
             if (lastValues.ContainsKey(e.ApplicationMessage.Topic))
                 lastValues[e.ApplicationMessage.Topic] = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
 
-            GetService<rulemanager.Service>().trigger("Mqtt Subscribe", new Dictionary<string, object>()
-            {
-                { "topic" , e.ApplicationMessage.Topic },
-                { "payload" , Encoding.UTF8.GetString(e.ApplicationMessage.Payload) },
-
-            });
-
             GetService<rulemanager.Service>().triggerModuleCommand(this.moduleNameFirstCap, "Subscribe", 
                 new Dictionary<string, object>()
                 {

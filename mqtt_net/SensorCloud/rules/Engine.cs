@@ -90,9 +90,6 @@ namespace SensorCloud.rules
         public static void init(Service service)
         {
             registerComponent(new TextComponent());
-            registerComponent(new TelegramMessageComponent(service));
-            registerComponent(new TelegramMessageReceivedComponent());
-            registerComponent(new MqttSubscribeComponent());
             registerComponent(new IfComponent());
             registerComponent(new ModuleFunctionsComponent(service));
             registerComponent(new ModuleTriggersComponent(service));

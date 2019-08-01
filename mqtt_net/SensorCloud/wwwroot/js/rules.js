@@ -71,63 +71,6 @@ class TextComponent extends Component {
 }
 
 
-class TelegramReceiveMessage extends Component {
-    constructor() {
-        super("Receive Telegram Message");
-    }
-    cat = "Telegram";
-
-    build(node, data) {
-        return node
-            .addOutput(new Output('text', 'Message', textSocket))
-            .addOutput(new Output('trigger', 'trigger', actionSocket));
-    }
-}
-
-class TelegramSendMessage extends Component {
-    constructor() {
-        super("Send Telegram Message");
-    }
-    cat = "Telegram";
-
-    build(node, data) {
-        return node
-            .addInput(new Input('text', 'Message', textSocket))
-            .addInput(new Input('trigger', 'trigger', actionSocket));
-    }
-}
-
-
-
-class MqttSubscribeComponent extends Component {
-    constructor() {
-        super("Mqtt Subscribe");
-    }
-    cat = "Mqtt";
-
-    build(node, data) {
-        return node
-            .addOutput(new Output('trigger', 'trigger', actionSocket))
-            .addOutput(new Output('payload', 'Payload', textSocket))
-            .addInput(new Input('topic', 'Topic', textSocket));
-    }
-}
-
-class MqttPublishComponent extends Component {
-    constructor() {
-        super("Mqtt Publish");
-    }
-    cat = "Mqtt";
-
-    build(node, data) {
-        return node
-            .addInput(new Output('trigger', 'trigger', actionSocket))
-            .addInput(new Input('topic', 'Topic', textSocket))
-            .addInput(new Input('payload', 'Payload', textSocket));
-    }
-}
-
-
 class AddComponent extends Component {
     constructor() {
         super("Add");
