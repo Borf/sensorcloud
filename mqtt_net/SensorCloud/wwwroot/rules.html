@@ -84,8 +84,10 @@
     editor.registerComponent(new TextComponent());
     editor.registerComponent(new AddComponent());
     editor.registerComponent(new IfComponent());
+    editor.registerComponent(new JsonSelectComponent());
     editor.registerComponent(new ModuleActionComponent());
     editor.registerComponent(new ModuleTriggerComponent());
+    editor.registerComponent(new LogComponent());
 
     $("button#btnRulesNew").click(function () {
         editor.empty();

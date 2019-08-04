@@ -107,6 +107,38 @@ class IfComponent extends Component {
 }
 
 
+class JsonSelectComponent extends Component {
+    constructor() {
+        super("Json Select");
+    }
+    cat = "Operations";
+
+    build(node, data) {
+        node
+            .addInput(new Input('json', 'Json', textSocket), data)
+            .addOutput(new Output('data', 'Data', textSocket), data)
+            .addInput(new Input('query', 'Query', textSocket)
+                .addControl(new TextControl(), data));
+        return node;
+    }
+}
+
+
+class LogComponent extends Component {
+    constructor() {
+        super("Log");
+    }
+    cat = "Functions";
+
+    build(node, data) {
+        node
+            .addInput(new Input('data', 'Data', textSocket), data)
+            .addInput(new Input('trigger', 'Trigger', actionSocket), data);
+        return node;
+    }
+}
+
+
 
 class ModuleActionComponent extends Component {
     constructor() {
