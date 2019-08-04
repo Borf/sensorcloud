@@ -35,7 +35,13 @@ namespace SensorCloud
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
-            await base.StartAsync(cancellationToken);
+            try
+            {
+                await base.StartAsync(cancellationToken);
+            }catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
             var telegram = GetService<services.telegram.Service>();
             if (telegram != null)
                 InstallTelegramHandlers(telegram);
