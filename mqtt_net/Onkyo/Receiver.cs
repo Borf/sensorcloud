@@ -95,8 +95,8 @@ namespace Onkyo
                     }
 					if (command.command == "SLI")
 						_input = GetInputFromPacket(command.data);
-					if (command.command == "NLS") // net-usb-list-info
-						;
+                    if (command.command == "NLS") // net-usb-list-info
+                    { }
 
 				}
 			}

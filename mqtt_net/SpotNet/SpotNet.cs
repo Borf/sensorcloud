@@ -66,7 +66,7 @@ namespace SpotNet
                     if (spot.segments != null)
                         OnSpot?.Invoke(this, spot);
                 }
-                catch (XmlException e)
+                catch (XmlException)
                 {
                     //  Console.WriteLine("Could not parse spot: " + e + "\n\n" + h.headers["X-XML"]);
                 }

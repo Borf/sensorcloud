@@ -25,14 +25,14 @@ namespace SensorCloud.rules
             outputs[name] = socket;
         }
 
-        public Task<bool> trigger(Node node)
+        public async Task<bool> trigger(Node node)
         {
             //fix inputs
-            return OnTrigger(node);
+            return await OnTrigger(node);
         }
 
-        public virtual async Task<bool> OnTrigger(Node node)
-        { return true; }
+        public virtual Task<bool> OnTrigger(Node node)
+        { return Task.FromResult(true); }
 
         public virtual void SetOutputs(Node node)
         { }

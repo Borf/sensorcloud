@@ -13,11 +13,11 @@ namespace SensorCloud.rules
             addInput("val2", new TextSocket());
         }
 
-        public override async Task<bool> OnTrigger(Node node)
+        public override Task<bool> OnTrigger(Node node)
         {
             if ((string)node.getInputValue("val1") == (string)node.getInputValue("val2"))
-                return true;
-            return false;
+                return Task.FromResult(true);
+            return Task.FromResult(false);
         }
     }
 }

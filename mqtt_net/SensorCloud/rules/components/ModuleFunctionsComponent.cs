@@ -14,12 +14,12 @@ namespace SensorCloud.rules
             addInput("function", new TextSocket());
         }
 
-        public override async Task<bool> OnTrigger(Node node)
+        public override Task<bool> OnTrigger(Node node)
         {
             rulesManager.functions.Find(r => 
                 r.Module == node.data["module"].ToObject<string>() &&
                 r.FunctionName == node.data["function"].ToObject<string>()).Callback(node.inputValues);
-            return false;
+            return Task.FromResult(false);
         }
     }
 }

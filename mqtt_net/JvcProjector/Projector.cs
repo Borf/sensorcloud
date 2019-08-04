@@ -48,7 +48,7 @@ namespace JvcProjector
 			{
 				Console.WriteLine($"JVC\t\tException when connecting to socket: {e}");
                 await Task.Delay(30000);
-                Task.Run(async () => await Connect(address)); //run in background
+                await Connect(address);
             }
         }
 

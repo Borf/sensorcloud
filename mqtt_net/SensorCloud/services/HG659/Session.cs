@@ -64,7 +64,7 @@ namespace SensorCloud.services.HG659
                 return JToken.Parse(data);
             }catch(WebException e)
             {
-                Console.WriteLine("HG659\tsession 404 on API, logging in again");
+                Console.WriteLine("HG659\tsession 404 on API, logging in again, " + e);
                 await Login();
                 await Task.Delay(1000);
                 return await getApi(api);
@@ -98,7 +98,7 @@ namespace SensorCloud.services.HG659
             }
             catch (WebException e)
             {
-                Console.WriteLine("HG659\tsession 404 on API, logging in again");
+                Console.WriteLine("HG659\tsession 404 on API, logging in again, " + e);
                 await Login();
                 await Task.Delay(1000);
                 return await getApi(api);
