@@ -21,9 +21,12 @@ namespace SensorCloud.datamodel
         public DbSet<DashboardItem> dashboardItems { get; set; }
         public DbSet<DashboardCard> dashboardCards { get; set; }
 
+        //spotnet service
         public DbSet<Spot> spots { get; set; }
         public DbSet<SpotNzb> spotNzbs { get; set; }
 
+        //HG659 hosts
+        public DbSet<HG659_host> HG569_hosts { get; set; }
 
         public SensorCloudContext(IConfiguration configuration)
 		{
@@ -103,6 +106,10 @@ namespace SensorCloud.datamodel
                 entity.HasOne(e => e.spot).WithMany(s => s.nzbs);
             });
 
+            modelBuilder.Entity<HG659_host>(entity =>
+            {
+                entity.HasKey(e => new { e.mac });
+            });
         }
     }
 }
