@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NNTP", "NNTP\NNTP.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpotNet", "SpotNet\SpotNet.csproj", "{1A3ECE68-FD13-4DB0-9133-FCB7EC243C5B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorCloud-test", "SensorCloud-test\SensorCloud-test.csproj", "{03C592F6-8BD3-43C9-9291-9DADB6FACE24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SensorCloud-test", "SensorCloud-test\SensorCloud-test.csproj", "{03C592F6-8BD3-43C9-9291-9DADB6FACE24}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libraries", "libraries", "{52A59768-BEB1-4189-B91C-A49C8CF15EF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9912F8E5-8E15-451A-99AC-C07AF63C1CEA} = {52A59768-BEB1-4189-B91C-A49C8CF15EF0}
+		{ABDC2568-326B-43B2-82ED-189DA680FE9E} = {52A59768-BEB1-4189-B91C-A49C8CF15EF0}
+		{8A3A90BE-B669-402D-B8FB-D8ABB6B46B9F} = {52A59768-BEB1-4189-B91C-A49C8CF15EF0}
+		{1037F737-AAED-4970-B448-C9DA3479BD2D} = {52A59768-BEB1-4189-B91C-A49C8CF15EF0}
+		{1A3ECE68-FD13-4DB0-9133-FCB7EC243C5B} = {52A59768-BEB1-4189-B91C-A49C8CF15EF0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7E1B20F1-0F69-4239-A1D9-5BA7891E45BC}

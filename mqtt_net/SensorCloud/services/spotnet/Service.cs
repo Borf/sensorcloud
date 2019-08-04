@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 using SensorCloud.datamodel;
 using SpotNet;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SensorCloud.services.spotnet
 {
-    public class Service : SensorCloud.Service
+    public partial class Service : SensorCloud.Service
     {
         private Config config;
         private IConfiguration configuration;
@@ -52,6 +53,8 @@ namespace SensorCloud.services.spotnet
                         db.spots.Add(dbSpot);
                         db.spotNzbs.AddRange(dbSpot.nzbs);
                         await db.SaveChangesAsync();
+                        if (mqtt != null)
+                            await mqtt.Publish("spotnet", JObject.FromObject(new { id = spot.articleid, title = spot.title }).ToString());
                     }
 
                 };
