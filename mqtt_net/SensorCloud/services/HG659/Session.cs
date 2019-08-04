@@ -15,8 +15,8 @@ namespace SensorCloud.services.HG659
 
         string csrf_param;
         string csrf_token;
-        string cookie;
         private Config config;
+        private CookieContainer cookieContainer = new CookieContainer();
 
         public Session(Config config)
         {
@@ -24,11 +24,10 @@ namespace SensorCloud.services.HG659
         }
         public async Task Login()
         {
-            WebRequest request = WebRequest.Create($"http://{config.address}/");
+            HttpWebRequest request = WebRequest.Create($"http://{config.address}/") as HttpWebRequest;
+            request.CookieContainer = cookieContainer;
             WebResponse response = await request.GetResponseAsync();
             string data = await new StreamReader(response.GetResponseStream()).ReadToEndAsync();
-
-            cookie = response.Headers["Set-Cookie"];
 
             HtmlDocument pageDocument = new HtmlDocument();
             pageDocument.LoadHtml(data);
@@ -41,25 +40,35 @@ namespace SensorCloud.services.HG659
                 Password = password,
                 isInstance = true,
                 isDestroyed = false,
-                isDestroying = false,
+                isDestroying = true,
                 isObserverable = true
             });
-            Console.WriteLine($"Logged in, cookie {cookie}");
+            if(res["errorCategory"].ToObject<string>() != "ok")
+            {
+                Console.WriteLine(res);
+            }
         }
 
 
 
         internal async Task<JToken> getApi(string api)
         {
-            WebRequest request = WebRequest.Create($"http://{config.address}/" + api);
-            request.Headers["Cookie"] = cookie;
-            WebResponse response = await request.GetResponseAsync();
-            string data = await new StreamReader(response.GetResponseStream()).ReadToEndAsync();
-            data = data.Substring(data.IndexOf("/*") + 2);
-            data = data.Substring(0, data.LastIndexOf("*/"));
-            if (response.Headers["Set-Cookie"] != null)
-                cookie = response.Headers["Set-Cookie"];
-            return JToken.Parse(data);
+            HttpWebRequest request = WebRequest.Create($"http://{config.address}/" + api) as HttpWebRequest;
+            request.CookieContainer = cookieContainer;
+            try
+            {
+                WebResponse response = await request.GetResponseAsync();
+                string data = await new StreamReader(response.GetResponseStream()).ReadToEndAsync();
+                data = data.Substring(data.IndexOf("/*") + 2);
+                data = data.Substring(0, data.LastIndexOf("*/"));
+                return JToken.Parse(data);
+            }catch(WebException e)
+            {
+                Console.WriteLine("HG659\tsession 404 on API, logging in again");
+                await Login();
+                await Task.Delay(1000);
+                return await getApi(api);
+            }
         }
 
         internal async Task<JToken> postApi(string api, object postData)
@@ -73,19 +82,27 @@ namespace SensorCloud.services.HG659
                 },
                 data = postData
             };
-            WebRequest request = WebRequest.Create($"http://{config.address}/" + api);
-            request.Headers["Cookie"] = cookie;
-            request.Method = "post";
-            var req = await request.GetRequestStreamAsync();
-            await req.WriteAsync(Encoding.UTF8.GetBytes(JObject.FromObject(realPostData).ToString()));
+            try
+            {
+                HttpWebRequest request = WebRequest.Create($"http://{config.address}/" + api) as HttpWebRequest;
+                request.CookieContainer = cookieContainer;
+                request.Method = "post";
+                var req = await request.GetRequestStreamAsync();
+                await req.WriteAsync(Encoding.UTF8.GetBytes(JObject.FromObject(realPostData).ToString()));
 
-            WebResponse response = await request.GetResponseAsync();
-            string data = await new StreamReader(response.GetResponseStream()).ReadToEndAsync();
-            data = data.Substring(data.IndexOf("/*") + 2);
-            data = data.Substring(0, data.LastIndexOf("*/"));
-            if (response.Headers["Set-Cookie"] != null)
-                cookie = response.Headers["Set-Cookie"];
-            return JToken.Parse(data);
+                WebResponse response = await request.GetResponseAsync();
+                string data = await new StreamReader(response.GetResponseStream()).ReadToEndAsync();
+                data = data.Substring(data.IndexOf("/*") + 2);
+                data = data.Substring(0, data.LastIndexOf("*/"));
+                return JToken.Parse(data);
+            }
+            catch (WebException e)
+            {
+                Console.WriteLine("HG659\tsession 404 on API, logging in again");
+                await Login();
+                await Task.Delay(1000);
+                return await getApi(api);
+            }
         }
     }
 }
