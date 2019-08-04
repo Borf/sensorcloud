@@ -58,18 +58,30 @@ namespace SensorCloud.services.HG659
                     var dbHost = dbHosts.FirstOrDefault(h => h.mac == host.MACAddress);
 
                     if (dbHost == null)
-                        await db.HG569_hosts.AddAsync(new HG659_host()
+                    {
+                        await db.HG569_hosts.AddAsync(dbHost = new HG659_host()
                         {
                             mac = host.MACAddress,
                             hostname = host.HostName,
                             ip = host.IPAddress
                         });
+                        if(mqtt != null)
+                            await mqtt.Publish("network/newhost", JObject.FromObject(dbHost).ToString());
+                    }
                     else
                     {
                         if (dbHost.hostname != host.HostName)
+                        {
                             Console.WriteLine($"hostname changed for mac {host.MACAddress}, host {host.HostName}");
+                            if (mqtt != null)
+                                await mqtt.Publish("network/hostchange", JObject.FromObject(dbHost).ToString());
+                        }
                         if (dbHost.ip != host.IPAddress)
+                        {
                             Console.WriteLine($"IP address changed for mac {host.MACAddress}, host {host.HostName}");
+                            if (mqtt != null)
+                                await mqtt.Publish("network/ipchange", JObject.FromObject(dbHost).ToString());
+                        }
                         dbHost.ip = host.IPAddress;
                         dbHost.hostname = host.HostName;
                     }

@@ -44,6 +44,7 @@ namespace SensorCloud.services.HG659
                 isDestroying = false,
                 isObserverable = true
             });
+            Console.WriteLine($"Logged in, cookie {cookie}");
         }
 
 

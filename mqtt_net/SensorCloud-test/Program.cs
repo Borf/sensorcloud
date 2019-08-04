@@ -33,11 +33,17 @@ namespace SensorCloud_test
             builder.AddJsonFile(Path.GetFullPath("../../../../appsettings.json")); //ewww
             IConfiguration configuration = builder.Build();
 
+
+            var mqttConfig = new SensorCloud.services.mqtt.Config();
+            configuration.GetSection("mqtt").Bind(mqttConfig);
+            var mqtt = new SensorCloud.services.mqtt.Service(null, mqttConfig);
+            await mqtt.StartAsync(new System.Threading.CancellationToken());
+
             var config = new SensorCloud.services.HG659.Config();
             configuration.GetSection("HG659").Bind(config);
 
-
             var service = new SensorCloud.services.HG659.Service(null, configuration, config);
+            service.InstallMqttHandlers(mqtt);
 
             var bla = service.StartAsync(new System.Threading.CancellationToken());
 
