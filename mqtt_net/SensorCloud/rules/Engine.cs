@@ -95,6 +95,7 @@ namespace SensorCloud.rules
             registerComponent(new ModuleTriggersComponent(service));
             registerComponent(new LogComponent());
             registerComponent(new JsonSelectComponent());
+            registerComponent(new ConcatComponent());
         }
 
         static void registerComponent(Component component)

@@ -21,6 +21,10 @@ class Input {
         for (var c in this.controls)
             return this.controls[c].build(); //TODO: fix multiple controls?
     }
+    set value(value) {
+        for (var c in this.controls)
+            this.controls[c].value = value;
+    }
 }
 
 class Output {

@@ -67,7 +67,10 @@ namespace SensorCloud.rules
 
         internal object getInputValue(string name)
         {
-            return inputValues[name];
+            if (inputValues.ContainsKey(name))
+                return inputValues[name];
+            else
+                return data[name].ToObject<string>();
         }
 
     }

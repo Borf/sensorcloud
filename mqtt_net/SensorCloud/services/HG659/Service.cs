@@ -74,13 +74,24 @@ namespace SensorCloud.services.HG659
                         {
                             Console.WriteLine($"hostname changed for mac {host.MACAddress}, host {host.HostName}");
                             if (mqtt != null)
-                                await mqtt.Publish("network/hostchange", JObject.FromObject(dbHost).ToString());
+                                await mqtt.Publish("network/hostchange", JObject.FromObject(new {
+                                ip = dbHost.ip,
+                                mac = dbHost.mac,
+                                oldHost = dbHost.hostname,
+                                newHost = host.HostName
+                                }).ToString());
                         }
                         if (dbHost.ip != host.IPAddress)
                         {
                             Console.WriteLine($"IP address changed for mac {host.MACAddress}, host {host.HostName}");
                             if (mqtt != null)
-                                await mqtt.Publish("network/ipchange", JObject.FromObject(dbHost).ToString());
+                                await mqtt.Publish("network/ipchange", JObject.FromObject(new
+                                {
+                                    oldIp = dbHost.ip,
+                                    newIp = host.IPAddress,
+                                    mac = dbHost.mac,
+                                    host = dbHost.hostname
+                                }).ToString());
                         }
                         dbHost.ip = host.IPAddress;
                         dbHost.hostname = host.HostName;

@@ -85,6 +85,20 @@ class AddComponent extends Component {
     }
 }
 
+class ConcatComponent extends Component {
+    constructor() {
+        super("Concatenate");
+    }
+    cat = "Operations";
+
+    build(node, data) {
+        node
+            .addOutput(new Output('text', "Text", textSocket), data)
+            .addInput(new Input('val1', 'Value 1', textSocket).addControl(new TextControl()), data)
+            .addInput(new Input('val2', 'Value 2', textSocket).addControl(new TextControl()), data);
+        return node;
+    }
+}
 
 class IfComponent extends Component {
     constructor() {
@@ -118,7 +132,7 @@ class JsonSelectComponent extends Component {
             .addInput(new Input('json', 'Json', textSocket), data)
             .addOutput(new Output('data', 'Data', textSocket), data)
             .addInput(new Input('query', 'Query', textSocket)
-                .addControl(new TextControl(), data));
+                .addControl(new TextControl()), data);
         return node;
     }
 }
