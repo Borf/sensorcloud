@@ -34,7 +34,7 @@ namespace SensorCloud.services.spotnet
                     {
                         using (SensorCloudContext db = new SensorCloudContext(configuration))
                         {
-                            Console.WriteLine($"Saving {spot.article}");
+                            Log($"Saving {spot.article}");
                             datamodel.Spot dbSpot = new datamodel.Spot()
                             {
                                 article = spot.article,

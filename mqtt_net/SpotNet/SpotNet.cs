@@ -42,21 +42,17 @@ namespace SpotNet
         public async Task<long> Update(long start)
         {
             GroupInfo = await nntp.Group("free.pt");
-            if(start < GroupInfo.high)
-                Console.WriteLine("Found new spots, fetching");
             for (long id = start; id <= GroupInfo.high; id++)
             {
                 await Get(id);
                 if(id % 50 == 0)
                     System.GC.Collect();
             }
-            Console.WriteLine("Done");
             return GroupInfo.high+1;
         }
 
         public async Task Get(long id)
         {
-            Console.WriteLine($"Getting spot {id}");
             Header h = await nntp.Headers(id);
             if (h != null && h.headers.ContainsKey("X-XML"))
             {
@@ -76,7 +72,7 @@ namespace SpotNet
                 }
             }
             else
-                Console.WriteLine($"{id} not a spotnet spot");
+            { /*    Console.WriteLine($"{id} not a spotnet spot");*/ }
         }
 
 
