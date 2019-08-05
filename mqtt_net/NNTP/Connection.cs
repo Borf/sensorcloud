@@ -30,7 +30,7 @@ namespace NNTP
             this.username = username;
             this.password = password;
 
-            Console.WriteLine("nntp: connecting to server");
+            //Console.WriteLine("nntp: connecting to server");
             await client.ConnectAsync(this.host, this.port);
             //client.Connect(this.host, this.port);
 
@@ -42,11 +42,11 @@ namespace NNTP
                 //int rc = await stream.ReadAsync(buffer, 0, buffer.Length);
                 int rc = await stream.ReadAsync(buffer, 0, buffer.Length);
 
-                Console.WriteLine($"Got {rc} bytes");
+                //Console.WriteLine($"Got {rc} bytes");
                 lineBuffer += Encoding.GetEncoding("ISO-8859-1").GetString(buffer, 0, rc);
-                for(int i = 0; i < rc; i++)
-                    Console.Write(buffer[i].ToString("x2") + " ");
-                Console.WriteLine("");
+                //for(int i = 0; i < rc; i++)
+                //    Console.Write(buffer[i].ToString("x2") + " ");
+                //Console.WriteLine("");
                 if(lineBuffer.Contains("\n"))
                 {
                     string line = lineBuffer.Substring(0, lineBuffer.IndexOf("\n", StringComparison.Ordinal)).Trim();
