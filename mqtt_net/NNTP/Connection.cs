@@ -56,6 +56,8 @@ namespace NNTP
                         await Send($"AUTHINFO USER {username}\r\n");
                     else if (cmd[0] == "381") //need more
                         await Send($"AUTHINFO PASS {password}\r\n");
+                    else if (cmd[0] == "281") //authentication accepted
+                        break;
                     else
                     {
                         Console.WriteLine($"Unknown line: {line}");
