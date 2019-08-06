@@ -16,7 +16,8 @@ function alert(msg, className) {
 }
 
 
-$(function() {
+$(function () {
+    feather.replace();
 	$.ajax({
         url: apiurl + "user/login",
 		method: "post",
@@ -34,16 +35,16 @@ $(function() {
 	});
 
 
-	$("a#btnDashboard").click(function()
-	{
-		setPage("dashboard.html").then(function()
+	$("a#btnDashboard").click(function(e)
+    {
+        setPage("dashboard.html", $(e.target)).then(function()
 		{
 			showGraphs();
 		});
 	});
-	$("a#btnNodes").click(function()
+	$("a#btnNodes").click(function(e)
     {
-		setPage("nodes.html").then(function()
+        setPage("nodes.html", $(e.target)).then(function()
 		{
 			$.ajax({
 				url: apiurl + "nodes",
@@ -119,9 +120,9 @@ $(function() {
 			});
 		});
 	});
-	$("a#btnSensors").click(function()
+	$("a#btnSensors").click(function(e)
 	{
-		setPage("sensors.html").then(function()
+        setPage("sensors.html", $(e.target)).then(function()
 		{
 			$.ajax({
 				url: apiurl + "sensordata/type:temperature",
@@ -161,9 +162,9 @@ $(function() {
 
 		});
 	});
-	$("a#btnMap").click(function()
+	$("a#btnMap").click(function(e)
 	{
-		setPage("map.html").then(function()
+        setPage("map.html", $(e.target)).then(function()
         {
 			$.ajax({
 				url: apiurl + "room",
@@ -203,60 +204,14 @@ $(function() {
 							});
 						}
 					}
-
-/*					plan.dining = R.path("M285,83 l190,0 l0,240 l-190,0z").attr(attr);
-					plan.kitchen = R.path("M285,323 l190,0 l0,382 l-177,0 l-13,-250z").attr(attr);
-					plan.livingroom = R.path("M19,455 l266,0 l13,250 l0,330 l-279,0z").attr(attr);
-					plan.hallway = R.path("M298,705 l177,0 l0,170 l-90,0 l0,10 l10,0 l0,150 l-97,0z").attr(attr);
-					plan.toilet = R.path("M395,932 l80,0 l0,103 l-80,0z").attr(attr);
-					plan.meter = R.path("M395,885 l80,0 l0,47 l-80,0z").attr(attr);
-
-					attr.stroke = '#0f0';
-
-					plan.smallbedroom = R.path("M755,300 l190,0 l0,411 l-73,0 l0,-30 l-106,0 l0,-226 l-11,0z").attr(attr);
-					plan.masterbedroom = R.path("M489,455 l277,0 l0,305 l-279,0z").attr(attr);
-					plan.hallway2 = R.path("M766,681 l105,0 l0,30 l75,0 l0,174 l-180,0z").attr(attr);
-					plan.bathroom = R.path("M766,885 l180,0 l0,155 l-180,0z").attr(attr);
-					plan.bedroom = R.path("M489,760 l277,0 l0,280 l-277,0z").attr(attr);
-					attr.stroke = '#00f';*/
-
-/*
-		 			var current = null;
-					for (var room in plan) {
-						plan[room].color = "#afa";
-
-
-						var bbox = plan[room].getBBox();
-						var center = { x : bbox.x + bbox.width/2, y : bbox.y + bbox.height/2 };
-						R.text(center.x, center.y, room).attr({
-							'font-size' : 20
-						});
-
-						(function (st, room) {
-							st[0].style.cursor = "pointer";
-							st[0].onmouseover = function () {
-								current && plan[current].animate({fill: "#faa"}, 150)
-								st.animate({fill: st.color}, 150);
-								st.toFront();
-								R.safari();
-								//document.getElementById(room).style.display = "block";
-								current = room;
-							};
-							st[0].onmouseout = function () {
-								st.animate({fill: "#faa"}, 150);
-								st.toFront();
-								R.safari();
-							};
-						})(plan[room], room);
-					}*/
 				}
 			});
 
 		});
 	});
-	$("a#btnLog").click(function()
+	$("a#btnLog").click(function(e)
 	{
-		setPage("log.html").then(function()
+        setPage("log.html", $(e.target)).then(function()
 		{
 				$.ajax({
 				url: apiurl + "log",
@@ -284,8 +239,8 @@ $(function() {
     
 
 
-    $("a#btnRules").click(function () {
-        setPage("rules.html").then(function () {
+    $("a#btnRules").click(function (e) {
+        setPage("rules.html", $(e.target)).then(function () {
 
         });
     });
@@ -294,11 +249,12 @@ $(function() {
     else if (location.hash == "#sensors")   $("a#btnSensors").click();
 	else if (location.hash == "#rules")     $("a#btnRules").click();
     else if (location.hash == "#map") $("a#btnMap").click();
-    else if (location.hash == "#nodeedit") setPage("nodeedit.html").then(function () {});
 	else								    $("a#btnDashboard").click();
 
-	function setPage(url)
-	{
+	function setPage(url, src)
+    {
+        $("a.nav-link").removeClass("active");
+        src.addClass("active");
 		return $.ajax({
 			url : url,
 			success : function(data, status, xhr)

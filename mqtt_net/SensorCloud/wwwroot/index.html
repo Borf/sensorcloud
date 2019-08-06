@@ -27,102 +27,101 @@
         <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
     <style>
-body {
-  font-size: 1rem;
-}
+                body {
+                    font-size: 1rem;
+                }
 
-.feather {
-  width: 16px;
-  height: 16px;
-  vertical-align: text-bottom;
-}
+                .feather {
+                    width: 16px;
+                    height: 16px;
+                    vertical-align: text-bottom;
+                }
 
-/*
- * Sidebar
- */
+                /*
+         * Sidebar
+         */
 
-/*.sidebar {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 100; 
-  padding: 48px 0 0; 
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-}*/
+                /*.sidebar {
+          position: fixed;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          z-index: 100;
+          padding: 48px 0 0;
+          box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+        }*/
 
-.sidebar-sticky {
-  position: relative;
-  top: 0;
-  height: calc(100vh - 48px);
-  padding-top: .5rem;
-  overflow-x: hidden;
-  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-}
+                .sidebar-sticky {
+                    position: relative;
+                    top: 0;
+                    height: calc(100vh - 48px);
+                    padding-top: .5rem;
+                    overflow-x: hidden;
+                    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+                }
 
-@supports ((position: -webkit-sticky) or (position: sticky)) {
-  .sidebar-sticky {
-    position: -webkit-sticky;
-    position: sticky;
-  }
-}
+                @supports ((position: -webkit-sticky) or (position: sticky)) {
+                    .sidebar-sticky {
+                        position: -webkit-sticky;
+                        position: sticky;
+                    }
+                }
 
-.sidebar .nav-link {
-  font-weight: 500;
-  color: #ddd;
-}
+                .sidebar .nav-link {
+                    font-weight: 500;
+                    color: #ddd;
+                }
 
-.sidebar .nav-link .feather {
-  margin-right: 4px;
-  color: #999;
-}
+                    .sidebar .nav-link .feather {
+                        margin-right: 2px;
+                        color: #999;
+                    }
 
-.sidebar .nav-link.active {
-  color: #007bff;
-}
+                    .sidebar .nav-link.active {
+                        color: #007bff;
+                    }
 
-.sidebar .nav-link:hover .feather,
-.sidebar .nav-link.active .feather {
-  color: inherit;
-}
+                        .sidebar .nav-link:hover .feather,
+                        .sidebar .nav-link.active .feather {
+                            color: inherit;
+                        }
 
-.sidebar-heading {
-  font-size: .75rem;
-  text-transform: uppercase;
-}
+                .sidebar-heading {
+                    font-size: .75rem;
+                    text-transform: uppercase;
+                }
 
 
-/*
- * Navbar
- */
+                /*
+         * Navbar
+         */
 
-.navbar-brand {
-  padding-top: .75rem;
-  padding-bottom: .75rem;
-  font-size: 1rem;
-  background-color: rgba(0, 0, 0, .25);
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
-}
+                .navbar-brand {
+                    padding-top: .75rem;
+                    padding-bottom: .75rem;
+                    font-size: 1rem;
+                    background-color: rgba(0, 0, 0, .25);
+                    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);
+                }
 
-.navbar .form-control {
-  padding: .75rem 1rem;
-  border-width: 0;
-  border-radius: 0;
-}
+                .navbar .form-control {
+                    padding: .75rem 1rem;
+                    border-width: 0;
+                    border-radius: 0;
+                }
 
-.form-control-dark {
-  color: #fff;
-  background-color: rgba(255, 255, 255, .1);
-  border-color: rgba(255, 255, 255, .1);
-}
+                .form-control-dark {
+                    color: #fff;
+                    background-color: rgba(255, 255, 255, .1);
+                    border-color: rgba(255, 255, 255, .1);
+                }
 
-.form-control-dark:focus {
-  border-color: transparent;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
-}
+                    .form-control-dark:focus {
+                        border-color: transparent;
+                        box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
+                    }
     </style>
-
-    </head>
+</head>
 
 <body>
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
@@ -137,13 +136,13 @@ body {
 
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-1 sidebar text-white" style="background-color: #323842">
+            <nav class="col-md-1 sidebar text-white p-0" style="background-color: #323842; margin-top: 48px">
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
                             <a id="btnDashboard" class="nav-link" href="#">
-                                <span data-feather="home"></span>
-                                Dashboard <span class="sr-only">(current)</span>
+                                <span data-feather="grid"></span>
+                                Dashboard
                             </a>
                         </li>
                         <li class="nav-item">
@@ -154,19 +153,19 @@ body {
                         </li>
                         <li class="nav-item">
                             <a id="btnSensors" class="nav-link" href="#sensors">
-                                <span data-feather="shopping-cart"></span>
+                                <span data-feather="sunset"></span>
                                 Sensors
                             </a>
                         </li>
                         <li class="nav-item">
                             <a id="btnActuators" class="nav-link" href="#actuators">
-                                <span data-feather="users"></span>
+                                <span data-feather="sunrise"></span>
                                 Actuators
                             </a>
                         </li>
                         <li class="nav-item">
                             <a id="btnRules" class="nav-link" href="#rules">
-                                <span data-feather="bar-chart-2"></span>
+                                <span data-feather="share-2"></span>
                                 Rules
                             </a>
                         </li>
@@ -176,40 +175,46 @@ body {
                                 Nodes
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a id="btnModules" class="nav-link" href="#modules">
+                                <span data-feather="server"></span>
+                                Modules
+                            </a>
+                        </li>
                     </ul>
 
                     <!--<h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                <span>Saved reports</span>
-                <a class="d-flex align-items-center text-muted" href="#">
-                    <span data-feather="plus-circle"></span>
-                </a>
-            </h6>
-            <ul class="nav flex-column mb-2">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <span data-feather="file-text"></span>
-                        Current month
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <span data-feather="file-text"></span>
-                        Last quarter
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <span data-feather="file-text"></span>
-                        Social engagement
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">
-                        <span data-feather="file-text"></span>
-                        Year-end sale
-                    </a>
-                </li>
-            </ul>-->
+                        <span>Saved reports</span>
+                        <a class="d-flex align-items-center text-muted" href="#">
+                            <span data-feather="plus-circle"></span>
+                        </a>
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text"></span>
+                                Current month
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text"></span>
+                                Last quarter
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text"></span>
+                                Social engagement
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text"></span>
+                                Year-end sale
+                            </a>
+                        </li>
+                    </ul>-->
                 </div>
             </nav>
             <div class="col-md-11 p-0" style="margin-top: 48px">
@@ -243,7 +248,7 @@ body {
     <script src="js/sensor.js"></script>
     <script src="js/nodeedit.js"></script>
     <script src="js/rules.js"></script>
-
+    <script src="https://unpkg.com/feather-icons"></script>
 </body>
 
 </html>
