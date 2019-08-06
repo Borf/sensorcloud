@@ -69,8 +69,9 @@ namespace SensorCloud.rules
         {
             if (inputValues.ContainsKey(name))
                 return inputValues[name];
-            else
+            else if(data.ContainsKey(name))
                 return data[name].ToObject<string>();
+            return "";
         }
 
     }
