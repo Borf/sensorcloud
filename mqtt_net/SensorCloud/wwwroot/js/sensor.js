@@ -42,18 +42,23 @@ $(function() {
 		});
 	});
 	$("a#btnNodes").click(function()
-	{
+    {
 		setPage("nodes.html").then(function()
 		{
 			$.ajax({
-				url: apiurl + "nodelist",
+				url: apiurl + "nodes",
 				dataType: "json",
 				success : function(data)
-				{
+                {
 					container = $("#nodesContainer");
-					container.empty();
+                    container.empty();
+                    var row = $(`<div class="row"></div>`);
+                    container.append(row);
+
 					for(var i = 0; i < data.length; i++)
-					{
+                    {
+                        var lastPing = Math.round((Date.now() - Date.parse(data[i].stamp) - (60 * 60 * 2 * 1000)) / 100) / 10;
+
 						var memclass = "";
 						console.log(data[i].heapspace);
                         if (!data[i].heapspace)
@@ -67,43 +72,32 @@ $(function() {
 
 
 						if(navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
-							data[i].stamp = data[i].stamp.replace(" ", "T");
+                            data[i].stamp = data[i].stamp.replace(" ", "T");
 						var time = "";
 						if(data[i].stamp)
-							time = '<abbr title="'+data[i].stamp+'">'+Math.round((Date.now() - Date.parse(data[i].stamp)) / 100)/10+' seconds ago</abbr>';
+                            time = '<abbr title="' + data[i].stamp + '">' + Math.round((Date.now() - Date.parse(data[i].stamp) - (60 * 60 * 2*1000)) / 100)/10+'sec ago</abbr>';
 
 						var sensorTime = "";
 						if(data[i].lastsensordata)
-							sensorTime = '<abbr title="'+data[i].lastsensordata+'">'+Math.round((Date.now() - Date.parse(data[i].lastsensordata)) / 100)/10+' seconds ago</abbr>';
+							sensorTime = '<abbr title="'+data[i].lastsensordata+'">'+Math.round((Date.now() - Date.parse(data[i].lastsensordata)) / 100)/10+'sec ago</abbr>';
 
+                        var inDanger = !data[i].ip || !data[i].stamp || lastPing > 120;
 
-						container.append('<div class="col-lg-4">' +
-											'<div class="panel'+(data[i].ip ? " panel-default" : ' panel-danger')+'">' +
-				'<div class="panel-heading">' +
-					'<i class="fa fa-heartbeat fa-fw"></i> Node' +
-					'<div class="pull-right">' +
-						'<div class="btn-group">' +
-							'<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">' +
-								'Actions' +
-								'<span class="caret"></span>' +
-							'</button>' +
-							'<ul class="dropdown-menu pull-right" role="menu">' +
-								'<li><a href="#">Edit</a></li>' +
-								'<li><a href="#">Delete</a></li>' +
-							'</ul>' +
-						'</div>' +
-					'</div>' +
+						row.append('<div class="col-2">' +
+				'<div class="card border-primary text-white bg-dark">' +
+				'<div class="card-heading bg-primary">' +
+					'<h2 class="card-title"><i class="fa fa-heartbeat fa-fw"></i>' + data[i].name + '</h2>' +
 				'</div>' +
-				'<!-- /.panel-heading -->' +
-				'<div class="panel-body">' +
-					'<table class="table">' +
+				'<!-- /.card-heading -->' +
+				'<div class="card-body">' +
+					'<table class="table text-white">' +
 						'<tbody>' +
 							'<tr><td>Id</td><td>'+data[i].id+'</td></tr>' +
 							'<tr><td>Hardware Id</td><td>'+data[i].hwid+'</td></tr>' +
 							'<tr><td>Name</td><td>'+data[i].name+'</td></tr>' +
 							'<tr><td>Room</td><td>'+data[i].room+'</td></tr>' +
-							'<tr><td>IP</td><td><a href="http://'+data[i].ip+'">'+data[i].ip+'</a></td></tr>' +
-							'<tr><td>Last ping</td><td>'+time+'</td></tr>' +
+                            '<tr' + (inDanger ? ' class="bg-danger"' : '') + '><td>IP</td><td><a href="http://' + data[i].ip + '">' + data[i].ip + '</a></td></tr>' +
+                            '<tr' + (inDanger?' class="bg-danger"':'') + '><td>Last ping</td><td>' + time + '</td></tr>' +
 							'<tr><td>Last sensor update</td><td>'+sensorTime+'</td></tr>' +
 							'<tr class="'+memclass+'"><td>Memory</td><td>'+data[i].heapspace+' bytes</td></tr>' +
 							'<tr><td>RSSI</td><td>'+data[i].rssi+' Dbm</td></tr>' +
@@ -112,10 +106,14 @@ $(function() {
 						'</tbody>' +
 					'</table>' +
 				'</div>' +
-				'<!-- /.panel-body -->' +
+				'<!-- /.card-body -->' +
 			'</div>' +
-			'<!-- /.panel -->' +
+			'<!-- /.card -->' +
 		'</div>');
+                       /* if (i % 4 == 3) {
+                            row = $(`<div class="row"></div>`);
+                            container.append(row);
+                        }*/
 					}
 				}
 			});
@@ -166,19 +164,25 @@ $(function() {
 	$("a#btnMap").click(function()
 	{
 		setPage("map.html").then(function()
-		{
+        {
 			$.ajax({
-				url: apiurl + "roomlist",
+				url: apiurl + "room",
 				dataType: "json",
 				success : function(data)
-				{
+                {
 					var R = Raphael("mapje");
 
+                    var r = R.rect(0, 0, 1048, 1084);
+                    r.attr({
+                        fill: "#252A31",
+                        "fill-opacity": 0.5
+                    });
+
 					var attr = {
-						fill: "#faa",
+                        fill: "#323842",
 						"fill-opacity":0.3,
-						stroke: "#f00",
-						"stroke-width": 10,
+                        stroke: "#4F75FC",
+						"stroke-width": 2,
 						"stroke-linejoin": "round"
 					};
 					for(var i in data)
@@ -188,12 +192,14 @@ $(function() {
 						var bbox = data[i].el.getBBox();
 						var center = { x : bbox.x + bbox.width/2, y : bbox.y + bbox.height/2 };
 						R.text(center.x, center.y, data[i].name).attr({
-							'font-size' : 20
+                            'font-size': 20,
+                            fill: '#fff'
 						});
 						if(data[i].nodes)
-						{
-							R.text(center.x, center.y+20, data[i].nodes.length + " node").attr({
-								'font-size' : 10
+                        {
+                            R.text(center.x, center.y + 20, data[i].nodes.length + " node" + (data[i].nodes.length > 1 ? "s" : "")).attr({
+                                'font-size': 10,
+                                fill: '#fff'
 							});
 						}
 					}

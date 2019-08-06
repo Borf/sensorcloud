@@ -63,9 +63,14 @@ namespace SensorCloud.datamodel
 				entity.HasKey(e => e.id);
 				entity.HasOne(s => s.node)
 				  .WithMany(n => n.sensors);
-			});
+                entity.HasOne(s => s.Type);
+            });
+            modelBuilder.Entity<Sensortype>(entity =>
+            {
+                entity.HasKey(e => e.id);
+            });
 
-			modelBuilder.Entity<Room>(entity =>
+            modelBuilder.Entity<Room>(entity =>
 			{
 				entity.HasKey(e => e.id);
 			});

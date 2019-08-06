@@ -69,7 +69,7 @@ body {
 
 .sidebar .nav-link {
   font-weight: 500;
-  color: #333;
+  color: #ddd;
 }
 
 .sidebar .nav-link .feather {
@@ -137,11 +137,11 @@ body {
 
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-1 bg-light sidebar">
+            <nav class="col-md-1 sidebar text-white" style="background-color: #323842">
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a id="btnDashboard" class="nav-link active" href="#">
+                            <a id="btnDashboard" class="nav-link" href="#">
                                 <span data-feather="home"></span>
                                 Dashboard <span class="sr-only">(current)</span>
                             </a>
@@ -171,7 +171,7 @@ body {
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a id="nodes" class="nav-link" href="#nodes">
+                            <a id="btnNodes" class="nav-link" href="#nodes">
                                 <span data-feather="layers"></span>
                                 Nodes
                             </a>
@@ -214,7 +214,7 @@ body {
             </nav>
             <div class="col-md-11 p-0" style="margin-top: 48px">
                 <ul class="list-group" id="alerts" style="position: fixed; width: 100%; z-index: 10;"></ul>
-                <main role="main" class="px-4">
+                <main role="main" class="h-100 px-4 text-white" style="background-color: #252A31">
                     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                         <h1 class="h2">Dashboard</h1>
                         <div class="btn-toolbar mb-2 mb-md-0">

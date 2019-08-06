@@ -1,48 +1,10 @@
-<div class="row">
-    <div class="col-lg-12">
-        <h1 class="page-header">Nodes</h1>
-    </div>
-    <!-- /.col-lg-12 -->
-</div>
-<!-- /.row -->
-<!-- /.row -->
-<div class="row" id="nodesContainer">
-    <div class="col-lg-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <i class="fa fa-heartbeat fa-fw"></i> Node
-                <div class="pull-right">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
-                            Actions
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu pull-right" role="menu">
-                            <li><a href="#">Delete</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <!-- /.panel-heading -->
-            <div class="panel-body">
-                <table class="table">
-                    <tbody>
-                        <tr><td>Id</td><td>2</td></tr>
-                        <tr><td>Hardware Id</td><td>D3 AD B3 3F</td></tr>
-                        <tr><td>Name</td><td>Shed</td></tr>
-                        <tr><td>IP</td><td>192.168.2.123</td></tr>
-                        <tr><td>Last ping</td><td>10s ago</td></tr>
-                        <tr><td>Last sensor update</td><td>10s ago</td></tr>
-                        <tr><td>Memory Left</td><td>2</td></tr>
-                        <tr><td>Sensors</td><td>2</td></tr>
-                        <tr><td>Actuators</td><td>1</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- /.panel-body -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Node configuration</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2">
+            <button id="btnNodesNew" type="button" class="btn btn-sm btn-outline-secondary">New</button>
         </div>
-        <!-- /.panel -->
     </div>
-
 </div>
-<!-- /.row -->
+<div class="row" id="nodesContainer">
+</div>

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 using SensorCloud.datamodel;
 
 
@@ -22,9 +23,30 @@ namespace SensorCloud.api.Controllers
 		}
 
         [HttpGet]
-		public IEnumerable<Node> Get()
+		public object Get()
 		{
-			return db.nodes;
+            return db.nodes
+                .Include(n => n.Room)
+                .Include(n => n.sensors)
+                    .ThenInclude(s => s.Type)
+                .AsEnumerable().Select(n =>
+            {
+                var ping = db.pings.OrderByDescending(p => p.id).FirstOrDefault(p => p.nodeid == n.id);
+                return new
+                {
+                    id = n.id,
+                    hwid = n.hwid,
+                    name = n.name,
+                    room = n.Room.name,
+                    ip = ping?.ip,
+                    rssi = ping?.rssi,
+                    heapspace = ping?.heapspace,
+                    stamp = ping?.stamp,
+                    lastsensordata = "",
+                    sensorcount = n.sensors.Count(s => s.Type.isSensor == 1),
+                    actcount = n.sensors.Count(s => s.Type.isSensor == 0)
+                };
+            });
 		}
 
 		// GET api/<controller>/5
