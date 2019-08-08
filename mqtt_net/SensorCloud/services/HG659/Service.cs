@@ -40,8 +40,15 @@ namespace SensorCloud.services.HG659
 
         public async Task<List<Host>> GetHosts()
         {
-            var hosts = await session.getApi("api/system/HostInfo");
-            return hosts.ToObject<List<Host>>();
+            var hosts = (await session.getApi("api/system/HostInfo")).ToObject<List<Host>>();
+            foreach(var host in hosts)
+            {
+                if (host.HostName.EndsWith("_Ethernet"))
+                    host.HostName = host.HostName.Replace("_Ethernet", "");
+                if (host.HostName.EndsWith("_Wireless"))
+                    host.HostName = host.HostName.Replace("_Wireless", "");
+            }
+            return hosts;
         }
 
 
