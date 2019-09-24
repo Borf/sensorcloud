@@ -35,10 +35,10 @@ namespace JvcProjector
 				Console.WriteLine($"JVC\t\tConnected to {address}");
 				stream = tcpClient.GetStream();
 
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
-				Task.Run(async () => await ReadPackets()); //run in background
-				Task.Run(async () => await UpdateStatus()); //run in background
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+				var readPackets = Task.Run(async () => await ReadPackets()); //run in background
+				var updateStatus = Task.Run(async () => await UpdateStatus()); //run in background
+
+                await Task.WhenAll(new Task[] { readPackets, updateStatus });
 			}
 			catch (IOException e)
 			{

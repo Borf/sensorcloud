@@ -24,7 +24,7 @@ namespace SensorCloud.services.dash
             this.configuration = configuration;
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             mqtt = GetService<mqtt.Service>();
             db = new SensorCloudContext(configuration);
@@ -33,10 +33,7 @@ namespace SensorCloud.services.dash
                 if (item.type == "mqtt")
                     StartMqtt(item);
 
-            Task.Run(async () => await update());
-
-
-            return Task.CompletedTask;
+            await update();
         }
 
         async Task update()

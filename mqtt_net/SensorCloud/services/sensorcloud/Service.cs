@@ -20,6 +20,8 @@ namespace SensorCloud.services.sensorcloud
         private SensorCloudContext db;
         private IConfiguration configuration;
 
+        private List<Node> nodes = new List<Node>();
+
         public Service(IServiceProvider services, IConfiguration configuration) : base(services)
         {
             this.configuration = configuration;
@@ -64,7 +66,14 @@ namespace SensorCloud.services.sensorcloud
                 }).First();
                 await mqtt.Publish("boot/whoami/" + hwid, JsonConvert.SerializeObject(ret));
                 Log($"Sensor {ret.name}  (id {ret.id}) in {ret.roomtopic} is booting");
-                new Node(hwid, services, configuration);
+                var newNode = new Node(hwid, services, configuration);
+                if (nodes.Any(n => n.hwid == hwid))
+                {
+                    Log($"Sensor already connected before");
+                    nodes.RemoveAll(n => n.hwid == hwid);
+                }
+                nodes.Add(newNode);
+
             });
 
             mqtt.On("boot/whoami/(.+)", (match, message) =>
@@ -72,8 +81,36 @@ namespace SensorCloud.services.sensorcloud
 
             });
 
+            var watchDog = Task.Run(WatchDog);
+            var backlog = Task.Run(BackLog);
 
+            await Task.WhenAll(new Task[] { watchDog, backlog });
+        }
 
+        private async Task WatchDog()
+        {
+            List<Node> messagedNodes = new List<Node>();
+            while(true)
+            {
+                await Task.Delay(1000);
+                nodes.ForEach(async n =>
+                {
+                    bool isLate = (DateTime.Now - n.lastPing).TotalSeconds > 60 || (DateTime.Now - n.lastValue).TotalSeconds > 60;
+                    if (isLate && !messagedNodes.Contains(n))
+                    {
+                        messagedNodes.Add(n);
+                        if (telegram != null)
+                            await telegram.SendMessageAsync($"Warning: node {n.node.name} in {n.node.Room} is missing in action!", true);
+                    }
+                    else if (!isLate && messagedNodes.Contains(n))
+                        messagedNodes.Remove(n);
+                });
+
+            }
+        }
+        
+        private async Task BackLog()
+        {
             while (true)
             {
                 await Task.Delay(1000 * 60 * 30);
@@ -92,7 +129,6 @@ namespace SensorCloud.services.sensorcloud
                 }
             }
         }
-
 
         public void Activate(Dictionary<string, object> parameters)
         {

@@ -14,22 +14,26 @@ namespace SensorCloud.services.sensorcloud
     public class Node : SensorCloud.Service
     {
         private mqtt.Service mqtt;
-        private SensorCloudContext db;
-        private datamodel.Node node;
+        private IConfiguration configuration;
+
+        public datamodel.Node node { get; private set; }
+        public string hwid {get; private set; }
+        public DateTime lastPing { get; private set; }
+        public DateTime lastValue { get; private set; }
+
 
         public Node(string hwid, IServiceProvider services, IConfiguration configuration) : base(services)
         {
-            mqtt = GetService<mqtt.Service>();
-            db = new SensorCloudContext(configuration);
-
-            node = db.nodes.Include(node => node.Room).Include(node => node.sensors).First(n => n.hwid == hwid);
-
+            this.mqtt = GetService<mqtt.Service>();
+            this.configuration = configuration;
+            using (var db = new SensorCloudContext(configuration))
+                node = db.nodes.Include(node => node.Room).Include(node => node.sensors).First(n => n.hwid == hwid);
             mqtt.On("(" + node.Room.topic + "/" + node.topic + ")/(.*)", onData);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         private void onData(Match match, string payload)
@@ -45,8 +49,12 @@ namespace SensorCloud.services.sensorcloud
                     heapspace = data.heapspace,
                     rssi = data.rssi
                 };
-                db.pings.Add(ping);
-                db.SaveChanges();
+                using (var db = new SensorCloudContext(configuration))
+                {
+                    db.pings.Add(ping);
+                    db.SaveChanges();
+                }
+                lastPing = DateTime.Now;
             }
             if (match.Groups[2].Value == "temperature" || match.Groups[2].Value == "humidity")
             {
@@ -61,8 +69,12 @@ namespace SensorCloud.services.sensorcloud
                         type = match.Groups[2].Value,
                         value = float.Parse(payload)
                     };
-                    db.sensordata.Add(sensorData);
-                    db.SaveChanges();
+                    using (var db = new SensorCloudContext(configuration))
+                    {
+                        db.sensordata.Add(sensorData);
+                        db.SaveChanges();
+                    }
+                    lastValue = DateTime.Now;
                 }
                 catch (FormatException)
                 {

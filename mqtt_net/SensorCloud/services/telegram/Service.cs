@@ -51,6 +51,7 @@ namespace SensorCloud.services.telegram
 
         private async void OnMessage(object sender, MessageEventArgs e)
         {
+            Console.WriteLine(e.Message.Chat.Id);
             GetService<rulemanager.Service>().trigger("Receive Telegram Message", new Dictionary<string, object>()
             {
                 {"text" ,e.Message.Text }

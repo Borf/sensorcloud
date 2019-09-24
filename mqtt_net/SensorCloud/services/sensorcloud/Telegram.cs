@@ -14,8 +14,12 @@ namespace SensorCloud.services.sensorcloud
     public partial class Service
     {
         private Menu sensorDataMenu;
+        private telegram.Service telegram;
+
         public override void InstallTelegramHandlers(telegram.Service telegram)
         {//TODO: softcode this
+            this.telegram = telegram;
+
             var projectorMenu = new Menu(title: "Projector");
             new Menu("Projector screen up", async () => await mqtt.Publish("livingroom/RF/7", "up"), projectorMenu);
             new Menu("Projector screen down", async () => await mqtt.Publish("livingroom/RF/7", "down"), projectorMenu);
