@@ -95,12 +95,12 @@ namespace SensorCloud.services.sensorcloud
                 await Task.Delay(1000);
                 nodes.ForEach(async n =>
                 {
-                    bool isLate = (DateTime.Now - n.lastPing).TotalSeconds > 60 || (DateTime.Now - n.lastValue).TotalSeconds > 60;
+                    bool isLate = (DateTime.Now - n.lastPing).TotalSeconds > 15*60 || (DateTime.Now - n.lastValue).TotalSeconds > 15*60;
                     if (isLate && !messagedNodes.Contains(n))
                     {
                         messagedNodes.Add(n);
                         if (telegram != null)
-                            await telegram.SendMessageAsync($"Warning: node {n.node.name} in {n.node.Room} is missing in action!", true);
+                            await telegram.SendMessageAsync($"Warning: node {n.node.name} in {n.node.Room.name} is missing in action!", true);
                     }
                     else if (!isLate && messagedNodes.Contains(n))
                         messagedNodes.Remove(n);
