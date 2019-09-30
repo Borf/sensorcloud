@@ -13,6 +13,8 @@ namespace SensorCloud
 	public abstract class Service : BackgroundService
 	{
         private ConsoleColor color = ConsoleColor.Black;
+        protected services.status.Service status;
+
         protected IServiceProvider services { private set; get; }
         public string moduleName { get; private set; }
 
@@ -35,6 +37,7 @@ namespace SensorCloud
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
+            this.status = GetService<services.status.Service>();
             try
             {
                 await base.StartAsync(cancellationToken);

@@ -12,9 +12,10 @@ namespace JvcProjector
 		private NetworkStream stream;
 		private bool ready = false;
 		private PowerStatus _status = PowerStatus.notloaded;
-		public event EventHandler<PowerStatus> StatusChange;
+        public event EventHandler<PowerStatus> StatusChange;
+        public event EventHandler<bool> ConnectionChange;
 
-		public PowerStatus Status {
+        public PowerStatus Status {
 			get { return _status; }
 			set {
                 if(this.ready)
@@ -25,10 +26,11 @@ namespace JvcProjector
 		public async Task Connect(string address)
 		{
 			this.address = address;
-
-			try
-			{
-				ready = false;
+            try
+            {
+                if(ready)
+                    ConnectionChange.Invoke(this, false);
+                ready = false;
 				tcpClient = new TcpClient();
 				Console.WriteLine($"JVC\t\tConnecting to {address}");
 				await tcpClient.ConnectAsync(address, 20554);
@@ -79,7 +81,8 @@ namespace JvcProjector
 						{
 							//hands have been shaked
 							ready = true;
-							count -= 5;
+                            ConnectionChange.Invoke(this, true);
+                            count -= 5;
 							if (count > 0)
 								Buffer.BlockCopy(buffer, 5, buffer, 0, count);
 							continue;

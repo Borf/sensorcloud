@@ -82,6 +82,7 @@ namespace SensorCloud.services.mqtt
 
         private async void mqttConnect(object sender, MqttClientConnectedEventArgs e)
         {
+            status["mqtt.connected"] = "True";
             await mqttClient.SubscribeAsync(new TopicFilterBuilder().WithTopic("#").Build());
         }
 
@@ -101,6 +102,7 @@ namespace SensorCloud.services.mqtt
 
         private async void mqttDisconnect(object sender, MqttClientDisconnectedEventArgs e)
         {
+            status["mqtt.connected"] = "False";
             Log("Disconnected from broker");
             while (true)
             {

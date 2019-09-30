@@ -71,7 +71,7 @@ namespace SensorCloud.services.P1Meter
             measurements.Add(new Measurement() { data = data, time = DateTime.Now });
             while (measurements.Count > 0 && measurements[0].time.AddMinutes(60*24) < DateTime.Now)
                 measurements.RemoveAt(0);
-
+            status["p1meter"] = $"Valid: {data.IsValid}";
             using (db = new SensorCloudContext(configuration))
             {
                 db.sensordata.Add(new SensorData()

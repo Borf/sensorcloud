@@ -35,7 +35,7 @@ namespace SensorCloud.services
                 services.AddSingleton<Service>(sp => sp.GetServices<IHostedService>().ToList().Find(x => x.GetType() == typeof(Service)) as Service);
             }
             else
-                System.Console.WriteLine("APP\t\tCould not find config for service " + configSectionName);
+                System.Console.WriteLine($"APP\t\tService {configSectionName} disabled");
         }
     }
 }

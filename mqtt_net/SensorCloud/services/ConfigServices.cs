@@ -6,6 +6,7 @@ namespace SensorCloud.services
     {
         public static List<IConfigServiceBase> services = new List<IConfigServiceBase>
         {
+            new ConfigService<status.Service, status.Config>("Status"),
             new ConfigService<mqtt.Service, mqtt.Config>("Mqtt"),
             new ConfigService<sensorcloud.Service, sensorcloud.Config>("Sensorcloud"),
             new ConfigService<onkyo.Service, onkyo.Config>("Onkyo"),
@@ -15,7 +16,6 @@ namespace SensorCloud.services
             new ConfigService<dash.Service, dash.Config>("Dashboard"),
             new ConfigService<HG659.Service, HG659.Config>("HG659"),
             new ConfigService<spotnet.Service, spotnet.Config>("Spotnet"),
-
 
 
             new ConfigService<telegram.Service, telegram.Config>("Telegram"),

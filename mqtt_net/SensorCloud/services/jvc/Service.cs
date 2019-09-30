@@ -22,9 +22,14 @@ namespace SensorCloud.services.jvc
         {
             projector = new Projector();
             projector.StatusChange += onStatusChange;
+            projector.ConnectionChange += onConnectionChange;
             await projector.Connect(config.host);
         }
 
+        private void onConnectionChange(object sender, bool connected)
+        {
+            status["jvc.connected"] = "" + connected;
+        }
 
         private async void onStatusChange(object sender, PowerStatus e)
         {
