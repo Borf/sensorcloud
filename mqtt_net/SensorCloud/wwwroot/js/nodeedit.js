@@ -134,6 +134,9 @@ class Node {
     }
 
     handle_dragnode(e) {
+        if (e.preventDefault)
+            e.preventDefault();
+
         var node = e.data;
         if (editor.selectedNode != null) {
             editor.selectedNode.el.card.removeClass("bg-primary");
@@ -168,6 +171,7 @@ class Node {
         $('body')
             .on('mouseup', handle_mouseup)
             .on('mousemove', handle_dragging);
+        return false;
     }
 
     addOutput(output, data) {
@@ -349,6 +353,8 @@ class NodeEditor {
     componentList = null;
     el = null;
     componentCategories = {};
+    scale = 1;
+    viewPos = [0, 0];
 
     constructor(element, componentList) {
         this.el = element;
@@ -386,6 +392,44 @@ class NodeEditor {
             }
         });
         this.el.append(this.nodeList);
+        this.el.parent().bind("mousewheel", function (e) {
+            var scroll = e.originalEvent.wheelDelta / 120;
+
+            editor.scale *= (1 + 0.02 * scroll);
+            element.css("transform", "translate(" + editor.viewPos[0] + "px, " + editor.viewPos[1] + "px) scale(" + editor.scale + ")");
+            console.log(editor.scale);
+            return false;
+        });
+
+        this.el.parent().mousedown(function (e) {
+            if (e.preventDefault)
+                e.preventDefault();
+            var lastX = e.pageX;
+            var lastY = e.pageY;
+
+            function handle_dragging(e) {
+                editor.viewPos[0] += (e.pageX - lastX);
+                editor.viewPos[1] += (e.pageY - lastY);
+
+                element.css("transform", "translate(" + editor.viewPos[0] + "px, " + editor.viewPos[1] + "px) scale(" + editor.scale + ")");
+                lastX = e.pageX;
+                lastY = e.pageY;
+            }
+            function handle_mouseup(e) {
+                var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
+                mousePos.left = e.pageX - mousePos.left;
+                mousePos.top = e.pageY - mousePos.top;
+                $('body')
+                    .off('mousemove', handle_dragging)
+                    .off('mouseup', handle_mouseup);
+            }
+            $('body')
+                .on('mouseup', handle_mouseup)
+                .on('mousemove', handle_dragging);
+            return false;
+        });
+        element.css("transform-origin", "0px 0px");
+        element.css("transform", "translate(" + editor.viewPos[0] + "px, " + editor.viewPos[1] + "px) scale(" + editor.scale + ")");
 
     }
 
