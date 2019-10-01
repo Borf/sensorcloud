@@ -18,6 +18,7 @@ class TextControl {
     el = null;
     build() {
         this.el = $(`<input>`);
+        this.el.click(e => this.el.focus());
         return this.el;
     }
     get value() { return this.el.val(); }
@@ -99,6 +100,53 @@ class ConcatComponent extends Component {
         return node;
     }
 }
+
+class TextBuilderComponent extends Component {
+    constructor() {
+        super("Text Builder");
+    }
+    cat = "Operations";
+
+    build(node, data) {
+
+
+        node.addOutput(new Output('text', "Text", textSocket), data);
+
+        function changeListener() {
+            var inp = node.inputs[node.inputs.length-1];
+            var filled = inp.connection != null || inp.control.val() != "";
+            if (filled) {
+                var id = node.inputs.length + 1;
+                var c = new TextControl();
+                node.addInput(new Input('val' + id, 'Value ' + id, textSocket).addControl(c), data);
+                c.el.change(changeListener);
+                c.el.keyup(changeListener);
+            }
+            if (node.inputs.length > 1) {
+                inp = node.inputs[node.inputs.length - 2];
+                filled = inp.connection != null || inp.control.val() != "";
+                if (!filled) {
+                    node.removeInput(node.inputs.length - 1);
+                }
+            }
+
+        }
+
+        var count = 1;
+        if (data.inputs)
+            count = Object.keys(data.inputs).length;
+
+        for (var i = 1; i <= count; i++) {
+            var c = new TextControl();
+            node.addInput(new Input('val' + i, 'Value ' + i, textSocket).addControl(c), data);
+            c.el.change(changeListener);
+            c.el.keyup(changeListener);
+        }
+
+        return node;
+    }
+}
+
 
 class IfComponent extends Component {
     constructor() {

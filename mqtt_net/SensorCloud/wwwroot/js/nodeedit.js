@@ -282,7 +282,16 @@ class Node {
     }
     addInput(input, data) {
         this.inputs.push(input);
-        input.el = $(`<li class="list-group-item bg-dark"><div class="inputsocket socket-` + input.type.name.toLowerCase()+`"></div>` + input.title + `</li>`);
+        input.el = $(`<li class="list-group-item bg-dark"><div class="inputsocket socket-` + input.type.name.toLowerCase() + `"></div>` + input.title + `</li>`);
+        input.el.find(".inputsocket").click(e => {
+            var con = input.connection;
+            con.el.remove();
+            con.out.connections = con.out.connections.filter(e => {
+                return !(e.node == this.id &&
+                    e.input == input.name);
+            });
+            input.connection = null;
+        });
         input.control = input.build();
         if (input.control) {
             input.el.append($("<br />"));
@@ -566,5 +575,9 @@ class NodeEditor {
             path: connection.path,
             out: socketOut
         };
+        if (socketIn.control) {
+            socketIn.control.change();
+        }
+
     }
 }
