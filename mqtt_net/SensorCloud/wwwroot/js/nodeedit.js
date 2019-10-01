@@ -230,9 +230,8 @@ class Node {
                     mousePos.left + ' ' + mousePos.top);
             }
             function handle_mouseup(e) {
-                var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
-                mousePos.left = e.pageX - mousePos.left;
-                mousePos.top = e.pageY - mousePos.top;
+                var mousePos = editor.mousePos(e);
+                mousePos = { left: mousePos[0], top: mousePos[1] };
 
                 var foundInput = null;
                 var foundNode = null;
@@ -362,7 +361,7 @@ class NodeEditor {
         this.el.css("overflow: hidden");
         this.componentList = componentList;
         var editor = this;
-        element.keydown(e => {
+        element.parent().keydown(e => {
             if (e.keyCode == 46) //delete
             {
                 if (editor.selectedNode != null) {
@@ -422,6 +421,8 @@ class NodeEditor {
                 $('body')
                     .off('mousemove', handle_dragging)
                     .off('mouseup', handle_mouseup);
+                editor.el.parent().focus();
+                return false;
             }
             $('body')
                 .on('mouseup', handle_mouseup)
