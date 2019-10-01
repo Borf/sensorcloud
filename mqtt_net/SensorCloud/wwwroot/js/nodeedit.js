@@ -151,6 +151,9 @@ class Node {
         editor.selectedNode.el.card.find(".bg-dark").removeClass("bg-dark");
 
         window.my_dragging = {};
+
+        my_dragging.pageP0 = editor.mousePos(e);
+
         my_dragging.pageX0 = e.pageX;
         my_dragging.pageY0 = e.pageY;
         my_dragging.elem = this;
@@ -203,9 +206,8 @@ class Node {
 
             var position = editor.findSocketPos($(this));
 
-            var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
-            mousePos.left = e.pageX - mousePos.left;
-            mousePos.top = e.pageY - mousePos.top;
+            var mousePos = editor.mousePos(e);
+            mousePos = { left: mousePos[0], top: mousePos[1] };
 
             window.my_dragging = {};
             my_dragging.svg = $('<svg class="connection"></svg>');
@@ -218,9 +220,8 @@ class Node {
             editor.el.append(my_dragging.svg);
 
             function handle_dragging(e) {
-                var mousePos = { left: editor.el.offset().left, top: editor.el.offset().top };
-                mousePos.left = e.pageX - mousePos.left;
-                mousePos.top = e.pageY - mousePos.top;
+                var mousePos = editor.mousePos(e);
+                mousePos = { left: mousePos[0], top: mousePos[1] };
 
                 my_dragging.path.setAttributeNS(null, "d", 'M ' +
                     my_dragging.position.left + ' ' + my_dragging.position.top + ' C ' +
@@ -395,9 +396,8 @@ class NodeEditor {
         this.el.parent().bind("mousewheel", function (e) {
             var scroll = e.originalEvent.wheelDelta / 120;
 
-            editor.scale *= (1 + 0.02 * scroll);
+            editor.scale *= (1 + 0.05 * scroll);
             element.css("transform", "translate(" + editor.viewPos[0] + "px, " + editor.viewPos[1] + "px) scale(" + editor.scale + ")");
-            console.log(editor.scale);
             return false;
         });
 
@@ -433,6 +433,13 @@ class NodeEditor {
 
     }
 
+
+    mousePos(event) {
+        return [
+            (event.pageX - this.el.parent().offset().left - this.viewPos[0]) / this.scale ,
+            (event.pageY - this.el.parent().offset().top  - this.viewPos[1]) / this.scale];
+    }
+
     registerComponent(component) {
         this.components[component.name] = component;
         if (!this.componentCategories[component.cat]) {
@@ -464,13 +471,18 @@ class NodeEditor {
 
     findSocketPos(el) {
         var e = el;
-        var position = { left: 0, top: 0 };
+        var position = {
+            left: -editor.viewPos[0],
+            top: -editor.viewPos[1]
+        };
         while (!el.is(editor.el)) {
             var pos = el.position();
             position.left += pos.left;
             position.top += pos.top;
             el = el.parent();
         }
+        position.left /= editor.scale;
+        position.top /= editor.scale;
         if (e.hasClass("inputsocket")) {
             position.left -= 14; //center
             position.top -= 10;
@@ -478,6 +490,8 @@ class NodeEditor {
             position.left += 10; //center
             position.top -= 36;
         }
+
+
         return position;
     }
 
